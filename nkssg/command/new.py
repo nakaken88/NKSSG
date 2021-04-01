@@ -105,7 +105,11 @@ def page(name, path, config):
     template_file = None
 
     for d in config['themes'].dirs:
+        if not template_file is None:
+            break
         for f in d.glob('**/*'):
+            if not template_file is None:
+                break
             if f.is_file() and f.stem == 'new_' + name:
                 template_file = f
     
