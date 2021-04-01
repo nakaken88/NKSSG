@@ -153,7 +153,7 @@ def page(name, path, config):
         if to_path == '':
             to_path = config['docs_dir'] / name / now.strftime(r'%Y%m%d-%H%M%S.html')
 
-        if to_path.is_relative_to(config['docs_dir']):
+        if str(to_path).startswith(str(to_path)):
             if not to_path.parent.exists():
                 to_path.parent.mkdir(parents=True)
 
