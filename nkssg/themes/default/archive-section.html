@@ -1,0 +1,62 @@
+{% extends "main.html" %}
+
+
+{% block head_tag -%}
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#">
+{%- endblock %}
+
+
+{% block content %}
+<div class="entry">
+  <h1>{{ mypage.title }}</h1>
+
+  {% if mypage.content -%}
+  <div>{{mypage.content}}</div>
+  {%- endif %}
+</div>
+
+{% if mypage.children %}
+<div class="subsection-list">
+  <h2>Sub section</h2>
+  <ul>
+{%- for child in mypage.children %}
+<li><a href="{{ child.abs_url }}">{{ child.title }}</a></li>
+{%- endfor %}
+</ul>
+</div>
+{%- endif %}
+
+
+{%- for page in pages if page.url != mypage.url %}
+{%- if loop.first %}
+<div class="page-list">
+  <h2>Page list</h2>
+{%- endif %}
+  <div class="page-item">
+    <div class="page-item-info">
+      <small>{{ page.date.strftime('%Y/%m/%d') }}</small>
+    </div>
+    <div class="page-item-body">
+      <a href="{{ page.url }}">{{ page.title }}</a>
+    </div>
+  </div>
+{%- if loop.last %}
+</div>
+{%- endif %}
+{%- endfor %}
+
+
+{% if paginator and paginator.pages and paginator.pages | count > 1 -%}
+<div>
+  <div class="pagination">
+{%- for page in paginator.pages %}
+  {% if page.page_number == paginator.paged -%}
+    <span aria-current="page" class="page-numbers current">{{ page.page_number }}</span>
+  {%- else -%}
+    <a class="page-numbers" href="{{ page.url }}">{{ page.page_number }}</a>
+  {%- endif %}
+{%- endfor %}
+  </div>
+</div>
+{%- endif %}
+{% endblock %}

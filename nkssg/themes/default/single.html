@@ -1,0 +1,52 @@
+{% extends "main.html" %}
+
+
+{% block head_tag -%}
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+{%- endblock %}
+
+
+
+{% block content %}
+<div class="entry-info">
+  <small>
+    <span>{{ mypage.date.strftime('%Y/%m/%d') }}</span>
+  </small>
+</div>
+
+<div class="entry">
+  <h1>{{ mypage.title }}</h1>
+  {{ mypage.content }}
+</div>
+
+
+{% for archive in mypage.archive_list if archive.archive_type == "taxonomy" -%}
+  {%- if loop.first or loop.previtem.root_name != archive.root_name %}
+    {%- if not loop.first -%}
+</div>
+    {%- endif -%}
+<div class="entry-info">
+  {{ archive.root_name.capitalize() }}: 
+  {%- endif %}
+  <a href="{{ archive.url }}">{{ archive.name }}</a>
+  {%- if loop.last %}
+</div>
+  {%- endif %}
+{%- endfor %}
+
+
+{% if mypage.post_type == "post" -%}
+<div class="entry-info">
+  {%- set neighbor = mypage.next_page -%}
+  {%- if neighbor and neighbor.post_type == "post" %}
+  <div>Older: <a href="{{ neighbor.url }}">{{ neighbor.title }}</a></div>
+  {%- endif %}
+
+  {%- set neighbor = mypage.prev_page -%}
+  {%- if neighbor and neighbor.post_type == "post" %}
+  <div>Newer: <a href="{{ neighbor.url }}">{{ neighbor.title }}</a></div>
+  {%- endif %}
+</div>
+{%- endif -%}
+
+{% endblock %}

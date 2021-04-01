@@ -1,0 +1,37 @@
+site:
+  site_name: 'Site Title'
+  site_url: ''
+  site_desc: ''
+  site_image: ''
+
+post_type:
+  - post:
+      permalink: /%Y/%m/%d/%H%M%S/
+      archive_type: "date"
+  - page:
+      permalink: /{slug}/
+      archive_type: "none"
+  - section:
+      archive_type: "section"
+
+plugins:
+  - autop:
+  - awesome-img-link
+  - awesome-page-link
+  - select-pages:
+      start: 0
+
+taxonomy:
+  - tag:
+    - tag1
+    - tag 2: 
+        slug: tag2
+    - tag3
+
+  - category:
+    - cat1
+    - cat11:
+        parent: cat1
+    - cat12:
+        parent: cat1
+    - cat2

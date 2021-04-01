@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+  {% block head_tag -%}
+  <head>
+  {%- endblock %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% block title_tag -%}
+      {% if mypage and mypage.title -%}
+        <title>{{ mypage.title }} | {{ config.site.site_name }}</title>
+      {%- elif config.site.site_name -%}
+        <title>{{ config.site.site_name }}</title>
+      {%- endif %}
+    {%- endblock %}
+    {% block desc_tag -%}
+      {% if mypage and mypage.summary -%}
+        <meta name="description" content="{{ mypage.summary }}" />
+      {%- elif config.site.site_desc -%}
+        <meta name="description" content="{{ config.site.site_desc }}" />
+      {%- endif %}
+    {%- endblock %}
+    {% block ogp -%}
+      {% if mypage -%}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content="{{ mypage.title }} | {{ config.site.site_name }}" />
+        <meta property="og:url" content="{{ mypage.abs_url }}" />
+        {% if mypage.summary -%}
+          <meta property="og:description" content="{{ mypage.summary }}" />
+        {%- elif config.site.site_desc -%}
+          <meta property="og:description" content="{{ config.site.site_desc }}" />
+        {%- endif %}
+        {% if mypage.image and mypage.image.url_abs -%}
+          <meta property="og:image" content="{{ mypage.image.url_abs }}" />
+        {%- elif config and config.site and config.site.site_image -%}
+          <meta property="og:image" content="{{ config.site.site_url }}{{ config.site.site_image }}" />
+        {%- endif %}
+      {%- endif %}
+    {% endblock %}
+    {% block twitter_card -%}
+      {% if mypage and mypage.title and config.site.site_name -%}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="{{ mypage.title }} | {{ config.site.site_name }}" />
+      {%- endif %}
+    {%- endblock %}
+    {% block google_analytics %}{% endblock %}
+    {% block google_adsense %}{% endblock %}
+    <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
+    <link rel="stylesheet" href="{{ config.site.site_url }}/themes/default/style.css">
+    {% block other_header %}{% endblock %}
+  </head>
+  <body class="{% if mypage %}{{ [mypage.post_type, mypage.page_type] | join(' ') }}{% endif %}">
+    <div id="container">
+      <header>
+        <div id="inner-header">
+          <a href="{{ config.site.site_url or '/' }}" class="blog-title">{{ config.site.site_name }}</a>
+          {% if config.site.site_desc %}<div class="blog-description">{{ config.site.site_desc }}</div>{% endif %}
+        </div>
+      </header>
+    
+      <main>
+        <div id="inner-main">
+          <article>
+            {% block content -%}
+            {%- endblock %}
+          </article>
+
+          <aside>
+            <div class="widget">
+              <div class="widget-title">About</div>
+              <div class="widget-body">
+                This site "<a href="/">{{ config.site.site_name }}</a>" is a sample site. <a href="{{ config.site.site_url }}/sitemap.html">Sitemap is here.</a>
+              </div>
+            </div>
+
+            {% for archive in archives if archive.root_name == "post" and archive.is_root -%}
+              {%- for page in archive.singles_all[:10] -%}
+                {%- if loop.first %}
+            <div class="widget">
+              <div class="widget-title">Recent Posts</div>
+              <div class="widget-body">
+                <ul>
+                {%- endif %}
+                  <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                {%- if loop.last %}
+                </ul>
+              </div>
+            </div>
+                {%- endif %}
+              {%- endfor -%}
+            {%- endfor %}
+
+            {% for archive in archives if archive.root_name == "post" and not archive.is_root and archive.name | length == 4 -%}
+              {%- if loop.first %}
+            <div class="widget">
+              <div class="widget-title">Archive</div>
+              <div class="widget-body">
+                <ul>
+              {%- endif %}
+                  <li><a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})</li>
+              {%- if loop.last %}
+                </ul>
+              </div>
+            </div>
+              {%- endif %}
+            {%- endfor %}
+
+            {% for archive in archives | sort(attribute='singles_all_count', reverse=True) if archive.root_name == "category" and not archive.is_root and archive.singles_all_count > 0 -%}
+              {%- if loop.first %}
+            <div class="widget">
+              <div class="widget-title">Category List</div>
+              <div class="widget-body">
+                <ul>
+              {%- endif %}
+                  <li><a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})</li>
+              {%- if loop.last %}
+                </ul>
+              </div>
+            </div>
+              {%- endif %}
+            {%- endfor %}
+
+            {% for archive in archives | sort(attribute='singles_all_count', reverse=True) if archive.root_name == "tag" and not archive.is_root and archive.singles_all_count > 0 -%}
+              {%- if loop.first %}
+            <div class="widget tagcloud">
+              <div class="widget-title">Tag List</div>
+              <div class="widget-body">
+              {%- endif %}
+                <span class="link-item"><a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})</span>
+              {%- if loop.last %}
+              </div>
+            </div>
+              {%- endif %}
+            {%- endfor %}
+
+            {% for page in single_pages if page.post_type == "page" -%}
+              {%- if loop.first %}
+            <div class="widget">
+              <div class="widget-title">Page List</div>
+              <div class="widget-body">
+                <ul>
+              {%- endif %}
+                  <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+              {%- if loop.last %}
+                </ul>
+              </div>
+            </div>
+              {%- endif %}
+            {%- endfor %}
+
+          </aside>
+        </div>
+      </main>
+
+      <footer>
+        <div id="inner-footer">
+          <a href="{{ config.site.site_url or '/' }}" class="blog-title">{{ config.site.site_name }}</a>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

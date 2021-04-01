@@ -1,0 +1,65 @@
+{% extends "main.html" %}
+
+
+{% block head_tag -%}
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#">
+{%- endblock %}
+
+
+{% block title_tag -%}
+  {% if mypage.root_name == "post" and mypage.is_root -%}
+    {% if paginator.paged == 1 -%}
+      <title>{{ config.site.site_name }}</title>
+    {%- else -%}
+      <title>Page {{ paginator.paged }} | {{ config.site.site_name }}</title>
+    {%- endif -%}
+  {% else -%}
+    {%- if paginator.paged == 1 -%}
+      <title>{{ mypage.title }} | {{ config.site.site_name }}</title>
+    {%- else -%}
+      <title>{{ mypage.title }} | Page {{ paginator.paged }} | {{ config.site.site_name }}</title>
+    {%- endif -%}
+  {%- endif %}
+{%- endblock %}
+
+
+{% block content %}
+{%- if paginator.paged == 1 and mypage.archive_type == "date" and mypage.is_root -%}
+<h1>Post List</h1>
+{%- elif mypage.archive_type == "date" and mypage.is_root -%}
+<h1>Post List: {{ paginator.paged }} Page</h1>
+{%- elif paginator.paged == 1 -%}
+<h1>"{{ mypage.title }}" List</h1>
+{%- else -%}
+<h1>"{{ mypage.title }}" List: {{ paginator.paged }} page</h1>
+{%- endif %}
+
+{% if pages -%}
+<div class="page-list">
+{%- for page in pages %}
+  <div class="page-item">
+    <div class="page-item-info">
+      <small>{{ page.date.strftime('%Y/%m/%d') }}</small>
+    </div>
+    <div class="page-item-body">
+      <a href="{{ page.url }}">{{ page.title }}</a>
+    </div>
+  </div>
+{%- endfor %}
+</div>
+{%- endif %}
+
+{% if paginator and paginator.pages -%}
+<div>
+  <div class="pagination">
+{%- for page in paginator.pages %}
+  {% if page.page_number == paginator.paged -%}
+    <span aria-current="page" class="page-numbers current">{{ page.page_number }}</span>
+  {%- else -%}
+    <a class="page-numbers" href="{{ page.url }}">{{ page.page_number }}</a>
+  {%- endif %}
+{%- endfor %}
+  </div>
+</div>
+{%- endif %}
+{% endblock %}

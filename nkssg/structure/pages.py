@@ -1,0 +1,148 @@
+from pathlib import Path
+import shutil
+from urllib.parse import quote, unquote, urljoin
+
+from bs4 import BeautifulSoup
+
+from nkssg.utils import get_config_by_list
+
+
+class Pages:
+    def __init__(self):
+        self.config = None
+        self.pages = []
+
+    def __iter__(self):
+        return iter(self.pages)
+
+    def setup(self):
+        pass
+
+    def update(self):
+        pass
+
+    def output(self):
+        for page in self.pages:
+            page.output_page(self.config)
+
+
+
+class Page:
+    def __init__(self):
+        self.id = 0
+        
+        self.src_path = ''
+        self.abs_src_path = ''
+        self.src_dir = ''
+
+        self.meta = {}
+        self.title = ''
+        self.name = ''
+        self.slug = ''
+        self.content = ''
+        self.summary = ''
+        self.image = {}
+
+        self.html = ''
+        self.url = ''
+        self.abs_url = ''
+        self.rel_url = ''
+        self.dest_path = ''
+        self.dest_dir = ''
+        self.aliases = []
+
+        self.is_single = False
+        self.is_archive = False
+        self.page_type = ''
+    
+
+    def output_page(self, config):
+        output_path = config['public_dir'] / self.dest_path
+        output_dir = output_path.parent
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        with open(output_path, 'w', encoding='UTF-8') as f:
+            f.write(self.html)
+
+        if self.image:
+            old_path = self.image['old_path']
+            new_path = self.image['new_path']
+
+            new_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(str(old_path), str(new_path))
+
+        if self.meta.get('aliases'):
+            self.output_aliases(config)
+
+
+    def _get_url_from_dest(self, dest_path=''):
+        if dest_path == '':
+            dest_path = self.dest_path
+        if dest_path == '':
+            try:
+                raise Exception
+            except:
+                print('Error: dest path error on ' + self.src_path)
+
+        parts = list( Path(dest_path).parts )
+
+        if parts[-1] == 'index.html':
+            if len(parts) == 1:
+                url = '/'
+            else:
+                url = '/' + '/'.join(parts[:-1]) + '/'
+        else:
+            url = '/' + '/'.join(parts[:-1])
+        return quote(url)
+
+    def _get_dest_from_url(self, url):
+        url = url.strip('/')
+        if not '.htm' in url:
+            url = url + '/index.html'
+        parts = unquote(url).split('/')
+        return Path(*parts)
+
+    def _url_setup(self, config):
+        if self.rel_url == '':
+            return
+        
+        site_url = get_config_by_list(config, ['site', 'site_url']) or '/'
+        self.abs_url = urljoin(site_url, self.rel_url)
+
+        if config['use_abs_url']:
+            self.url = self.abs_url
+        else:
+            self.url = self.rel_url
+
+
+    def output_aliases(self, config):
+        for url in self.meta['aliases']:
+            url = '/' + url.strip('/')
+            if not '.htm' in url:
+                url = url + '/'
+
+            output_path = self._get_dest_from_url(url)
+            output_path = config['public_dir'] / output_path
+            output_dir = output_path.parent
+            output_dir.mkdir(parents=True, exist_ok=True)
+            print(output_path)
+
+            with open(output_path, 'w', encoding='UTF-8') as f:
+                content = '''
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="uft-8">
+<link rel="canonical" href="{url}"/>
+<meta http-equiv="refresh" content="0;url={url}">
+</head>
+<body>
+<p>This page has moved. Click <a href="{url}">here</a> to go to the new page.</p>
+/body>
+</html>
+'''.format(url=self.url)
+                f.write(content)
+
+
+    def lookup_template(self, config):
+        return 'main.html'

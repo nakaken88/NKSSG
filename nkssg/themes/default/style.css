@@ -1,0 +1,180 @@
+body {
+  background-color: #fffde7;
+  color: #555;
+  font-family: sans-serif;
+  line-height: 1.8;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+a, a:hover {
+  text-decoration: none;
+}
+a {
+  color: #2196f3;
+}
+a:hover {
+  color: #1976d2;
+}
+a:visited {
+  color: #673ab7;
+}
+
+
+#inner-header
+, #inner-main
+, #inner-footer {
+  max-width: 1080px;
+}
+
+#inner-header {
+  margin: 5rem auto;
+}
+#inner-main {
+  margin: 0 auto;
+  padding: 20px 0;
+}
+article, aside {
+  padding: 10px 10px 30px;
+}
+#inner-footer {
+  margin: 2rem auto;
+}
+
+
+header, footer {
+  text-align: center;
+}
+a.blog-title {
+  color: #555;
+  font-size: 2rem;
+}
+a.blog-title:hover {
+  color: #2196f3;
+  transition: color 0.7s;
+}
+
+
+.entry h1 {
+  font-size: 2rem;
+}
+.entry p {
+  margin: 1.5rem 0;
+}
+.entry a {
+  text-decoration: underline;
+}
+
+.entry img {
+  height: auto;
+}
+.entry img.aligncenter {
+  margin: 0 auto;
+}
+.entry img.alignleft {
+  display: inline;
+  float: left;
+  margin-right: 1.5rem;
+}
+.entry img.alignright {
+  display: inline;
+  float: right;
+  margin-left: 1.5rem;
+}
+
+.entry table {
+  margin: 1.5rem 0;
+  width : 100%;
+  border: 2px solid #bbdefb;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.entry table tr {
+  border-bottom: solid 1px #bbdefb;
+}
+.entry table th {
+  padding: 5px;
+  border-right: solid 1px #bbdefb;
+  background-color: #e3f2fd;
+}
+.entry table td {
+  padding: 5px;
+  border-right: solid 1px #bbdefb;
+}
+
+.entry blockquote
+, .entry pre {
+  padding: 1rem;
+  margin: 1.5rem 0;
+  background-color: #eceff1;
+}
+.entry pre {
+  white-space: pre-wrap;
+  background-color: #e3f2fd;
+}
+
+.entry-info {
+  margin-bottom: 0.5rem;
+}
+.entry-info a {
+  margin: 0 0.2rem;
+}
+
+.page-item {
+  margin-bottom: 1rem;
+}
+.pagination {
+  margin: 3rem 0;
+  text-align: center;
+}
+.pagination > span, .pagination a {
+  display: inline-block;
+  margin: 0.5rem;
+  width: 4rem;
+  text-align: center;
+  background: #ccc;
+  color: #fff;
+}
+.pagination > span, .pagination a:hover {
+  background: #2196f3;
+}
+
+
+.widget {
+  margin-bottom: 30px;
+}
+.widget-title {
+  font-weight: bold;
+  padding: 5px 10px;
+}
+.widget-body {
+  font-size: 0.9rem;
+  padding: 5px 10px;
+}
+
+.widget-body ul {
+  margin: 0;
+  padding: 0;
+}
+.widget-body li {
+  list-style: none;
+  margin: 0 0 0.9rem;
+}
+.widget-body a {
+  text-decoration: none;
+}
+.widget-body .link-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+
+@media (min-width: 769px) {
+  #inner-main {
+    display: grid;
+    grid-template: auto / auto 320px;
+  }
+  article {
+    padding: 10px 50px 10px 30px;
+  }
+}

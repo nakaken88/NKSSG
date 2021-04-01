@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+
+{% block title_tag -%}
+<title>Sitemap | {{ config.site.site_name }}</title>
+{%- endblock %}
+
+{% block content %}
+<h1>Sitemap</h1>
+
+{% for page in single_pages-%}
+  {%- if loop.first -%}
+  <h2>{{ page.post_type }}</h2>
+  {%- elif page.post_type != page.prev_page.post_type -%}
+  <h2>{{ page.post_type }}</h2>
+  {%- endif -%}
+
+  {%- if page.is_in_date_archive -%}
+    {%- if loop.first -%}
+    <h3>Year: {{ page.date.strftime('%Y') }}</h3>
+    {%- elif page.date.strftime('%Y') != page.prev_page.date.strftime('%Y') -%}
+    <h3>Year: {{ page.date.strftime('%Y') }}</h3>
+    {%- endif -%}
+  {%- endif -%}
+
+{%- if page.title -%}
+<div>{{ page.date.strftime('%Y/%m/%d %H:%M') }}: <a href="{{ page.url }}">{{ page.title }}</a></div>
+{%- else -%}
+<div><a href="{{ page.url }}">{{ page.date.strftime('%Y/%m/%d %H:%M') }}</a></div>
+{%- endif -%}
+{%- endfor -%}
+
+{% endblock %}

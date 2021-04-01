@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="entry-info">
+  <small>
+    <span>{{ mypage.date.strftime('%Y/%m/%d') }}</span>
+  </small>
+</div>
+
+<div class="entry">
+  <h1>{{ mypage.title }}</h1>
+  {{ mypage.content }}
+</div>
+
+{% endblock %}
