@@ -6,6 +6,7 @@ setup(
     description='NakaKen Static Site Generator',
     author='nakaken88',
     packages=find_packages(),
+    include_package_data=True,
     python_requires='>=3.6',
     install_requires=[
         'beautifulsoup4',
