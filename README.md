@@ -47,5 +47,10 @@ The post template is under '/themes/default/new/new_post.html'. If you use markd
 file: "post/%Y/%m/%Y%m%d-%H%M%S.md"
 ```
 
+### Build Static Pages
 
+```
+> nkssg build
+```
 
+Output will be in ./public/ folder.
