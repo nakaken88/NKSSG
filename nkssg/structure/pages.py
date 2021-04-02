@@ -51,8 +51,6 @@ class Page:
         self.dest_dir = ''
         self.aliases = []
 
-        self.is_single = False
-        self.is_archive = False
         self.page_type = ''
     
 

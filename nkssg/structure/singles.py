@@ -144,7 +144,6 @@ class Single(Page):
         self.date = ''
         self.modified = ''
 
-        self.is_single = True
         self.page_type = 'single'
 
         self.post_type = ''

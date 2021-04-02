@@ -220,7 +220,6 @@ class Archive(Page):
             self.slug = self.name.replace(' ', '-')
 
 
-        self.is_archive = True
         self.page_type = 'archive'
 
         self.path = ''
