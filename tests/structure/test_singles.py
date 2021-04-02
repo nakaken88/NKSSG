@@ -51,3 +51,12 @@ def test_get_url_from_permalink_filename_index():
     ret = single.get_url_from_permalink('/{filename}/', None)
     assert ret == '/dir2/'
 
+
+def test_get_url_from_permalink_filename_top_index():
+    single = Single('', '')
+    single.date = datetime.datetime.now()
+    single.filename = 'index'
+    single.src_dir = Path('post_type')
+    ret = single.get_url_from_permalink('/{filename}/', None)
+    assert ret == '/post_type/'
+
