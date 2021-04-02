@@ -60,18 +60,14 @@ def set_default_config(config):
         config['post_type'].append({
             'post': {
                 'permalink': r'/%Y/%m/%d/%H%M%S/',
-                'date_archive': True,
-                'section_archive': False,
-                'priority_archive': 'date',
+                'archive_type': 'date',
             }
         })
 
         config['post_type'].append({
             'page': {
                 'permalink': r'/{slug}/',
-                'date_archive': False,
-                'section_archive': True,
-                'priority_archive': 'section',
+                'archive_type': 'section',
             }
         })
 
