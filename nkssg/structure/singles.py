@@ -348,14 +348,13 @@ class Single(Page):
         new_path = Path(config['public_dir'], 'thumb', year, month, image_name)
         image['new_path'] = new_path
 
-        image['url_rel'] = '/' + '/'.join(['thumb', year, month, image_name])
-        image['url_abs'] = config['site']['site_url'] + image['url_rel']
+        image['rel_url'] = '/' + '/'.join(['thumb', year, month, image_name])
+        image['abs_url'] = config['site']['site_url'] + image['rel_url']
 
         if config['use_abs_url']:
-            image['url'] = image['url_abs']
+            image['url'] = image['abs_url']
         else:
-            image['url'] = image['url_rel']
-        print(image)
+            image['url'] = image['rel_url']
         return image
 
 
