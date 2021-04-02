@@ -14,7 +14,7 @@ def site(project_dir, package_dir):
 
     base_dir = Path.cwd()
     project_dir = Path(base_dir, project_dir)
-    config_path = project_dir / 'config.yml'
+    config_path = project_dir / 'nkssg.yml'
 
     if config_path.exists():
         log.warn('Project already exists.')
@@ -45,7 +45,7 @@ def site(project_dir, package_dir):
                 to_path.parent.mkdir(parents=True)
             shutil.copyfile(str(f), str(to_path))
 
-    Path(project_dir, 'config.yml').write_text('''\
+    Path(project_dir, 'nkssg.yml').write_text('''\
 site:
   site_name: "site name"
   site_url: ""

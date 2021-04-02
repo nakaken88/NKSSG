@@ -8,7 +8,7 @@ from nkssg.utils import get_config_by_list
 
 
 def load_config(mode):
-    with open('config.yml', encoding='utf8') as stream:
+    with open('nkssg.yml', encoding='utf8') as stream:
         config = YAML(typ='safe').load(stream)
 
     if get_config_by_list(config, ['site', 'site_url']) is not None:
