@@ -69,13 +69,14 @@ class Site:
             if archive_type != 'date' and archive_type != 'none':
                 archive_type = 'section'
 
-            post_type_dict['archive_type'] = archive_type
-
             if not has_home_template and index == 0:
                 post_type_dict['with_front'] = False
+                if archive_type == 'none':
+                    archive_type = 'section'
             elif index > 0:
                 post_type_dict['with_front'] = True
             
+            post_type_dict['archive_type'] = archive_type
             config_post_type.append({post_type: post_type_dict})
 
         config['post_type'] = config_post_type
