@@ -433,9 +433,9 @@ class Single(Page):
         if '{filename}' in url:
             filename = clean_name(self.filename)
             if filename == 'index':
-                url = url.replace('/{filename}', '')
-            else:
-                url = url.replace('{filename}', filename)
+                filename = clean_name(list(self.src_dir.parts)[-1])
+
+            url = url.replace('{filename}', filename)
 
         if '{' in url:
             parts = re.findall(r'\{.*?\}', url)

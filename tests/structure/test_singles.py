@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 from nkssg.structure.singles import Singles, Single
 
@@ -46,6 +47,7 @@ def test_get_url_from_permalink_filename_index():
     single = Single('', '')
     single.date = datetime.datetime.now()
     single.filename = 'index'
+    single.src_dir = Path('post_type', 'dir1', 'dir2')
     ret = single.get_url_from_permalink('/{filename}/', None)
-    assert ret == '/'
+    assert ret == '/dir2/'
 
