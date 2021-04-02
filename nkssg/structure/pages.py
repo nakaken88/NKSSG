@@ -93,7 +93,7 @@ class Page:
                 url = '/' + '/'.join(parts[:-1]) + '/'
         else:
             url = '/' + '/'.join(parts[:-1])
-        return quote(url)
+        return quote(url).lower()
 
     def _get_dest_from_url(self, url):
         url = url.strip('/')

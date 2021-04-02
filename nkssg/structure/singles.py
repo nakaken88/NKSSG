@@ -422,7 +422,7 @@ class Single(Page):
 
         url = '/' + url.strip('/') + '/'
 
-        return url, dest_path
+        return url.lower(), dest_path
 
 
     def get_url_from_permalink(self, permalink, archives):
@@ -468,7 +468,7 @@ class Single(Page):
                 url = url.replace(original_part, '/'.join(new_part))
 
         url = quote(url)
-        return url
+        return url.lower()
 
 
     def update_html(self, singles, archives):
