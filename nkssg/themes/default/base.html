@@ -46,6 +46,7 @@
     {% block google_adsense %}{% endblock %}
     <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
     <link rel="stylesheet" href="{{ config.site.site_url }}/themes/default/style.css">
+    {% if config.theme.child %}<link rel="stylesheet" href="{{ config.site.site_url }}/themes/{{ config.theme.child }}/style.css">{% endif %}
     {% block other_header %}{% endblock %}
   </head>
   <body class="{% if mypage %}{{ [mypage.post_type, mypage.page_type] | join(' ') }}{% endif %}">
