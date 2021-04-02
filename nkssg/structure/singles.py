@@ -430,6 +430,7 @@ class Single(Page):
         permalink = '/' + permalink.strip('/') + '/'
         url = self.date.strftime(permalink)
         url = url.replace('{slug}', self.slug)
+        url = url.replace('{filename}', clean_name(self.filename))
 
         if '{' in url:
             parts = re.findall(r'\{.*?\}', url)
