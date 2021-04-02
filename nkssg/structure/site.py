@@ -58,15 +58,21 @@ class Site:
         for index, post_type in enumerate(config['post_type_list']):
             post_type_dict = get_config_by_list(config, ['post_type', post_type]) or {}
 
+            archive_type = post_type_dict.get('archive_type')
+            if archive_type is None:
+                if post_type == 'post':
+                    archive_type = 'date'
+                else:
+                    archive_type = 'section'
+            
+            archive_type = archive_type.lower()
+            if archive_type != 'date' and archive_type != 'none':
+                archive_type = 'section'
+
+            post_type_dict['archive_type'] = archive_type
+
             if not has_home_template and index == 0:
                 post_type_dict['with_front'] = False
-
-                if post_type_dict.get('date_archive') is None and post_type_dict.get('section_archive') is None:
-                    if post_type == 'post':
-                        post_type_dict['date_archive'] = True
-                    else:
-                        post_type_dict['section_archive'] = True
-
             elif index > 0:
                 post_type_dict['with_front'] = True
             
