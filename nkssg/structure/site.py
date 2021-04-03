@@ -6,7 +6,7 @@ import jinja2
 from nkssg.structure.archives import Archives
 from nkssg.structure.singles import Singles
 from nkssg.structure.themes import Themes
-from nkssg.utils import get_config_by_list
+from nkssg.utils import get_config_by_list, to_slug
 
 
 class Site:
@@ -46,7 +46,7 @@ class Site:
                 if not post_type in config['post_type_list']:
                     config['post_type_list'].append(post_type)
 
-        # update archive type, and with front
+        # update archive type, slug, and with front
         has_home_template = False
         for theme_dir in config['themes'].dirs:
             target_file = Path(theme_dir) / 'home.html'
@@ -77,6 +77,10 @@ class Site:
                 post_type_dict['with_front'] = True
             
             post_type_dict['archive_type'] = archive_type
+
+            slug = post_type_dict.get('slug') or post_type
+            post_type_dict['slug'] = to_slug(slug)
+
             config_post_type.append({post_type: post_type_dict})
 
         config['post_type'] = config_post_type
