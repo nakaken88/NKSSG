@@ -207,6 +207,7 @@ class Single(Page):
 
         self.image = self._get_image(config)
 
+        self.archive_type = self._get_archive_type(config)
         self.is_in_date_archive = self._is_in_date_archive(config)
         self.is_in_section_archive = self._is_in_section_archive(config)
 
@@ -355,6 +356,10 @@ class Single(Page):
         else:
             image['url'] = image['rel_url']
         return image
+
+
+    def _get_archive_type(self, config):
+        return  get_config_by_list(config, ['post_type', self.post_type, 'archive_type'])
 
 
     def _is_in_date_archive(self, config):
