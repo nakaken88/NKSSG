@@ -64,11 +64,12 @@ class Page:
             f.write(self.html)
 
         if self.image:
-            old_path = self.image['old_path']
-            new_path = self.image['new_path']
+            old_path = self.image.get('old_path')
+            new_path = self.image.get('new_path')
 
-            new_path.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(str(old_path), str(new_path))
+            if old_path is not None and new_path is not None:
+                new_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(str(old_path), str(new_path))
 
         if self.meta.get('aliases'):
             self.output_aliases(config)
