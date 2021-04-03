@@ -3,7 +3,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from nkssg.structure.pages import Pages, Page
-from nkssg.utils import clean_name, get_config_by_list
+from nkssg.utils import clean_name, get_config_by_list, to_slug
 
 
 class Archives(Pages):
@@ -141,8 +141,11 @@ class Archives(Pages):
             self.setup_taxonomy_archive(tax_name, term_list)
 
     def setup_taxonomy_archive(self, tax_name, term_list):
-        root_archive = self.create_root_archive('taxonomy', tax_name)
-        root_archive.dest_path = Path(tax_name, 'index.html')
+        slug = get_config_by_list(term_list, ['slug']) or tax_name
+        slug = to_slug(slug)
+
+        root_archive = self.create_root_archive('taxonomy', tax_name, slug)
+        root_archive.dest_path = Path(slug, 'index.html')
         root_archive.rel_url = root_archive._get_url_from_dest()
         root_archive._url_setup(self.config)
 
