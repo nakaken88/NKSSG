@@ -142,7 +142,6 @@ class Archives(Pages):
 
     def setup_taxonomy_archive(self, tax_name, term_list):
         slug = get_config_by_list(term_list, ['slug']) or tax_name
-        slug = to_slug(slug)
 
         root_archive = self.create_root_archive('taxonomy', tax_name, slug)
         root_archive.dest_path = Path(slug, 'index.html')
@@ -162,7 +161,7 @@ class Archives(Pages):
             if type(term_dict) != dict:
                 continue # it is taxonomy setting
 
-            slug = to_slug(term_dict.get('slug', name))
+            slug = term_dict.get('slug', name)
             parent_name = term_dict.get('parent', tax_name)
 
             new_archive = self.create_archive('taxonomy', name, slug)
@@ -217,11 +216,7 @@ class Archive(Page):
         self.archive_type = archive_type
         self.name = str(name)
         self.title = self.name
-        self.slug = slug
-
-        if self.slug == '':
-            self.slug = self.name.replace(' ', '-')
-
+        self.slug = to_slug(slug or self.name)
 
         self.page_type = 'archive'
 
