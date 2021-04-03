@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 import jinja2
 
 from nkssg.structure.pages import Pages, Page
-from nkssg.utils import clean_name, front_matter_setup, get_config_by_list
+from nkssg.utils import *
 
 
 class Singles(Pages):
@@ -291,7 +291,7 @@ class Single(Page):
         return self.title[:80]
 
     def _get_slug(self):
-        return self.meta.get('slug') or self.name.replace(' ', '-')
+        return self.meta.get('slug') or to_slug(self.name)
 
 
 
