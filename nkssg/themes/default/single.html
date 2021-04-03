@@ -14,6 +14,17 @@
   </small>
 </div>
 
+{% for archive in mypage.archive_list if archive.archive_type == 'section' -%}
+<div class="breadcrumb">
+  <a href="{{ config.site.site_url }}">Home</a>
+  {%- for parent in archive.parents %}
+  / <a href="{{ parent.url }}">{{ parent.name }}</a>
+  {%- endfor %}
+  / <a href="{{ archive.url }}">{{ archive.name }}</a>
+  / {{ mypage.title }}
+</div>
+{%- endfor %}
+
 <div class="entry">
   <h1>{{ mypage.title }}</h1>
   {% if mypage.content -%}

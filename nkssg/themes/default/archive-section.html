@@ -7,6 +7,14 @@
 
 
 {% block content %}
+<div class="breadcrumb">
+  <a href="{{config.site.site_url}}">Home</a>
+  {% for parent in mypage.parents %}
+  / <a href="{{parent.url}}">{{parent.name}}</a>
+  {% endfor %}
+  / {{mypage.title}}
+</div>
+
 <div class="entry">
   <h1>{{ mypage.title }}</h1>
 
