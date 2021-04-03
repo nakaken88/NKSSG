@@ -150,8 +150,6 @@ class Single(Page):
         self.status = ''
         self.is_draft = False
         self.is_expired = False
-        self.is_in_date_archive = False
-        self.is_in_section_archive = False
 
         self.archive_list = []
 
@@ -170,7 +168,7 @@ class Single(Page):
             return (s_order, self.id) < (o_order, other.id)
 
 
-        if self.is_in_date_archive:
+        if self.archive_type == 'date':
             if self.date != other.date:
                 return self.date > other.date
             return self.id < other.id
@@ -208,8 +206,6 @@ class Single(Page):
         self.image = self._get_image(config)
 
         self.archive_type = self._get_archive_type(config)
-        self.is_in_date_archive = self._is_in_date_archive(config)
-        self.is_in_section_archive = self._is_in_section_archive(config)
 
         return self
 
@@ -360,26 +356,6 @@ class Single(Page):
 
     def _get_archive_type(self, config):
         return  get_config_by_list(config, ['post_type', self.post_type, 'archive_type'])
-
-
-    def _is_in_date_archive(self, config):
-
-        date_archive = get_config_by_list(config, ['post_type', self.post_type, 'date_archive'])
-
-        if date_archive is None:
-            return False
-
-        return date_archive
-
-
-    def _is_in_section_archive(self, config):
-
-        section_archive = get_config_by_list(config, ['post_type', self.post_type, 'section_archive'])
-
-        if section_archive is None:
-            return True
-
-        return section_archive
 
 
 
