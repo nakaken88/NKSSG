@@ -65,11 +65,11 @@ class Archives(Pages):
 
 
     def setup_date_archives(self, post_type, singles, with_front):
-
-        date_archive = self.create_root_archive('date', post_type)
+        slug = get_config_by_list(self.config, ['post_type', post_type, 'slug'])
+        date_archive = self.create_root_archive('date', post_type, slug)
 
         if with_front:
-            date_archive.dest_path = Path(post_type, 'index.html')
+            date_archive.dest_path = Path(date_archive.slug, 'index.html')
         else:
             date_archive.dest_path = Path('index.html')
         
@@ -109,10 +109,11 @@ class Archives(Pages):
 
 
     def setup_section_archive(self, post_type, basepath, with_front):
-        root_archive = self.create_root_archive('section', post_type)
+        slug = get_config_by_list(self.config, ['post_type', post_type, 'slug'])
+        root_archive = self.create_root_archive('section', post_type, slug)
 
         if with_front:
-            root_archive.dest_path = Path(post_type, 'index.html')
+            root_archive.dest_path = Path(root_archive.slug, 'index.html')
         else:
             root_archive.dest_path = Path('index.html')
 
