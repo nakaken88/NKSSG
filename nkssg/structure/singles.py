@@ -303,7 +303,21 @@ class Single(Page):
 
         ext = self.ext
         if ext == 'md' or ext == 'markdown':
-            return markdown.markdown(doc)
+            md_config = get_config_by_list(config, 'markdown')
+            if md_config is None:
+                return markdown.markdown(doc)
+            else:
+                extensions = []
+                ext_configs = {}
+                for item in md_config:
+                    if type(item) == dict:
+                        for k in item:
+                            extensions.append(k)
+                            ext_configs[k] = item[k]
+                            break
+                    else:
+                        extensions.append(item)
+                return markdown.markdown(doc, extensions=extensions, extension_configs=ext_configs)
         else:
             return doc
 
