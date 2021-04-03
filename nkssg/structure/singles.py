@@ -100,6 +100,8 @@ class Singles(Pages):
         self.config['plugins'].do_action('after_update_singles_url', target=self)
         self.dest_path_dup_check()
 
+        self.index_files = {str(p.abs_src_path.parent / 'index'): p for p in self.pages if p.filename == 'index'}
+
         for page in self.pages:
             page.update_html(self, archives)
 

@@ -316,8 +316,8 @@ class Archive(Page):
             paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or 10
 
             # get data from single page
-            if str(self.dest_path) in singles.dest_paths:
-                target_single = singles.dest_paths[str(self.dest_path)]
+            if str(self.path / 'index') in singles.index_files:
+                target_single = singles.index_files[str(self.path / 'index')]
                 self.meta = target_single.meta
                 self.title = target_single.title
                 self.name = target_single.name
