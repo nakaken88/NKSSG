@@ -162,7 +162,7 @@ class Archives(Pages):
             if type(term_dict) != dict:
                 continue # it is taxonomy setting
 
-            slug = term_dict.get('slug', name)
+            slug = to_slug(term_dict.get('slug', name))
             parent_name = term_dict.get('parent', tax_name)
 
             new_archive = self.create_archive('taxonomy', name, slug)
