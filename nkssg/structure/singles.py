@@ -288,7 +288,8 @@ class Single(Page):
         return self.title[:80]
 
     def _get_slug(self):
-        return self.meta.get('slug') or to_slug(self.name)
+        slug = self.meta.get('slug') or self.name
+        return to_slug(slug)
 
 
 
