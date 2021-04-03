@@ -144,7 +144,7 @@ class Archives(Pages):
         slug = get_config_by_list(term_list, ['slug']) or tax_name
 
         root_archive = self.create_root_archive('taxonomy', tax_name, slug)
-        root_archive.dest_path = Path(slug, 'index.html')
+        root_archive.dest_path = Path(root_archive.slug, 'index.html')
         root_archive.rel_url = root_archive._get_url_from_dest()
         root_archive._url_setup(self.config)
 
