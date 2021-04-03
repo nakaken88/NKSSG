@@ -366,7 +366,7 @@ class Archive(Page):
 
         while page_index == 1 or start < end:
 
-            archive = Archive(0, self.archive_type, self.name)
+            archive = Archive(0, self.archive_type, self.name, self.slug)
             if page_index == 1:
                 archive.dest_path = dest_dir / 'index.html'
             else:
