@@ -398,7 +398,7 @@ class Single(Page):
                 url = self._get_url_from_dest(dest_path)
 
             else:
-                url = self.get_url_from_permalink(permalink, archives)
+                url = self.get_url_from_permalink(permalink, archives, config)
                 dest_path = self._get_dest_from_url(url)
 
         else:
@@ -409,7 +409,7 @@ class Single(Page):
         return url.lower(), dest_path
 
 
-    def get_url_from_permalink(self, permalink, archives):
+    def get_url_from_permalink(self, permalink, archives, config):
         permalink = '/' + permalink.strip('/') + '/'
         url = self.date.strftime(permalink)
         url = url.replace('{slug}', self.slug)
@@ -417,7 +417,12 @@ class Single(Page):
         if '{filename}' in url:
             filename = clean_name(self.filename)
             if filename == 'index':
-                filename = clean_name(list(self.src_dir.parts)[-1])
+                part_list = list(self.src_dir.parts)
+                if len(part_list) == 1:
+                    slug = get_config_by_list(config, ['post_type', self.post_type, 'slug'])
+                    filename = slug
+                else:
+                    filename = clean_name(part_list[-1])
 
             filename = to_slug(filename)
             url = url.replace('{filename}', filename)
