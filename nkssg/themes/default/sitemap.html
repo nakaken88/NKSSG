@@ -14,7 +14,7 @@
   <h2>{{ page.post_type }}</h2>
   {%- endif -%}
 
-  {%- if page.is_in_date_archive -%}
+  {%- if page.archive_type == "date" -%}
     {%- if loop.first -%}
     <h3>Year: {{ page.date.strftime('%Y') }}</h3>
     {%- elif page.date.strftime('%Y') != page.prev_page.date.strftime('%Y') -%}
