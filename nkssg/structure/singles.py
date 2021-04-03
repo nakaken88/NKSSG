@@ -434,6 +434,7 @@ class Single(Page):
             if filename == 'index':
                 filename = clean_name(list(self.src_dir.parts)[-1])
 
+            filename = to_slug(filename)
             url = url.replace('{filename}', filename)
 
         if '{' in url:
