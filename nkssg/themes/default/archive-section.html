@@ -11,7 +11,9 @@
   <h1>{{ mypage.title }}</h1>
 
   {% if mypage.content -%}
-  <div>{{mypage.content}}</div>
+  {{ mypage.content }}
+  {%- else -%}
+  <div>(no content)</div>
   {%- endif %}
 </div>
 

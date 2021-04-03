@@ -297,7 +297,7 @@ class Single(Page):
 
     def _get_content(self, config, doc):
         if not doc:
-            return '<div>(no content)</div>'
+            return ''
 
         content = config['plugins'].do_action('on_get_content', target=doc, config=config, single=self)
         if content and content != doc:
