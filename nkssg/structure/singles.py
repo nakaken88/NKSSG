@@ -411,12 +411,11 @@ class Single(Page):
                 else:
                     dest_path = dest_path.relative_to(Path(post_type))
                 
-                if '_' in str(dest_path):
-                    parts = dest_path.parts
-                    new_parts = []
-                    for part in parts:
-                        new_parts.append(clean_name(part))
-                    dest_path = Path(*new_parts)
+                parts = dest_path.parts
+                new_parts = []
+                for part in parts:
+                    new_parts.append(to_slug(clean_name(part)))
+                dest_path = Path(*new_parts)
 
                 url = self._get_url_from_dest(dest_path)
 
