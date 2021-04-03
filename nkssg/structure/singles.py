@@ -328,7 +328,7 @@ class Single(Page):
                 if 'http' == src[:len('http')]:
                     return image
                 elif '/static' == src[:len('/static')]:
-                    image_path = config['base_dir'] / src
+                    image_path = config['base_dir'] / src.strip('/')
                 else:
                     image_path = self.abs_src_path.parent / src
 
@@ -339,17 +339,22 @@ class Single(Page):
         if not image:
             return image
 
-        cdate = self.date
-        year = str(cdate.year).zfill(4)
-        month = str(cdate.month).zfill(2)
 
-        image_name = image_path.name
-        new_path = Path(config['public_dir'], 'thumb', year, month, image_name)
-        image['new_path'] = new_path
+        if '/static' == src[:len('/static')]:
+            image['rel_url'] = src[len('/static'):]
+        else:
+            cdate = self.date
+            year = str(cdate.year).zfill(4)
+            month = str(cdate.month).zfill(2)
 
-        image['rel_url'] = '/' + '/'.join(['thumb', year, month, image_name])
+            image_name = image_path.name
+            new_path = Path(config['public_dir'], 'thumb', year, month, image_name)
+            image['new_path'] = new_path
+
+            image['rel_url'] = '/' + '/'.join(['thumb', year, month, image_name])
+
+
         image['abs_url'] = config['site']['site_url'] + image['rel_url']
-
         if config['use_abs_url']:
             image['url'] = image['abs_url']
         else:
