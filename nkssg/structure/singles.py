@@ -400,7 +400,10 @@ class Single(Page):
 
                 with_front = get_config_by_list(config, ['post_type', post_type, 'with_front'])
 
-                if not with_front:
+                if with_front:
+                    slug = get_config_by_list(config, ['post_type', post_type, 'slug'])
+                    dest_path = Path(str(dest_path).replace(post_type, slug, 1))
+                else:
                     dest_path = dest_path.relative_to(Path(post_type))
                 
                 if '_' in str(dest_path):
