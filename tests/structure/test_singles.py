@@ -64,7 +64,9 @@ def test_get_url_from_permalink_filename_top_index():
     single = Single('', '')
     single.date = datetime.datetime.now()
     single.filename = 'index'
-    single.src_dir = Path('post_type')
-    ret = single.get_url_from_permalink('/{filename}/', None)
-    assert ret == '/post_type/'
+    single.post_type = 'sample_post_type'
+    single.src_dir = Path(single.post_type)
+    config = {'post_type': [{'sample_post_type': {'slug': 'new_post_type'}}]}
+    ret = single.get_url_from_permalink('/{filename}/', config)
+    assert ret == '/new_post_type/'
 
