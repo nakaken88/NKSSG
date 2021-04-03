@@ -398,7 +398,7 @@ class Single(Page):
                 url = self._get_url_from_dest(dest_path)
 
             else:
-                url = self.get_url_from_permalink(permalink, archives, config)
+                url = self.get_url_from_permalink(permalink, config)
                 dest_path = self._get_dest_from_url(url)
 
         else:
@@ -409,7 +409,7 @@ class Single(Page):
         return url.lower(), dest_path
 
 
-    def get_url_from_permalink(self, permalink, archives, config):
+    def get_url_from_permalink(self, permalink, config):
         permalink = '/' + permalink.strip('/') + '/'
         url = self.date.strftime(permalink)
         url = url.replace('{slug}', self.slug)
