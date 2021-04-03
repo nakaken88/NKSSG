@@ -22,6 +22,11 @@ def get_config_by_list(config, keys):
     return cnf
 
 
+def to_slug(dirty_slug):
+    slug = dirty_slug.replace(' ', '-').lower()
+    return slug
+
+
 def clean_name(dirty_name):
     if dirty_name[0] != '_':
         return dirty_name
