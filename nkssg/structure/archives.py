@@ -250,9 +250,8 @@ class Archive(Page):
     def add_singles(self, singles, root_name):
         if self.archive_type == 'section':
             for single in singles:
-                if not single.is_in_section_archive:
-                    continue
-                self.add_single_to_section_archive(single)
+                if single.archive_type == 'section':
+                    self.add_single_to_section_archive(single)
 
         elif self.archive_type == 'taxonomy':
             for single in singles:
