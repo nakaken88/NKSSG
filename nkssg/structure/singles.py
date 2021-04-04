@@ -95,7 +95,7 @@ class Singles(Pages):
 
     def update(self, archives):
         for page in self.pages:
-            page.update_url(self)
+            page.update_url(self.config)
 
         self.config['plugins'].do_action('after_update_singles_url', target=self)
         self.dest_path_dup_check()
@@ -379,14 +379,13 @@ class Single(Page):
 
 
 
-    def update_url(self, archives):
-        config = archives.config
-        self.rel_url, self.dest_path = self._get_url_and_dest_path(config, archives)
+    def update_url(self, config):
+        self.rel_url, self.dest_path = self._get_url_and_dest_path(config)
         self.dest_dir = self.dest_path.parent
         self._url_setup(config)
 
 
-    def _get_url_and_dest_path(self, config, archives):
+    def _get_url_and_dest_path(self, config):
 
         url = self.meta.get('url')
         
