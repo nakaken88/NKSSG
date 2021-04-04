@@ -272,6 +272,25 @@ class Archive(Page):
                 target_archive.singles_all.append(single)
                 single.archive_list.append(target_archive)
 
+                # get data from single page
+                if single.filename == 'index':
+                    self.meta = single.meta
+                    self.title = single.title
+                    self.name = single.name
+                    self.slug = single.slug
+                    self.content = single.content
+                    self.summary = single.summary
+                    self.image = single.image
+
+                    self.html = single.html
+                    self.url = single.url
+                    self.abs_url = single.abs_url
+                    self.rel_url = single.rel_url
+                    self.dest_path = Path(single.dest_path)
+                    self.dest_dir = single.dest_dir
+
+                    self.archive_list = single.archive_list
+
             else:
                 for archive in self.children:
                     archive.add_single_to_section_archive(single)
@@ -314,27 +333,6 @@ class Archive(Page):
 
             post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
             paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or 10
-
-            # get data from single page
-            if str(self.path / 'index') in singles.index_files:
-                target_single = singles.index_files[str(self.path / 'index')]
-                self.meta = target_single.meta
-                self.title = target_single.title
-                self.name = target_single.name
-                self.slug = target_single.slug
-                self.content = target_single.content
-                self.summary = target_single.summary
-                self.image = target_single.image
-
-                self.html = target_single.html
-                self.url = target_single.url
-                self.abs_url = target_single.abs_url
-                self.rel_url = target_single.rel_url
-                self.dest_path = target_single.dest_path
-                self.dest_dir = target_single.dest_dir
-
-                self.archive_list = target_single.archive_list
-
 
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
