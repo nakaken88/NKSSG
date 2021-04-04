@@ -283,12 +283,6 @@ class Archive(Page):
                     self.image = single.image
 
                     self.html = single.html
-                    self.url = single.url
-                    self.abs_url = single.abs_url
-                    self.rel_url = single.rel_url
-                    self.dest_path = Path(single.dest_path)
-                    self.dest_dir = single.dest_dir
-
                     self.archive_list = single.archive_list
 
             else:
@@ -334,6 +328,16 @@ class Archive(Page):
             post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
             paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or 10
 
+            # get data from single page
+            if str(self.path / 'index') in singles.index_files:
+                target_single = singles.index_files[str(self.path / 'index')]
+                self.url = target_single.url
+                self.abs_url = target_single.abs_url
+                self.rel_url = target_single.rel_url
+                self.dest_path = target_single.dest_path
+                self.dest_dir = target_single.dest_dir
+
+                
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
 
