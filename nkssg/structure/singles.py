@@ -436,8 +436,7 @@ class Single(Page):
             if filename == 'index':
                 part_list = list(self.src_dir.parts)
                 if len(part_list) == 1:
-                    slug = get_config_by_list(config, ['post_type', self.post_type, 'slug'])
-                    filename = slug
+                    filename = get_config_by_list(config, ['post_type', self.post_type, 'slug'])
                 else:
                     filename = clean_name(part_list[-1])
 
@@ -466,7 +465,7 @@ class Single(Page):
                         break
                 
                 if target_archive is None:
-                    new_part.append('no-' + part)
+                    new_part.append('no-' + to_slug(part))
                 else:
                     target_archives = [p for p in target_archive.parents if not p.is_root]
                     target_archives = target_archives + [target_archive]
@@ -480,8 +479,7 @@ class Single(Page):
 
                 url = url.replace(original_part, '/'.join(new_part))
 
-        url = quote(url)
-        return url.lower()
+        return quote(url).lower()
 
 
     def update_html(self, singles, archives):
