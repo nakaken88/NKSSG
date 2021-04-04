@@ -196,6 +196,10 @@ class Archives(Pages):
 
 
     def update(self, singles):
+        for root_archive in self.root_archives:
+            root_archive.update_url()
+
+
         new_pages = []
 
         for root_archive in self.root_archives:
@@ -309,6 +313,26 @@ class Archive(Page):
 
 
 
+    def update_url(self):
+        if self.singles_all is None or len(self.singles_all) == 0:
+            return
+
+        if self.archive_type != 'section':
+            return
+
+        # get data from single index file
+        if self.single_index is not None:
+            self.url = self.single_index.url
+            self.abs_url = self.single_index.abs_url
+            self.rel_url = self.single_index.rel_url
+            self.dest_path = self.single_index.dest_path
+            self.dest_dir = self.single_index.dest_dir
+
+        if not self.children is None:
+            for child_archive in self.children:
+                child_archive.update_url()
+
+
     def get_archives(self, singles, archives):
         if self.singles_all is None or len(self.singles_all) == 0:
             return []
@@ -331,15 +355,6 @@ class Archive(Page):
             post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
             paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or 10
 
-            # get data from single index file
-            if self.single_index is not None:
-                self.url = self.single_index.url
-                self.abs_url = self.single_index.abs_url
-                self.rel_url = self.single_index.rel_url
-                self.dest_path = self.single_index.dest_path
-                self.dest_dir = self.single_index.dest_dir
-
-                
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
 
