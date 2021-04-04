@@ -99,9 +99,7 @@ class Site:
 
         if self.config['mode'] != 'draft':
             self.archives.setup(self.singles)
-
-        self.singles.update_urls()
-        if self.config['mode'] != 'draft':
+            self.singles.update_urls()
             self.archives.update_urls()
 
         self.singles.update_htmls(self.archives)
