@@ -199,6 +199,8 @@ class Archives(Pages):
         for root_archive in self.root_archives:
             root_archive.update_url()
 
+        self.config['plugins'].do_action('after_update_archives_url', target=self)
+
 
         new_pages = []
 
