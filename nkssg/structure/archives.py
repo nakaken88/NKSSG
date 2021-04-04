@@ -227,8 +227,10 @@ class Archive(Page):
         self.parent = None
         self.parents = []
         self.children = []
+
         self.singles = []
         self.singles_all = []
+        self.single_index = None
 
         self.archive_list = []
 
@@ -272,7 +274,7 @@ class Archive(Page):
                 target_archive.singles_all.append(single)
                 single.archive_list.append(target_archive)
 
-                # get data from single page
+                # get data from single index file
                 if single.filename == 'index':
                     self.meta = single.meta
                     self.title = single.title
@@ -284,6 +286,7 @@ class Archive(Page):
 
                     self.html = single.html
                     self.archive_list = single.archive_list
+                    self.single_index = single
 
             else:
                 for archive in self.children:
@@ -328,14 +331,13 @@ class Archive(Page):
             post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
             paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or 10
 
-            # get data from single page
-            if str(self.path / 'index') in singles.index_files:
-                target_single = singles.index_files[str(self.path / 'index')]
-                self.url = target_single.url
-                self.abs_url = target_single.abs_url
-                self.rel_url = target_single.rel_url
-                self.dest_path = target_single.dest_path
-                self.dest_dir = target_single.dest_dir
+            # get data from single index file
+            if self.single_index is not None:
+                self.url = self.single_index.url
+                self.abs_url = self.single_index.abs_url
+                self.rel_url = self.single_index.rel_url
+                self.dest_path = self.single_index.dest_path
+                self.dest_dir = self.single_index.dest_dir
 
                 
         elif self.archive_type == 'taxonomy':
