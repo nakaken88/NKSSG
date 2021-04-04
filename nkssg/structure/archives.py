@@ -238,8 +238,6 @@ class Archive(Page):
         self.singles_all = []
         self.single_index = None
 
-        self.archive_list = []
-
     
     def get_child(self, name):
         for child in self.children:

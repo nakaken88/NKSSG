@@ -53,7 +53,8 @@ class Page:
         self.aliases = []
 
         self.page_type = ''
-    
+        self.archive_list = []
+
 
     def output_page(self, config):
         output_path = config['public_dir'] / self.dest_path

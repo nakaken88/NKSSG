@@ -151,8 +151,6 @@ class Single(Page):
         self.is_draft = False
         self.is_expired = False
 
-        self.archive_list = []
-
 
     def __repr__(self):
         return "File(src='{}')".format(self.src_path)
