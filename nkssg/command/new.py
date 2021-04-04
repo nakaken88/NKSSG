@@ -4,7 +4,6 @@ from pathlib import Path
 import shutil
 
 from nkssg.structure.themes import Themes
-from nkssg.utils import front_matter_setup
 
 
 log = logging.getLogger(__name__)
