@@ -185,7 +185,10 @@ class Single(Page):
         with open(self.abs_src_path, 'r', encoding='UTF-8') as f:
             doc = f.read()
 
-        self.meta, doc = front_matter_setup(doc)
+        try:
+            self.meta, doc = front_matter_setup(doc)
+        except:
+            raise Exception('front matter error: ' + str(self.abs_src_path))
 
         self.post_type = self._get_post_type()
         self.post_type_index = config['post_type_list'].index(self.post_type)
