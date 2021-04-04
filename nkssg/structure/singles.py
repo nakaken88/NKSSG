@@ -93,13 +93,14 @@ class Singles(Pages):
 
 
 
-    def update(self, archives):
+    def update_urls(self):
         for page in self.pages:
             page.update_url(self.config)
 
         self.config['plugins'].do_action('after_update_singles_url', target=self)
         self.dest_path_dup_check()
 
+    def update(self, archives):
         for page in self.pages:
             page.update_html(self, archives)
 

@@ -195,13 +195,13 @@ class Archives(Pages):
                 root_archive.add_singles(singles, root_archive.root_name)
 
 
-    def update(self, singles):
+    def update_urls(self):
         for root_archive in self.root_archives:
             root_archive.update_url()
 
         self.config['plugins'].do_action('after_update_archives_url', target=self)
 
-
+    def update(self, singles):
         new_pages = []
 
         for root_archive in self.root_archives:
