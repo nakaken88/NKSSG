@@ -100,7 +100,7 @@ class Singles(Pages):
         self.config['plugins'].do_action('after_update_singles_url', target=self)
         self.dest_path_dup_check()
 
-    def update(self, archives):
+    def update_htmls(self, archives):
         for page in self.pages:
             page.update_html(self, archives)
 

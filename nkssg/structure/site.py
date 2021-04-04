@@ -104,9 +104,9 @@ class Site:
         if self.config['mode'] != 'draft':
             self.archives.update_urls()
 
-        self.singles.update(self.archives)
+        self.singles.update_htmls(self.archives)
         if self.config['mode'] != 'draft':
-            self.archives.update(self.singles)
+            self.archives.update_htmls(self.singles)
 
         self.config['plugins'].do_action('after_update_site', target=self)
 
