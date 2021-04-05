@@ -42,6 +42,5 @@ class Themes:
             self.dirs.append(theme_dir)
 
             cnf_path = theme_dir / 'default.yml'
-            if cnf_path.exists():
-                cnf = YAML(typ='safe').load(cnf_path) or {}
-                self.cnf = cnf
+            cnf = YAML(typ='safe').load(cnf_path) or {}
+            self.cnf = cnf
