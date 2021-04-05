@@ -48,6 +48,7 @@
     {%- endblock %}
     {% block google_analytics %}{% endblock %}
     {% block google_adsense %}{% endblock %}
+    <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
     <link rel="stylesheet" href="{{ config.site.site_url }}/themes/default/style.css">
     {% if config.theme and config.theme.child %}<link rel="stylesheet" href="{{ config.site.site_url }}/themes/{{ config.theme.child }}/style.css">{% endif %}
@@ -162,5 +163,6 @@
         </div>
       </footer>
     </div>
+    <script>twemoji.parse(document.body);</script>
   </body>
 </html>
