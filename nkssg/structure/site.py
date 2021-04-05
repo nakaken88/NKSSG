@@ -175,6 +175,7 @@ class Site:
             'config': self.config,
             'single_pages': self.singles.pages,
             'archives': self.archives,
+            'theme': self.config['themes'].cnf,
             })
 
         if parts[0] == 'home.html' and len(parts) == 1:

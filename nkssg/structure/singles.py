@@ -497,6 +497,7 @@ class Single(Page):
             'mypage': self,
             'single_pages': singles.pages,
             'archives': archives,
+            'theme': config['themes'].cnf,
             })
 
 

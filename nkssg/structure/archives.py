@@ -442,6 +442,7 @@ class Archive(Page):
                 'archives': archives,
                 'pages': target_singles[start:end],
                 'paginator': paginator,
+                'theme': config['themes'].cnf,
                 })
 
 
