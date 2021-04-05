@@ -37,7 +37,14 @@
   <h1>{{ mypage.title }}</h1>
   {% if mypage.meta and mypage.meta.image and mypage.meta.image.src -%}
   <p><img class="aligncenter" src="{{mypage.meta.image.src}}" alt=""></p>
+  {% elif mypage.meta and mypage.meta.emoji -%}
+  <p class="thumbnail-emoji">{{ mypage.meta.emoji }}</p>
+  {% elif theme.emoji -%}
+  {% set total_emoji = theme.emoji|length -%}
+  {% set index = (mypage.date.strftime('%Y%m%d%H%M%S') | int) % total_emoji %}
+  <p class="thumbnail-emoji">{{ theme.emoji[index] }}</p>
   {%- endif %}
+
   {% if mypage.content -%}
   {{ mypage.content }}
   {%- else -%}
