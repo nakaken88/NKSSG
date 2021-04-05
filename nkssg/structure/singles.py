@@ -426,6 +426,7 @@ class Single(Page):
             dest_path = self._get_dest_from_url(url)
 
         url = '/' + url.strip('/') + '/'
+        url = url.replace('//', '/')
 
         return url.lower(), dest_path
 
