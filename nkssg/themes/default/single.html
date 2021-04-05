@@ -8,12 +8,6 @@
 
 
 {% block content %}
-<div class="entry-info">
-  <small>
-    <span>{{ mypage.date.strftime('%Y/%m/%d') }}</span>
-  </small>
-</div>
-
 {% for archive in mypage.archive_list if archive.archive_type == 'section' -%}
 {% if archive.parents -%}
 <div class="breadcrumb">
@@ -32,6 +26,12 @@
 </div>
 {%- endif %}
 {%- endfor %}
+
+<div class="entry-info">
+  <small>
+    <span>{{ mypage.date.strftime('%Y/%m/%d') }}</span>
+  </small>
+</div>
 
 <div class="entry">
   <h1>{{ mypage.title }}</h1>
