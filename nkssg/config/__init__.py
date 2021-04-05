@@ -11,9 +11,6 @@ def load_config(mode):
     with open('nkssg.yml', encoding='utf8') as stream:
         config = YAML(typ='safe').load(stream)
 
-    if get_config_by_list(config, ['site', 'site_url']) is not None:
-        config['site']['site_url'] = config['site']['site_url'].rstrip('/')
-
     config['mode'] = mode
 
     config['base_dir'] = Path.cwd()
@@ -32,8 +29,13 @@ def load_config(mode):
 
 def set_default_config(config):
     config['site'] = get_config_by_list(config, ['site']) or {}
-    if get_config_by_list(config, ['site', 'site_url']) is None:
-        config['site']['site_url'] = ''
+    config['site']['site_name'] = get_config_by_list(config, ['site', 'site_name']) or 'Site Title'
+    config['site']['site_url'] = get_config_by_list(config, ['site', 'site_url']) or ''
+    config['site']['site_desc'] = get_config_by_list(config, ['site', 'site_desc']) or ''
+    config['site']['site_image'] = get_config_by_list(config, ['site', 'site_image']) or ''
+    config['site']['language'] = get_config_by_list(config, ['site', 'language']) or 'en'
+
+    config['site']['site_url'] = config['site']['site_url'].rstrip('/')
 
 
     if get_config_by_list(config, ['plugins']) is None:
