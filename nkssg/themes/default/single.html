@@ -27,6 +27,9 @@
 
 <div class="entry">
   <h1>{{ mypage.title }}</h1>
+  {% if mypage.meta and mypage.meta.image and mypage.meta.image.src -%}
+  <p><img class="aligncenter" src="{{mypage.meta.image.src}}" alt=""></p>
+  {%- endif %}
   {% if mypage.content -%}
   {{ mypage.content }}
   {%- else -%}
