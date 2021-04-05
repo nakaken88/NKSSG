@@ -26,7 +26,7 @@
     {% block ogp -%}
       {% if mypage -%}
         <meta property="og:type" content="article" />
-        <meta property="og:title" content="{{ mypage.title }} | {{ config.site.site_name }}" />
+        <meta property="og:title" content="{{ ns.title_tag }}" />
         <meta property="og:url" content="{{ mypage.abs_url }}" />
         {% if mypage.summary -%}
           <meta property="og:description" content="{{ mypage.summary }}" />
@@ -43,7 +43,7 @@
     {% block twitter_card -%}
       {% if mypage and mypage.title and config.site.site_name -%}
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="{{ mypage.title }} | {{ config.site.site_name }}" />
+        <meta name="twitter:title" content="{{ ns.title_tag }}" />
       {%- endif %}
     {%- endblock %}
     {% block google_analytics %}{% endblock %}
