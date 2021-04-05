@@ -4,11 +4,13 @@
   <head>
   {%- endblock %}
   {%- set ns = namespace(title_tag = "") %}
+  {% block calc_title_tag -%}
   {%- if mypage and mypage.title %}
-  {%-   set ns.title_tag = mypage.title + " | " + config.site.site_name %}
+  {%-   set ns.title_tag = mypage.title ~ " | " ~ config.site.site_name %}
   {%- elif config.site.site_name %}
   {%-   set ns.title_tag = config.site.site_name %}
   {%- endif %}
+  {%- endblock %}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% block title_tag -%}

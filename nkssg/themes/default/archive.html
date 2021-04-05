@@ -6,14 +6,14 @@
 {%- endblock %}
 
 
-{% block title_tag -%}
-  {% if mypage.rel_url and mypage.rel_url == "/" -%}
-    <title>{{ config.site.site_name }}</title>
-  {%- elif paginator.paged == 1 -%}
-    <title>{{ mypage.title }} | {{ config.site.site_name }}</title>
-  {%- else -%}
-    <title>{{ mypage.title }} | Page {{ paginator.paged }} | {{ config.site.site_name }}</title>
-  {%- endif %}
+{% block calc_title_tag -%}
+{%- if mypage.rel_url and mypage.rel_url == "/" %}
+{%-   set ns.title_tag = config.site.site_name %}
+{%- elif paginator.paged == 1 %}
+{%-   set ns.title_tag = mypage.title ~ " | " ~ config.site.site_name %}
+{%- else %}
+{%-   set ns.title_tag = mypage.title ~ " | Page " ~ paginator.paged ~ " | " ~ config.site.site_name %}
+{%- endif %}
 {%- endblock %}
 
 
