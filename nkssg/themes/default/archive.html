@@ -7,18 +7,12 @@
 
 
 {% block title_tag -%}
-  {% if mypage.root_name == "post" and mypage.is_root -%}
-    {% if paginator.paged == 1 -%}
-      <title>{{ config.site.site_name }}</title>
-    {%- else -%}
-      <title>Page {{ paginator.paged }} | {{ config.site.site_name }}</title>
-    {%- endif -%}
-  {% else -%}
-    {%- if paginator.paged == 1 -%}
-      <title>{{ mypage.title }} | {{ config.site.site_name }}</title>
-    {%- else -%}
-      <title>{{ mypage.title }} | Page {{ paginator.paged }} | {{ config.site.site_name }}</title>
-    {%- endif -%}
+  {% if mypage.rel_url and mypage.rel_url == "/" -%}
+    <title>{{ config.site.site_name }}</title>
+  {%- elif paginator.paged == 1 -%}
+    <title>{{ mypage.title }} | {{ config.site.site_name }}</title>
+  {%- else -%}
+    <title>{{ mypage.title }} | Page {{ paginator.paged }} | {{ config.site.site_name }}</title>
   {%- endif %}
 {%- endblock %}
 
