@@ -7,6 +7,7 @@
 
 
 {% block content %}
+{% if mypage.parents -%}
 <div class="breadcrumb">
   {% for parent in mypage.parents %}
     {%- if parent.rel_url == "" or parent.rel_url == "/" %}
@@ -20,6 +21,7 @@
   {%- endfor %}
   / {{mypage.title}}
 </div>
+{%- endif %}
 
 <div class="entry">
   <h1>{{ mypage.title }}</h1>

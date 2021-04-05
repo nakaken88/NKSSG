@@ -15,6 +15,7 @@
 </div>
 
 {% for archive in mypage.archive_list if archive.archive_type == 'section' -%}
+{% if archive.parents -%}
 <div class="breadcrumb">
   {% for parent in archive.parents %}
     {%- if parent.rel_url == "" or parent.rel_url == "/" %}
@@ -29,6 +30,7 @@
   / <a href="{{ archive.url }}">{{ archive.name }}</a>
   / {{ mypage.title }}
 </div>
+{%- endif %}
 {%- endfor %}
 
 <div class="entry">
