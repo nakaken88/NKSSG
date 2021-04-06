@@ -54,10 +54,23 @@
   <h2>Page list</h2>
 {%- endif %}
   <div class="page-item">
-    <div class="page-item-info">
-      <small>{{ page.date.strftime('%Y/%m/%d') }}</small>
+
+    <div class="page-image">
+    {% if page.meta and page.meta.image and page.meta.image.src -%}
+    <img src="{{page.meta.image.src}}" alt="">
+    {% elif page.meta and page.meta.emoji -%}
+    <div class="thumbnail-emoji">{{ page.meta.emoji }}</div>
+    {% elif theme.emoji -%}
+    {% set total_emoji = theme.emoji|length -%}
+    {% set index = (page.date.strftime('%Y%m%d%H%M%S') | int) % total_emoji %}
+    <div class="thumbnail-emoji">{{ theme.emoji[index] }}</div>
+    {%- endif %}
     </div>
+  
     <div class="page-item-body">
+      <div class="page-item-info">
+        <small>{{ page.date.strftime('%Y/%m/%d') }}</small>
+      </div>
       <a href="{{ page.url }}">{{ page.title }}</a>
     </div>
   </div>
