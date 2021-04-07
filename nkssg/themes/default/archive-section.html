@@ -51,7 +51,7 @@
 {%- for page in pages if page.url != mypage.url %}
 {%- if loop.first %}
 <h2>Page list</h2>
-<div class="page-list">
+<div class="page-list item-count-{{ pages | length }}">
 {%- endif %}
   <div class="page-item">
 

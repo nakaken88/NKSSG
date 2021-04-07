@@ -159,8 +159,8 @@ img.emoji {
   column-gap: 15px;
   row-gap: 30px;
 }
-.page-item {
-  width: 100%;
+.page-list.item-count-1, .page-list.item-count-2 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
 }
 .page-image .thumbnail-emoji {
   padding: 2rem 0;
