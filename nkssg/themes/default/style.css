@@ -108,9 +108,15 @@ a.blog-title:hover {
   margin: 1.5rem 0;
   background-color: #eceff1;
 }
-.entry pre {
+.entry pre
+, .entry code {
   white-space: pre-wrap;
   background-color: #e3f2fd;
+  border-radius: 0.25rem;
+}
+.entry code {
+  font-size: 0.95rem;
+  padding: 0.1rem 0.2rem;
 }
 
 .entry-info {
