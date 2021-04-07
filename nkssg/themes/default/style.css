@@ -119,6 +119,16 @@ a.blog-title:hover {
   padding: 0.1rem 0.2rem;
 }
 
+.entry dl {
+  margin: 1.5rem 0;
+}
+.entry dt {
+  font-weight: bold;
+}
+.entry dd {
+  margin: 0 1.5rem 1.5rem;
+}
+
 .entry-info {
   margin-bottom: 0.5rem;
 }
