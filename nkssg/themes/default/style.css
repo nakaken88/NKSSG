@@ -216,6 +216,18 @@ img.emoji {
   margin-right: 10px;
 }
 
+.widget-body .page-list {
+  display: grid;
+  grid-template: auto / 120px auto;
+}
+.widget-body .page-image .thumbnail-emoji {
+  padding: 1.5rem 0;
+}
+.widget-body .page-image .thumbnail-emoji img.emoji {
+  height: 2rem;
+  width: 2rem;
+}
+
 
 @media (min-width: 769px) {
   #inner-main {
