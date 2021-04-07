@@ -129,36 +129,12 @@ a.blog-title:hover {
   margin: 0 1.5rem 1.5rem;
 }
 
+
 .entry-info {
   margin-bottom: 0.5rem;
 }
 .entry-info a {
   margin: 0 0.2rem;
-}
-
-.page-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  column-gap: 15px;
-  row-gap: 30px;
-}
-.page-item {
-  width: 100%;
-}
-.pagination {
-  margin: 3rem 0;
-  text-align: center;
-}
-.pagination > span, .pagination a {
-  display: inline-block;
-  margin: 0.5rem;
-  width: 4rem;
-  text-align: center;
-  background: #ccc;
-  color: #fff;
-}
-.pagination > span, .pagination a:hover {
-  background: #2196f3;
 }
 
 img.emoji {
@@ -176,6 +152,16 @@ img.emoji {
   width: 5rem;
   margin: 0 auto;
 }
+
+.page-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  column-gap: 15px;
+  row-gap: 30px;
+}
+.page-item {
+  width: 100%;
+}
 .page-image .thumbnail-emoji {
   padding: 2rem 0;
   width: 100%;
@@ -185,6 +171,21 @@ img.emoji {
   width: 3rem;
 }
 
+.pagination {
+  margin: 3rem 0;
+  text-align: center;
+}
+.pagination > span, .pagination a {
+  display: inline-block;
+  margin: 0.5rem;
+  width: 4rem;
+  text-align: center;
+  background: #ccc;
+  color: #fff;
+}
+.pagination > span, .pagination a:hover {
+  background: #2196f3;
+}
 
 
 .widget {
