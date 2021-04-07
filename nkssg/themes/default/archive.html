@@ -33,17 +33,19 @@
 {%- for page in pages %}
   <div class="page-item">
 
-    <div class="page-image">
-    {% if page.meta and page.meta.image and page.meta.image.src -%}
-    <img src="{{page.meta.image.src}}" alt="">
-    {% elif page.meta and page.meta.emoji -%}
-    <div class="thumbnail-emoji">{{ page.meta.emoji }}</div>
-    {% elif theme.emoji -%}
-    {% set total_emoji = theme.emoji|length -%}
-    {% set index = (page.date.strftime('%Y%m%d%H%M%S') | int) % total_emoji %}
-    <div class="thumbnail-emoji">{{ theme.emoji[index] }}</div>
-    {%- endif %}
-    </div>
+    <a href="{{ page.url }}">
+      <div class="page-image">
+      {% if page.meta and page.meta.image and page.meta.image.src -%}
+      <img src="{{page.meta.image.src}}" alt="">
+      {% elif page.meta and page.meta.emoji -%}
+      <div class="thumbnail-emoji">{{ page.meta.emoji }}</div>
+      {% elif theme.emoji -%}
+      {% set total_emoji = theme.emoji|length -%}
+      {% set index = (page.date.strftime('%Y%m%d%H%M%S') | int) % total_emoji %}
+      <div class="thumbnail-emoji">{{ theme.emoji[index] }}</div>
+      {%- endif %}
+      </div>
+    </a>
 
     <div class="page-item-body">
       <div class="page-item-info">
