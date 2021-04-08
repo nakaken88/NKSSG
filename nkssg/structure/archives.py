@@ -353,7 +353,7 @@ class Archive(Page):
             target_singles = self.singles
 
             post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
-            paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or 10
+            paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or len(target_singles)
 
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
