@@ -189,7 +189,7 @@ class Site:
 
         html = template.render({
             'config': self.config,
-            'single_pages': self.singles.pages,
+            'singles': self.singles,
             'archives': self.archives,
             'theme': self.config['themes'].cnf,
             })

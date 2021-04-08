@@ -7,7 +7,7 @@
 {% block content %}
 <h1>Sitemap</h1>
 
-{% for page in single_pages-%}
+{% for page in singles -%}
   {%- if loop.first or page.post_type != page.prev_page.post_type -%}
   <h2>{{ page.post_type }}</h2>
   {%- endif -%}

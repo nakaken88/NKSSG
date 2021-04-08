@@ -494,7 +494,7 @@ class Single(Page):
         self.html = template.render({
             'config': config,
             'mypage': self,
-            'single_pages': singles.pages,
+            'singles': singles,
             'archives': archives,
             'theme': config['themes'].cnf,
             })
