@@ -102,21 +102,26 @@ a.blog-title:hover {
   border-right: solid 1px #bbdefb;
 }
 
-.entry blockquote
-, .entry pre {
+.entry blockquote {
   padding: 1rem;
   margin: 1.5rem 0;
   background-color: #eceff1;
 }
-.entry pre
-, .entry code {
+.entry pre {
   white-space: pre-wrap;
+  padding: 1rem;
+  margin: 1.5rem 0;
   background-color: #e3f2fd;
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
 }
 .entry code {
   font-size: 0.95rem;
   padding: 0.1rem 0.2rem;
+  background-color: #e3f2fd;
+  border-radius: 0.25rem;
+}
+.entry pre code {
+  padding: 0;
 }
 
 .entry dl {
