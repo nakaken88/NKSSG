@@ -185,8 +185,7 @@ class Site:
 
 
     def output_extra_page(self, extra_page):
-        parts = Path(extra_page).parts
-        template = self.config['env'].get_template('/'.join(parts))
+        template = self.config['env'].get_template(extra_page)
 
         html = template.render({
             'config': self.config,
@@ -195,10 +194,10 @@ class Site:
             'theme': self.config['themes'].cnf,
             })
 
-        if parts[0] == 'home.html' and len(parts) == 1:
+        if extra_page == 'home.html':
             output_path = self.config['public_dir'] / 'index.html'
         else:
-            output_path = Path(self.config['public_dir'], *parts)
+            output_path = Path(self.config['public_dir'], extra_page)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
