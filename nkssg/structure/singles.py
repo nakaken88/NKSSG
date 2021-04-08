@@ -1,7 +1,6 @@
 import collections
 import datetime
 import fnmatch
-from functools import cmp_to_key
 import markdown
 from pathlib import Path
 import platform
