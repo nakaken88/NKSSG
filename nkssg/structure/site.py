@@ -162,7 +162,8 @@ class Site:
 
 
     def output_extra_pages(self):
-        extra_pages = get_config_by_list(self.config, ['extra_pages']) or []
+        config = self.config['themes'].cnf
+        extra_pages = get_config_by_list(config, ['extra_pages']) or []
         config_extra_pages = extra_pages[:]
         default_extra_pages = ['home.html', '404.html', 'sitemap.html', 'sitemap.xml']
 
@@ -198,6 +199,8 @@ class Site:
             output_path = self.config['public_dir'] / 'index.html'
         else:
             output_path = Path(self.config['public_dir'], *parts)
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, 'w', encoding='UTF-8') as f:
             f.write(html)
