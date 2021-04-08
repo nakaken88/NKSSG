@@ -52,6 +52,11 @@
     <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
     <link rel="stylesheet" href="{{ config.site.site_url }}/themes/default/style.css">
     {% if config.theme and config.theme.child %}<link rel="stylesheet" href="{{ config.site.site_url }}/themes/{{ config.theme.child }}/style.css">{% endif %}
+    {% block favicon %}
+    <link rel="icon" href="{{ config.site.site_url }}/themes/{{ config.theme.name }}/img/favicon.ico">
+    <link rel="apple-touch-icon" type="image/png" href="{{ config.site.site_url }}/themes/{{ config.theme.name }}/img/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="{{ config.site.site_url }}/themes/{{ config.theme.name }}/img/icon-192x192.png">
+    {% endblock %}
     {% block other_header %}{% endblock %}
   </head>
   <body class="{% if mypage %}{{ [mypage.post_type, mypage.page_type] | join(' ') }}{% endif %}">
