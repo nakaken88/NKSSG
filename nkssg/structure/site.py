@@ -1,3 +1,4 @@
+import fnmatch
 from pathlib import Path
 import shutil
 
@@ -137,12 +138,27 @@ class Site:
         
         for d in self.config['themes'].dirs:
             for f in d.glob('**/*'):
-                if f.is_file() and f.suffix[1:] in ['css', 'js', 'gif', 'png', 'ico']:
-                    rel_path = f.relative_to(d.parent)
+                if not f.is_file():
+                    continue
+
+                rel_path = f.relative_to(d.parent)
+                if self.is_target(rel_path):
                     to_path = public_dir / 'themes' / rel_path
                     to_path.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(str(f), str(to_path))
 
+    def is_target(self, rel_path):
+        config = self.config['themes'].cnf
+        exclude = get_config_by_list(config, ['static_exclude']) or []
+        for item in exclude:
+            if fnmatch.fnmatch(rel_path, item):
+                return False
+
+        include = get_config_by_list(config, ['static_include']) or []
+        for item in include:
+            if fnmatch.fnmatch(rel_path, item):
+                return True
+        return False
 
 
     def output_extra_pages(self):
