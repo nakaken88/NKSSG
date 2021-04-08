@@ -58,6 +58,11 @@ post_type:
       permalink: /{slug}/
       archive_type: "section"
 
+markdown:
+  - fenced_code
+  - toc:
+      marker: "[toc]"
+
 plugins:
   - autop
   - awesome-img-link
