@@ -76,13 +76,17 @@
           </article>
 
           <aside>
+          {% block aside %}
+            {% block about -%}
             <div class="widget">
               <div class="widget-title">About</div>
               <div class="widget-body">
                 This site "<a href="/">{{ config.site.site_name }}</a>" is a sample site. <a href="{{ config.site.site_url }}/sitemap.html">Sitemap is here.</a>
               </div>
             </div>
+            {%- endblock %}
 
+            {% block recent_posts -%}
             {% for archive in archives if archive.root_name == "post" and archive.is_root -%}
               {%- for page in archive.singles_all[:10] -%}
                 {%- if loop.first %}
@@ -116,7 +120,9 @@
                 {%- endif %}
               {%- endfor -%}
             {%- endfor %}
+            {%- endblock %}
 
+            {% block date_archive -%}
             {% for archive in archives if archive.root_name == "post" and not archive.is_root and archive.name | length == 4 -%}
               {%- if loop.first %}
             <div class="widget">
@@ -131,7 +137,9 @@
             </div>
               {%- endif %}
             {%- endfor %}
+            {%- endblock %}
 
+            {% block category_list -%}
             {% for archive in archives | sort(attribute='singles_all_count', reverse=True) if archive.root_name == "category" and not archive.is_root and archive.singles_all_count > 0 -%}
               {%- if loop.first %}
             <div class="widget">
@@ -146,7 +154,9 @@
             </div>
               {%- endif %}
             {%- endfor %}
+            {%- endblock %}
 
+            {% block tag_cloud -%}
             {% for archive in archives | sort(attribute='singles_all_count', reverse=True) if archive.root_name == "tag" and not archive.is_root and archive.singles_all_count > 0 -%}
               {%- if loop.first %}
             <div class="widget tagcloud">
@@ -159,7 +169,9 @@
             </div>
               {%- endif %}
             {%- endfor %}
+            {%- endblock %}
 
+            {% block page_list -%}
             {% for page in singles if page.post_type == "page" -%}
               {%- if loop.first %}
             <div class="widget">
@@ -174,7 +186,8 @@
             </div>
               {%- endif %}
             {%- endfor %}
-
+            {%- endblock %}
+          {% endblock %}{# end of aside block #}
           </aside>
         </div>
       </main>
