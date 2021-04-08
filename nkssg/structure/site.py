@@ -137,7 +137,7 @@ class Site:
         
         for d in self.config['themes'].dirs:
             for f in d.glob('**/*'):
-                if f.is_file() and f.suffix[1:] in ['css', 'js', 'gif']:
+                if f.is_file() and f.suffix[1:] in ['css', 'js', 'gif', 'png', 'ico']:
                     rel_path = f.relative_to(d.parent)
                     to_path = public_dir / 'themes' / rel_path
                     to_path.parent.mkdir(parents=True, exist_ok=True)
