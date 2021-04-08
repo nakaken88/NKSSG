@@ -90,7 +90,7 @@ class AwesomePageLinkPlugin(BasePlugin):
 
             link['href'] = new_link
 
-        page.html = soup.prettify()
+        page.html = str(soup)
 
     def split_url(self, url):
         index = -1

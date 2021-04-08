@@ -52,7 +52,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
         if not srcs:
             return
 
-        page.html = soup.prettify()
+        page.html = str(soup)
         page.imgs = srcs
 
 
