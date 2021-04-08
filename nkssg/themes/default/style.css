@@ -244,6 +244,24 @@ img.emoji {
   width: 2rem;
 }
 
+.widget.section-list summary {
+  background-color: #e3f2fd;
+  margin: 4px;
+  padding: 0 4px;
+}
+.widget.section-list details {
+  border-left: 1px solid #aaa;
+}
+.widget.section-list details details {
+  margin-left: 10px;
+}
+.widget.section-list li {
+  margin: 4px 0 4px 8px;
+}
+.widget.section-list .current {
+  font-weight: bold;
+}
+
 
 @media (min-width: 769px) {
   #inner-main {
