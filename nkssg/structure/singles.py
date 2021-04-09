@@ -374,6 +374,7 @@ class Single(Page):
             image['url'] = image['abs_url']
         else:
             image['url'] = image['rel_url']
+        image['src'] = image['url']
         return image
 
 
