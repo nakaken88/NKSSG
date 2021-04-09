@@ -111,12 +111,15 @@ a.blog-title:hover {
   white-space: pre-wrap;
   padding: 1rem;
   margin: 1.5rem 0;
+  line-height: 1.5;
   background-color: #e3f2fd;
   border-radius: 0.5rem;
+  overflow: auto;
 }
 .entry code {
-  font-size: 0.95rem;
-  padding: 0.1rem 0.2rem;
+  font-size: 85%;
+  font-family: SFMono-Regular, Consolas, monospace;
+  padding: 0.2em 0.4em;
   background-color: #e3f2fd;
   border-radius: 0.25rem;
 }
