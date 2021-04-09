@@ -342,7 +342,7 @@ class Single(Page):
             if src:
                 if 'http' == src[:len('http')]:
                     return image
-                elif '/static' == src[:len('/static')]:
+                elif '/' == src[:len('/')]:
                     image_path = config['base_dir'] / src.strip('/')
                 else:
                     image_path = self.abs_src_path.parent / src
