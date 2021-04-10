@@ -190,6 +190,7 @@ class Single(Page):
             raise Exception('front matter error: ' + str(self.abs_src_path))
 
         self.post_type = self._get_post_type()
+        self.post_type_slug = get_config_by_list(config, ['post_type', self.post_type, 'slug'])
         self.post_type_index = config['post_type_list'].index(self.post_type)
 
         self.status = self._get_status()
