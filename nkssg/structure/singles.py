@@ -331,7 +331,7 @@ class Single(Page):
             summary = summary[:200]
             summary = summary.replace('/', ' ').replace('\\', ' ')
             summary = summary.replace('"', ' ').replace("'", ' ')
-            summary = summary.replace('\n', ' ')
+            summary = summary.replace('\n', '')
             summary = summary[:110]
         return summary
 
