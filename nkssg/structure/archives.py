@@ -301,10 +301,10 @@ class Archive(Page):
             if archive.name in single.meta[root_name]:
                 target_archive = archive
                 for parent in target_archive.parents:
-                    if not single.id in [s.id for s in parent.singles_all]:
+                    if not single in parent.singles_all:
                         parent.singles_all.append(single)
 
-                if not single.id in [s.id for s in target_archive.singles]:
+                if not single in target_archive.singles:
                     target_archive.singles.append(single)
                     target_archive.singles_all.append(single)
                     single.archive_list.append(target_archive)
