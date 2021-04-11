@@ -17,6 +17,7 @@
 {%- endblock %}
 
 
+{% import "import/thumbnail.html" as thumb %}
 {% block content %}
 {%- if paginator.paged == 1 and mypage.archive_type == "date" and mypage.is_root -%}
 <h1>Post List</h1>
@@ -35,15 +36,7 @@
 
     <a href="{{ page.url }}">
       <div class="page-image">
-      {% if page.meta and page.meta.image and page.meta.image.src -%}
-      <img src="{{page.meta.image.src}}" alt="">
-      {% elif page.meta and page.meta.emoji -%}
-      <div class="thumbnail-emoji">{{ page.meta.emoji }}</div>
-      {% elif theme.emoji -%}
-      {% set total_emoji = theme.emoji|length -%}
-      {% set index = (page.date.strftime('%Y%m%d%H%M%S') | int) % total_emoji %}
-      <div class="thumbnail-emoji">{{ theme.emoji[index] }}</div>
-      {%- endif %}
+        {{ thumb.get_thumb(page) }}
       </div>
     </a>
 
