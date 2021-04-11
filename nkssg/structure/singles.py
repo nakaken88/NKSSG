@@ -163,13 +163,13 @@ class Single(Page):
         o_order = 0 if other.meta.get('order') is None else other.meta.get('order')
 
         if s_order < 0 or o_order < 0:
-            return (s_order, self.id) < (o_order, other.id)
+            return (s_order, self.src_path) < (o_order, other.src_path)
 
 
         if self.archive_type == 'date':
             if self.date != other.date:
                 return self.date > other.date
-            return self.id < other.id
+            return self.src_path < other.src_path
 
         if self.src_dir != other.src_dir:
             return self.src_dir < other.src_dir
