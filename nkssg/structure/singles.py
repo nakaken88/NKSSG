@@ -83,12 +83,19 @@ class Singles(Pages):
         self.pages = sorted(new_pages)
         self.config['plugins'].do_action('after_sort_singles', target=self)
 
-        self.src_paths = {str(page.src_path): page for page in self.pages}
-
         bookended = [None] + self.pages + [None]
         zipped = zip(bookended[:-2], bookended[1:-1], bookended[2:])
         for page0, page1, page2 in zipped:
             page1.prev_page, page1.next_page = page0, page2
+
+        self.src_paths = {str(page.src_path): page for page in self.pages}
+        self.file_id_dup_check()
+        self.file_ids = {str(page.file_id): page for page in self.pages}
+
+
+    def file_id_dup_check(self):
+        file_id_list = [(str(page.file_id), page) for page in self.pages]
+        dup_check(file_id_list)
 
 
 
@@ -98,6 +105,7 @@ class Singles(Pages):
 
         self.config['plugins'].do_action('after_update_singles_url', target=self)
         self.dest_path_dup_check()
+        self.dest_paths = {str(page.dest_path): page for page in self.pages}
 
     def update_htmls(self, archives):
         for page in self.pages:
@@ -109,7 +117,6 @@ class Singles(Pages):
     def dest_path_dup_check(self):
         dest_path_list = [(str(page.dest_path), page) for page in self.pages]
         dup_check(dest_path_list)
-        self.dest_paths = {str(page.dest_path): page for page in self.pages}
 
 
 
