@@ -107,21 +107,8 @@ class Singles(Pages):
 
 
     def dest_path_dup_check(self):
-        dest_path_list = [str(page.dest_path) for page in self.pages]
-        dest_path_counter = collections.Counter(dest_path_list)
-
-        dest_path_check = True
-        for k, v in dest_path_counter.items():
-            if v > 1:
-                print('Error: ' + k + ' is duplicated')
-                for page in self.pages:
-                    if str(page.dest_path) == k:
-                        print('- ' + str(page.src_path))
-                dest_path_check = False
-
-        if not dest_path_check:
-            raise Exception('dest paths error')
-
+        dest_path_list = [(str(page.dest_path), page) for page in self.pages]
+        dup_check(dest_path_list)
         self.dest_paths = {str(page.dest_path): page for page in self.pages}
 
 
