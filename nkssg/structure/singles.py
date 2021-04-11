@@ -497,20 +497,12 @@ class Single(Page):
 
         if '{{' in self.content:
             self.content = config['env'].from_string(self.content).render({
-                'config': config,
                 'mypage': self,
                 'meta': self.meta,
-                'singles': singles,
-                'archives': archives,
-                'theme': config['themes'].cnf,
                 })
 
         self.html = template.render({
-            'config': config,
             'mypage': self,
-            'singles': singles,
-            'archives': archives,
-            'theme': config['themes'].cnf,
             })
 
 

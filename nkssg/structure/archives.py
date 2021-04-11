@@ -438,13 +438,9 @@ class Archive(Page):
             template = config['env'].get_template(template_file)
 
             paginator['pages'][i].html = template.render({
-                'config': config,
                 'mypage': self,
-                'singles': singles,
-                'archives': archives,
                 'pages': target_singles[start:end],
                 'paginator': paginator,
-                'theme': config['themes'].cnf,
                 })
 
 
