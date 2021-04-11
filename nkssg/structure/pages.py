@@ -29,7 +29,7 @@ class Pages:
 
 class Page:
     def __init__(self):
-        self.id = 0
+        self._id = 0
         
         self.src_path = ''
         self.abs_src_path = ''

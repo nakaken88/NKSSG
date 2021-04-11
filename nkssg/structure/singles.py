@@ -132,7 +132,7 @@ class Single(Page):
     def __init__(self, src_path, docs_dir, id=0):
         super().__init__()
 
-        self.id = id
+        self._id = id
 
         self.src_path = Path(src_path)
         self.abs_src_path = docs_dir / self.src_path

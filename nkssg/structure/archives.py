@@ -216,7 +216,7 @@ class Archive(Page):
     def __init__(self, id, archive_type, name, slug=''):
         super().__init__()
 
-        self.id = id
+        self._id = id
 
         self.archive_type = archive_type
         self.name = str(name)
