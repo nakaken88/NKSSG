@@ -336,6 +336,9 @@ class Archive(Page):
         if self.singles_all is None or len(self.singles_all) == 0:
             return []
 
+        if self.single_index is not None:
+            self.content = self.single_index.content
+
         config = archives.config
         dest_dir = self.dest_path.parent
 
