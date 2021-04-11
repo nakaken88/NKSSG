@@ -11,7 +11,6 @@ class Archives(Pages):
         self.config = config
         self.archives = []
         self.root_archives = []
-        self.id = 0
 
     def __iter__(self):
         return iter(self.archives)
@@ -32,8 +31,7 @@ class Archives(Pages):
 
 
     def create_archive(self, archive_type, name, slug=''):
-        self.id = self.id + 1
-        archive = Archive(self.id, archive_type, name, slug)
+        archive = Archive(len(self.archives) + 1, archive_type, name, slug)
         self.archives.append(archive)
         return archive
 
