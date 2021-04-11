@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 from nkssg.structure.plugins import BasePlugin
+from nkssg.utils import dup_check
 
 
 class AwesomePageLinkPlugin(BasePlugin):
@@ -17,29 +18,18 @@ class AwesomePageLinkPlugin(BasePlugin):
 
         # setting url ids
         target_pages = [page for page in self.singles if page.meta.get('url_id')]
-        url_id_list = [str(page.meta['url_id']) for page in target_pages]
-        url_id_counter = collections.Counter(url_id_list)
-
-        url_id_check = True
-        for k, v in url_id_counter.items():
-            if v > 1:
-                print('Error: URL ID "' + k + '" is duplicated')
-                for page in target_pages:
-                    if str(page.meta['url_id']) == k:
-                        print('- ' + str(page.src_path))
-                url_id_check = False
-
-        if not url_id_check:
-            raise Exception('URL ID error')
-
+        self.url_id_dup_check(target_pages)
         self.url_ids = {str(page.meta['url_id']): page for page in target_pages}
-
 
         for page in site.singles:
             self.update_page_link(page)
         for page in site.archives:
             self.update_page_link(page)
         return site
+
+    def url_id_dup_check(self, target_pages):
+        url_id_list = [(str(page.meta['url_id']), page) for page in target_pages]
+        dup_check(url_id_list)
 
     def update_page_link(self, page):
         config = self.site_config
