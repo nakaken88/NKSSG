@@ -119,6 +119,10 @@ class Singles(Pages):
         dup_check(dest_path_list)
 
 
+    def get_by_id(self, file_id):
+        return self.file_ids.get(file_id) or None
+
+
 
 
 class Single(Page):
