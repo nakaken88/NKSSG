@@ -278,6 +278,7 @@ class Archive(Page):
 
                 # get data from single index file
                 if single.filename == 'index':
+                    self.file_id = single.file_id
                     self.meta = single.meta
                     self.title = single.title
                     self.name = single.name

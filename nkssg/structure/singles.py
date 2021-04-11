@@ -207,6 +207,7 @@ class Single(Page):
 
         self.image = self._get_image(config)
 
+        self.file_id = self._get_file_id()
         self.archive_type = self._get_archive_type(config)
 
         return self
@@ -378,6 +379,9 @@ class Single(Page):
         image['src'] = image['url']
         return image
 
+
+    def _get_file_id(self):
+        return self.meta.get('file_id') or self.src_path
 
     def _get_archive_type(self, config):
         return  get_config_by_list(config, ['post_type', self.post_type, 'archive_type'])

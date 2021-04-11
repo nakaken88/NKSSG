@@ -30,7 +30,8 @@ class Pages:
 class Page:
     def __init__(self):
         self._id = 0
-        
+        self.file_id = ''
+
         self.src_path = ''
         self.abs_src_path = ''
         self.src_dir = ''
