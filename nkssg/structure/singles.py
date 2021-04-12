@@ -289,7 +289,13 @@ class Single(Page):
         return self.title[:80]
 
     def _get_slug(self):
-        slug = self.meta.get('slug') or self.name
+        slug = self.meta.get('slug')
+        if slug is None:
+            # set top index slug to post type slug instead of dir name
+            if self.filename == 'index' and str(self.src_dir) == self.post_type:
+                slug = self.post_type_slug
+            else:
+                slug = self.name
         return to_slug(slug)
 
 
