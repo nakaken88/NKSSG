@@ -501,7 +501,7 @@ class Single(Page):
         template_file = self.lookup_template(config)
         template = config['env'].get_template(template_file)
 
-        if '{{' in self.content:
+        if '{{' in self.content or '{#' in self.content:
             # add "import short code" statement
             additional_statement = ''
             import_sc = '{% import "import/short-code.html" as sc %}'
