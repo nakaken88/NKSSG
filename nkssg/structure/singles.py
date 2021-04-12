@@ -502,7 +502,22 @@ class Single(Page):
         template = config['env'].get_template(template_file)
 
         if '{{' in self.content:
-            self.content = config['env'].from_string(self.content).render({
+            # add "import short code" statement
+            additional_statement = ''
+            import_sc = '{% import "import/short-code.html" as sc %}'
+            import_scc = '{% import "import/short-code-child.html" as scc %}'
+
+            for theme_dir in config['themes'].dirs:
+                template_path = theme_dir / 'import' / 'short-code.html'
+                if template_path.exists():
+                    additional_statement = additional_statement + import_sc
+
+                template_path = theme_dir / 'import' / 'short-code-child.html'
+                if template_path.exists():
+                    additional_statement = additional_statement + import_scc
+
+            pre_content = additional_statement + self.content
+            self.content = config['env'].from_string(pre_content).render({
                 'mypage': self,
                 'meta': self.meta,
                 })
