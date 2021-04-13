@@ -133,7 +133,7 @@ class Site:
 
 
     def copy_static_files(self):
-        static_dir = Path.cwd() / 'static'
+        static_dir = self.config['base_dir'] / 'static'
         public_dir = self.config['public_dir']
 
         for f in static_dir.glob('**/*'):
