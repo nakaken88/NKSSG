@@ -236,6 +236,10 @@ class Archive(Page):
         self.singles_all = []
         self.single_index = None
 
+
+    def __str__(self):
+        return "Archive(name='{}', root='{}', type='{}')".format(self.name, self.root_name, self.archive_type)
+
     
     def get_child(self, name):
         for child in self.children:
