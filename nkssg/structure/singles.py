@@ -150,8 +150,8 @@ class Single(Page):
         self.is_expired = False
 
 
-    def __repr__(self):
-        return "File(src='{}')".format(self.src_path)
+    def __str__(self):
+        return "Single(src='{}')".format(self.src_path)
 
     def __lt__(self, other):
         if self.post_type != other.post_type:
