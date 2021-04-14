@@ -5,31 +5,22 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 from nkssg.structure.plugins import BasePlugin
-from nkssg.utils import dup_check
 
 
 class AwesomePageLinkPlugin(BasePlugin):
     def after_update_site(self, site, **kwargs):
         self.site_config = site.config
         self.singles = site.singles
+        self.file_ids = self.singles.file_ids
 
         self.keyword = self.config.get('keyword') or '?'
         self.strip_paths = self.config.get('strip_paths') or []
-
-        # setting url ids
-        target_pages = [page for page in self.singles if page.meta.get('url_id')]
-        self.url_id_dup_check(target_pages)
-        self.url_ids = {str(page.meta['url_id']): page for page in target_pages}
 
         for page in site.singles:
             self.update_page_link(page)
         for page in site.archives.pages:
             self.update_page_link(page)
         return site
-
-    def url_id_dup_check(self, target_pages):
-        url_id_list = [(str(page.meta['url_id']), page) for page in target_pages]
-        dup_check(url_id_list)
 
     def update_page_link(self, page):
         config = self.site_config
@@ -51,8 +42,8 @@ class AwesomePageLinkPlugin(BasePlugin):
                 href = href[1:]
                 old_link, suffix = self.split_url(href)
 
-                if self.url_ids.get(old_link):
-                    new_link = self.url_ids[old_link].url + suffix
+                if self.file_ids.get(old_link):
+                    new_link = self.file_ids[old_link].url + suffix
                 else:
                     print('Error: URL ID "' + href + '" is not found')
                     print(' on ' + str(page.src_path))
