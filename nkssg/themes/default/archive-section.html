@@ -35,14 +35,18 @@
 </div>
 
 {% if mypage.children %}
+  {%- for child in mypage.children if child.singles_all | length > 0 %}
+    {%- if loop.first  %}
 <div class="subsection-list">
   <h2>Sub section</h2>
   <ul>
-{%- for child in mypage.children %}
-<li><a href="{{ child.abs_url }}">{{ child.title }}</a></li>
-{%- endfor %}
-</ul>
+    {%- endif %}
+    <li><a href="{{ child.abs_url }}">{{ child.title }}</a></li>
+    {%- if loop.last  %}
+  </ul>
 </div>
+    {%- endif %}
+  {%- endfor %}
 {%- endif %}
 
 
