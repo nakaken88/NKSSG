@@ -1,0 +1,7 @@
+{% macro title_tag(mypage) -%}
+  {%- if mypage and mypage.title -%}
+    {{ mypage.title }} | {{ config.site.site_name }}
+  {%- else -%}
+    {{ config.site.site_name }}
+  {%- endif -%}
+{%- endmacro %}

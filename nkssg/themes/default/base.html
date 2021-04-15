@@ -1,21 +1,14 @@
+{%-
+  import "import/short-code.html" as sc
+-%}
 <!DOCTYPE html>
 <html lang="{{ config.site.language }}">
   {% block head_tag -%}
   <head>
   {%- endblock %}
-  {%- set ns = namespace(title_tag = "") %}
-  {% block calc_title_tag -%}
-  {%- if mypage and mypage.title %}
-  {%-   set ns.title_tag = mypage.title ~ " | " ~ config.site.site_name %}
-  {%- elif config.site.site_name %}
-  {%-   set ns.title_tag = config.site.site_name %}
-  {%- endif %}
-  {%- endblock %}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% block title_tag -%}
-      <title>{{ ns.title_tag }}</title>
-    {%- endblock %}
+    <title>{{ sc.title_tag(mypage) }}</title>
     {% block desc_tag -%}
       {% if mypage and mypage.summary -%}
         <meta name="description" content="{{ mypage.summary }}" />
@@ -26,7 +19,7 @@
     {% block ogp -%}
       {% if mypage -%}
         <meta property="og:type" content="article" />
-        <meta property="og:title" content="{{ ns.title_tag }}" />
+        <meta property="og:title" content="{{ sc.title_tag(mypage) }}" />
         <meta property="og:url" content="{{ mypage.abs_url }}" />
         {% if mypage.summary -%}
           <meta property="og:description" content="{{ mypage.summary }}" />
@@ -43,7 +36,7 @@
     {% block twitter_card -%}
       {% if mypage and mypage.title and config.site.site_name -%}
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="{{ ns.title_tag }}" />
+        <meta name="twitter:title" content="{{ sc.title_tag(mypage) }}" />
       {%- endif %}
     {%- endblock %}
     {% block google_analytics %}{% endblock %}
