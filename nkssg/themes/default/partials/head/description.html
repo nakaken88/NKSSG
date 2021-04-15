@@ -1,0 +1,5 @@
+{% if mypage and mypage.summary -%}
+<meta name="description" content="{{ mypage.summary }}" />
+{%- elif config.site.site_desc -%}
+<meta name="description" content="{{ config.site.site_desc }}" />
+{%- endif %}

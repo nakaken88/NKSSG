@@ -1,0 +1,4 @@
+{% if mypage and mypage.title and config.site.site_name -%}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="{{ sc.title_tag(mypage) }}" />
+{%- endif %}

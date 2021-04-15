@@ -1,0 +1,15 @@
+{% if mypage -%}
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="{{ sc.title_tag(mypage) }}" />
+  <meta property="og:url" content="{{ mypage.abs_url }}" />
+  {% if mypage.summary -%}
+    <meta property="og:description" content="{{ mypage.summary }}" />
+  {%- elif config.site.site_desc -%}
+    <meta property="og:description" content="{{ config.site.site_desc }}" />
+  {%- endif %}
+  {% if mypage.image and mypage.image.abs_url -%}
+    <meta property="og:image" content="{{ mypage.image.abs_url }}" />
+  {%- elif config and config.site and config.site.site_image -%}
+    <meta property="og:image" content="{{ config.site.site_url }}{{ config.site.site_image }}" />
+  {%- endif %}
+{%- endif %}
