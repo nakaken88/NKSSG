@@ -69,142 +69,15 @@
           </article>
 
           <aside>
-          {% block aside %}
-            {% block about -%}
-            <div class="widget">
-              <div class="widget-title">About</div>
-              <div class="widget-body">
-                This site "<a href="/">{{ config.site.site_name }}</a>" is a sample site. <a href="{{ config.site.site_url }}/sitemap.html">Sitemap is here.</a>
-              </div>
-            </div>
-            {%- endblock %}
-
-            {% block recent_posts -%}
-            {% import "import/thumbnail.html" as thumb %}
-            {% for archive in archives if archive.root_name == "post" and archive.is_root -%}
-              {%- for page in archive.singles_all[:10] -%}
-                {%- if loop.first %}
-            <div class="widget">
-              <div class="widget-title">Recent Posts</div>
-              <div class="widget-body">
-                <ul>
-                {%- endif %}
-                  <a href="{{ page.url }}">
-                    <li class="page-list">
-                      <div class="page-image">
-                        {{ thumb.get_thumb(page) }}
-                      </div>
-                      <div class="page-item-body">
-                        {{ page.title }}
-                      </div>
-                    </li>
-                  </a>
-                {%- if loop.last %}
-                </ul>
-              </div>
-            </div>
-                {%- endif %}
-              {%- endfor -%}
-            {%- endfor %}
-            {%- endblock %}
-
-            {% block date_archive -%}
-            {% for archive in archives if archive.root_name == "post" and not archive.is_root and archive.name | length == 4 -%}
-              {%- if loop.first %}
-            <div class="widget">
-              <div class="widget-title">Archive</div>
-              <div class="widget-body">
-                <ul>
-              {%- endif %}
-                  <li><a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})</li>
-              {%- if loop.last %}
-                </ul>
-              </div>
-            </div>
-              {%- endif %}
-            {%- endfor %}
-            {%- endblock %}
-
-            {% block category_list -%}
-            {% for archive in archives | sort(attribute='singles_all_count', reverse=True) if archive.root_name == "category" and not archive.is_root and archive.singles_all_count > 0 -%}
-              {%- if loop.first %}
-            <div class="widget">
-              <div class="widget-title">Category List</div>
-              <div class="widget-body">
-                <ul>
-              {%- endif %}
-                  <li><a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})</li>
-              {%- if loop.last %}
-                </ul>
-              </div>
-            </div>
-              {%- endif %}
-            {%- endfor %}
-            {%- endblock %}
-
-            {% block tag_cloud -%}
-            {% for archive in archives | sort(attribute='singles_all_count', reverse=True) if archive.root_name == "tag" and not archive.is_root and archive.singles_all_count > 0 -%}
-              {%- if loop.first %}
-            <div class="widget tagcloud">
-              <div class="widget-title">Tag List</div>
-              <div class="widget-body">
-              {%- endif %}
-                <span class="link-item"><a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})</span>
-              {%- if loop.last %}
-              </div>
-            </div>
-              {%- endif %}
-            {%- endfor %}
-            {%- endblock %}
-
-            {% block page_list -%}
-            {% for page in singles if page.post_type == "page" -%}
-              {%- if loop.first %}
-            <div class="widget">
-              <div class="widget-title">Page List</div>
-              <div class="widget-body">
-                <ul>
-              {%- endif %}
-                  <li><a href="{{ page.url }}">{{ page.title }}</a></li>
-              {%- if loop.last %}
-                </ul>
-              </div>
-            </div>
-              {%- endif %}
-            {%- endfor %}
-            {%- endblock %}
-
-            {% block section_list -%}
-            <div class="widget section-list">
-              <div class="widget-title">Section List</div>
-              <div class="widget-body">
-                {%- for menu_item in archives if menu_item.archive_type == 'section' and menu_item.is_root and menu_item.singles_all | length > 0 %}
-                <details open>
-                  <summary>
-                    <a href="{{ menu_item.url }}"{% if mypage and mypage.url == menu_item.url %} class="current"{% endif %}>
-                      {{ menu_item.title }}
-                    </a>
-                  </summary>
-                  {% for menu_item in menu_item.children if menu_item.singles_all | length > 0 %}
-                    {% include "parts/menu_item.html" %}
-                  {% endfor %}
-                  {% if menu_item.singles %}
-                  <ul>
-                    {% for page in menu_item.singles if page.url != menu_item.url %}
-                    <li>
-                      <a href="{{ page.url }}"{% if mypage and mypage.url == page.url %} class="current"{% endif %}>
-                        {{ page.title }}
-                      </a>
-                    </li>
-                    {% endfor %}
-                  </ul>
-                  {% endif %}
-                </details>
-                {%- endfor %}
-              </div>
-            </div>
-            {%- endblock %}
-          {% endblock %}{# end of aside block #}
+          {% block sidebar %}
+            {% include "partials/sidebar/about.html" %}
+            {% include "partials/sidebar/recent-posts.html" %}
+            {% include "partials/sidebar/date-archive.html" %}
+            {% include "partials/sidebar/category-list.html" %}
+            {% include "partials/sidebar/tag-cloud.html" %}
+            {% include "partials/sidebar/page-list.html" %}
+            {% include "partials/sidebar/section-list.html" %}
+          {% endblock %}
           </aside>
         </div>
       </main>

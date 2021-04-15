@@ -1,0 +1,28 @@
+<div class="widget section-list">
+  <div class="widget-title">Section List</div>
+  <div class="widget-body">
+    {%- for menu_item in archives if menu_item.archive_type == 'section' and menu_item.is_root and menu_item.singles_all | length > 0 %}
+    <details open>
+      <summary>
+        <a href="{{ menu_item.url }}"{% if mypage and mypage.url == menu_item.url %} class="current"{% endif %}>
+          {{ menu_item.title }}
+        </a>
+      </summary>
+      {% for menu_item in menu_item.children if menu_item.singles_all | length > 0 %}
+        {% include "partials/menu_item.html" %}
+      {% endfor %}
+      {% if menu_item.singles %}
+      <ul>
+        {% for page in menu_item.singles if page.url != menu_item.url %}
+        <li>
+          <a href="{{ page.url }}"{% if mypage and mypage.url == page.url %} class="current"{% endif %}>
+            {{ page.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </details>
+    {%- endfor %}
+  </div>
+</div>

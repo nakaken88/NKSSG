@@ -1,0 +1,14 @@
+{% for page in singles if page.post_type == "page" -%}
+  {%- if loop.first %}
+<div class="widget">
+  <div class="widget-title">Page List</div>
+  <div class="widget-body">
+    <ul>
+  {%- endif %}
+      <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+  {%- if loop.last %}
+    </ul>
+  </div>
+</div>
+  {%- endif %}
+{%- endfor %}

@@ -1,0 +1,14 @@
+{% for archive in archives if archive.root_name == "post" and not archive.is_root and archive.name | length == 4 -%}
+  {%- if loop.first %}
+<div class="widget">
+  <div class="widget-title">Archive</div>
+  <div class="widget-body">
+    <ul>
+  {%- endif %}
+      <li><a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})</li>
+  {%- if loop.last %}
+    </ul>
+  </div>
+</div>
+  {%- endif %}
+{%- endfor %}

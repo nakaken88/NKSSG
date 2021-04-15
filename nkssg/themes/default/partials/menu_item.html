@@ -10,7 +10,7 @@
   </summary>
   {% if menu_item.children %}
     {% for menu_item in menu_item.children if menu_item.singles_all | length > 0 %}
-      {% include "parts/menu_item.html" %}
+      {% include "partials/menu_item.html" %}
     {% endfor %}
   {% endif %}
   {% if menu_item.singles %}
