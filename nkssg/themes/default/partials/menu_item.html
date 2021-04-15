@@ -1,0 +1,27 @@
+{% if mypage and (mypage in menu_item.singles_all or mypage.url == menu_item.url or menu_item in mypage.parents) %}
+<details open>
+{% else %}
+<details>
+{% endif %}
+  <summary>
+    <a href="{{ menu_item.url }}"{% if mypage and mypage.url == menu_item.url %} class="current"{% endif %}>
+      {{ menu_item.title }}
+    </a>
+  </summary>
+  {% if menu_item.children %}
+    {% for menu_item in menu_item.children if menu_item.singles_all | length > 0 %}
+      {% include "parts/menu_item.html" %}
+    {% endfor %}
+  {% endif %}
+  {% if menu_item.singles %}
+  <ul>
+    {% for page in menu_item.singles if page.url != menu_item.url %}
+    <li>
+      <a href="{{ page.url }}"{% if mypage and mypage.url == page.url %} class="current"{% endif %}>
+        {{ page.title }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</details>
