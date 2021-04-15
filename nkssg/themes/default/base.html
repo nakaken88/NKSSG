@@ -3,7 +3,8 @@
 -%}
 <!DOCTYPE html>
 <html lang="{{ config.site.language }}">
-  {% block head_tag -%}
+{% block head_tag -%}
+  {% block head_start_tag -%}
   <head>
   {%- endblock %}
     <meta charset="utf-8" />
@@ -14,13 +15,12 @@
     {% include "partials/head/twitter-card.html" %}
     {% include "partials/head/google-analytics.html" %}
     {% include "partials/head/google-adsense.html" %}
-    <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://unpkg.com/modern-css-reset/dist/reset.min.css" />
-    <link rel="stylesheet" href="{{ config.site.site_url }}/themes/default/style.css">
-    {% if config.theme and config.theme.child %}<link rel="stylesheet" href="{{ config.site.site_url }}/themes/{{ config.theme.child }}/style.css">{% endif %}
+    {% include "partials/head/library.html" %}
+    {% include "partials/head/stylesheet.html" %}
     {% include "partials/head/favicon.html" %}
-    {% block other_header %}{% endblock %}
+    {% include "partials/head/extra-header.html" %}
   </head>
+{%- endblock %}
   <body class="{% if mypage %}{{ mypage.post_type_slug }} {{ mypage.page_type }}{% endif %}">
     <div id="container">
       <header>
