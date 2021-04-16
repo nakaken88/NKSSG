@@ -1,6 +1,6 @@
 {% macro title_tag(mypage) -%}
   {%-
-    if not mypage or not mypage.title or mypage.is_homepage
+    if not mypage or not mypage.title or mypage.rel_url == "/"
   -%}
     {{ config.site.site_name }}
   {%-
