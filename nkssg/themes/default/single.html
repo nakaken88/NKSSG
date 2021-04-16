@@ -8,26 +8,9 @@
 
 
 {% block content %}
-{% for archive in mypage.archive_list if archive.archive_type == 'section' -%}
-{% if archive.parents -%}
-<div class="breadcrumb">
-  {% for parent in archive.parents %}
-    {%- if parent.rel_url == "" or parent.rel_url == "/" %}
-    <a href="{{ parent.url }}">{{ parent.name }}</a>
-    {%- elif loop.first %}
-    <a href="{{ config.site.site_url }}">Home</a>
-    / <a href="{{ parent.url }}">{{ parent.name }}</a>
-    {%- else %}
-    / <a href="{{ parent.url }}">{{ parent.name }}</a>
-    {%- endif %}
-  {%- endfor %}
-  / <a href="{{ archive.url }}">{{ archive.name }}</a>
-  / {{ mypage.title }}
-</div>
-{%- endif %}
-{%- endfor %}
 
-{% include "partials/entry/date.html" %}
+  {% include "partials/entry/breadcrumb.html" %}
+  {% include "partials/entry/date.html" %}
 
 <div class="entry">
   <h1>{{ mypage.title }}</h1>
