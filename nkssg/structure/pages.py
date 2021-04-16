@@ -54,6 +54,7 @@ class Page:
         self.aliases = []
 
         self.page_type = ''
+        self.is_homepage = False
         self.archive_list = []
 
 

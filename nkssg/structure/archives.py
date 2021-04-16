@@ -438,6 +438,11 @@ class Archive(Page):
                 paginator['next'] = None
 
 
+            self.is_homepage = False
+            if paginator['pages'][i].rel_url == '/':
+                self.is_homepage = True
+
+
             template_file = self.lookup_template(config)
             template = config['env'].get_template(template_file)
 
