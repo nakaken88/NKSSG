@@ -7,16 +7,7 @@
 
 
 {% block content %}
-{%- if paginator.paged == 1 and mypage.archive_type == "date" and mypage.is_root -%}
-<h1>Post List</h1>
-{%- elif mypage.archive_type == "date" and mypage.is_root -%}
-<h1>Post List: {{ paginator.paged }} Page</h1>
-{%- elif paginator.paged == 1 -%}
-<h1>"{{ mypage.title }}" List</h1>
-{%- else -%}
-<h1>"{{ mypage.title }}" List: {{ paginator.paged }} page</h1>
-{%- endif %}
-
+  {% include "partials/entry/title.html" %}
   {% include "partials/entry/page-list.html" %}
   {% include "partials/entry/pagination.html" %}
 {% endblock %}

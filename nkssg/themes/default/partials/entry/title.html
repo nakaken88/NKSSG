@@ -1,0 +1,21 @@
+{%- if mypage.page_type == "single" -%}
+<h1>{{ mypage.title }}</h1>
+{%- elif mypage.archive_type == "section" -%}
+<h1>{{ mypage.title }}</h1>
+{%- elif mypage.archive_type == "date" -%}
+  {%- if paginator.paged == 1 and mypage.is_root -%}
+  <h1>Post List</h1>
+  {%- elif mypage.is_root -%}
+  <h1>Post List: Page {{ paginator.paged }}</h1>
+  {%- elif paginator.paged == 1 -%}
+  <h1>{{ mypage.title }}</h1>
+  {%- else -%}
+  <h1>{{ mypage.title }}: Page {{ paginator.paged }}</h1>
+  {%- endif %}
+{%- elif mypage.archive_type == "taxonomy" -%}
+  {%- if paginator.paged == 1 -%}
+  <h1>{{ mypage.title }}</h1>
+  {%- else -%}
+  <h1>{{ mypage.title }}: Page {{ paginator.paged }}</h1>
+  {%- endif %}
+{%- endif %}

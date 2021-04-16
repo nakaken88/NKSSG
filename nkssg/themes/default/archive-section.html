@@ -12,7 +12,7 @@
 
 
 <div class="entry">
-  <h1>{{ mypage.title }}</h1>
+  {% include "partials/entry/title.html" %}
 
   {% if mypage.meta and mypage.meta.image and mypage.meta.image.src -%}
   <p><img class="aligncenter" src="{{ mypage.meta.image.src }}"></p>
