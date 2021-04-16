@@ -22,21 +22,7 @@
   {%- endif %}
 </div>
 
-{% if mypage.children %}
-  {%- for child in mypage.children if child.singles_all | length > 0 %}
-    {%- if loop.first  %}
-<div class="subsection-list">
-  <h2>Sub section</h2>
-  <ul>
-    {%- endif %}
-    <li><a href="{{ child.abs_url }}">{{ child.title }}</a></li>
-    {%- if loop.last  %}
-  </ul>
-</div>
-    {%- endif %}
-  {%- endfor %}
-{%- endif %}
-
+  {% include "partials/entry/subsection-list.html" %}
   {% include "partials/entry/page-list.html" %}
   {% include "partials/entry/pagination.html" %}
 {% endblock %}
