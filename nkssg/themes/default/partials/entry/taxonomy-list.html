@@ -1,0 +1,13 @@
+{% for archive in mypage.archive_list if archive.archive_type == "taxonomy" -%}
+  {%- if loop.first or loop.previtem.root_name != archive.root_name %}
+    {%- if not loop.first -%}
+</div>
+    {%- endif -%}
+<div class="entry-info">
+  {{ archive.root_name.capitalize() }}: 
+  {%- endif %}
+  <a href="{{ archive.url }}">{{ archive.name }}</a>
+  {%- if loop.last %}
+</div>
+  {%- endif %}
+{%- endfor %}
