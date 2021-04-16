@@ -6,17 +6,6 @@
 {%- endblock %}
 
 
-{% block calc_title_tag -%}
-{%- if mypage.rel_url and mypage.rel_url == "/" %}
-{%-   set ns.title_tag = config.site.site_name %}
-{%- elif paginator.paged == 1 %}
-{%-   set ns.title_tag = mypage.title ~ " | " ~ config.site.site_name %}
-{%- else %}
-{%-   set ns.title_tag = mypage.title ~ " | Page " ~ paginator.paged ~ " | " ~ config.site.site_name %}
-{%- endif %}
-{%- endblock %}
-
-
 {% import "import/thumbnail.html" as thumb %}
 {% block content %}
 {%- if paginator.paged == 1 and mypage.archive_type == "date" and mypage.is_root -%}

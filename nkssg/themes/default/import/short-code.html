@@ -1,7 +1,27 @@
 {% macro title_tag(mypage) -%}
-  {%- if mypage and mypage.title -%}
-    {{ mypage.title }} | {{ config.site.site_name }}
-  {%- else -%}
+  {%-
+    if not mypage or not mypage.title or mypage.is_homepage
+  -%}
     {{ config.site.site_name }}
+  {%-
+    elif mypage.page_type == "single"
+  -%}
+    {{ mypage.title }} | {{ config.site.site_name }}
+  {%-
+    elif mypage.page_type != "archive"
+  -%}
+    {{ config.site.site_name }}
+  {%-
+    elif not paginator
+  -%}
+    {{ config.site.site_name }}
+  {%-
+    elif paginator.paged == 1
+  -%}
+    {{ mypage.title }} | {{ config.site.site_name }}
+  {%-
+    else
+  -%}
+    {{ mypage.title }} | Page {{ paginator.paged }} | {{ config.site.site_name }}
   {%- endif -%}
 {%- endmacro %}
