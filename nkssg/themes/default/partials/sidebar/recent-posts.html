@@ -1,4 +1,3 @@
-{% import "import/thumbnail.html" as thumb %}
 {% for archive in archives if archive.root_name == "post" and archive.is_root -%}
   {%- for page in archive.singles_all[:10] -%}
     {%- if loop.first %}
@@ -10,7 +9,7 @@
       <a href="{{ page.url }}">
         <li class="page-list">
           <div class="page-image">
-            {{ thumb.get_thumb(page) }}
+            {{ sc.get_thumb(page) }}
           </div>
           <div class="page-item-body">
             {{ page.title }}
