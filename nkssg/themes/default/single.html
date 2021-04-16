@@ -47,18 +47,5 @@
 {%- endfor %}
 
 
-{% if mypage.post_type == "post" -%}
-<div class="entry-info">
-  {%- set neighbor = mypage.next_page -%}
-  {%- if neighbor and neighbor.post_type == "post" %}
-  <div>Older: <a href="{{ neighbor.url }}">{{ neighbor.title }}</a></div>
-  {%- endif %}
-
-  {%- set neighbor = mypage.prev_page -%}
-  {%- if neighbor and neighbor.post_type == "post" %}
-  <div>Newer: <a href="{{ neighbor.url }}">{{ neighbor.title }}</a></div>
-  {%- endif %}
-</div>
-{%- endif -%}
-
+  {% include "partials/entry/next-prev.html" %}
 {% endblock %}
