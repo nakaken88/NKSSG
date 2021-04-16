@@ -154,14 +154,21 @@ img.emoji {
   margin: 0 .05em 0 .1em;
   vertical-align: -0.1em;
 }
+
+
 .thumbnail-emoji {
   background-color: #e3f2fd;
-  padding: 5rem 0;
+  display: block;
 }
 .thumbnail-emoji img.emoji {
+  margin: 0 auto;
+}
+.top-thumbnail .thumbnail-emoji {
+  padding: 5rem 0;
+}
+.top-thumbnail .thumbnail-emoji img.emoji {
   height: 5rem;
   width: 5rem;
-  margin: 0 auto;
 }
 
 .page-list {
