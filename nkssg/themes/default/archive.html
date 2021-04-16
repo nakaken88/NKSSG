@@ -6,7 +6,6 @@
 {%- endblock %}
 
 
-{% import "import/thumbnail.html" as thumb %}
 {% block content %}
 {%- if paginator.paged == 1 and mypage.archive_type == "date" and mypage.is_root -%}
 <h1>Post List</h1>
@@ -18,27 +17,6 @@
 <h1>"{{ mypage.title }}" List: {{ paginator.paged }} page</h1>
 {%- endif %}
 
-{% if pages -%}
-<div class="page-list item-count-{{ pages | length }}">
-{%- for page in pages %}
-  <div class="page-item">
-
-    <a href="{{ page.url }}">
-      <div class="page-image">
-        {{ thumb.get_thumb(page) }}
-      </div>
-    </a>
-
-    <div class="page-item-body">
-      <div class="page-item-info">
-        <small>{{ page.date.strftime('%Y/%m/%d') }}</small>
-      </div>
-      <a href="{{ page.url }}">{{ page.title }}</a>
-    </div>
-  </div>
-{%- endfor %}
-</div>
-{%- endif %}
-
+  {% include "partials/entry/page-list.html" %}
   {% include "partials/entry/pagination.html" %}
 {% endblock %}

@@ -1,0 +1,23 @@
+{% import "import/thumbnail.html" as thumb %}
+{%- for page in pages if page.url != mypage.url %}
+  {%- if loop.first %}
+<h2>Page list</h2>
+<div class="page-list item-count-{{ loop.length }}">
+  {%- endif %}
+  <div class="page-item">
+    <a href="{{ page.url }}">
+      <div class="page-image">
+        {{ thumb.get_thumb(page) }}
+      </div>
+    </a>
+    <div class="page-item-body">
+      <div class="page-item-info">
+        <small>{{ page.date.strftime('%Y/%m/%d') }}</small>
+      </div>
+      <a href="{{ page.url }}">{{ page.title }}</a>
+    </div>
+  </div>
+  {%- if loop.last %}
+</div>
+  {%- endif %}
+{%- endfor %}
