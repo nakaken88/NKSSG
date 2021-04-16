@@ -27,11 +27,7 @@
 {%- endif %}
 {%- endfor %}
 
-<div class="entry-info">
-  <small>
-    <span>{{ mypage.date.strftime('%Y/%m/%d') }}</span>
-  </small>
-</div>
+{% include "partials/entry/date.html" %}
 
 <div class="entry">
   <h1>{{ mypage.title }}</h1>

@@ -144,6 +144,9 @@ a.blog-title:hover {
 .entry-info a {
   margin: 0 0.2rem;
 }
+.entry-info img.emoji {
+  display: inline;
+}
 
 img.emoji {
   height: 1rem;

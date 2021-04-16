@@ -1,0 +1,6 @@
+<div class="entry-info">
+  <span>🕒 {{ mypage.date.strftime('%Y/%m/%d') }}</span>
+  {% if mypage.modified and mypage.modified.strftime('%Y%m%d') != mypage.date.strftime('%Y%m%d') %}
+  <span>🔄 {{ mypage.modified.strftime('%Y/%m/%d') }}</span>
+  {% endif %}
+</div>
