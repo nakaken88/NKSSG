@@ -40,17 +40,5 @@
 </div>
 {%- endif %}
 
-{% if paginator and paginator.pages -%}
-<div>
-  <div class="pagination">
-{%- for page in paginator.pages %}
-  {% if page.page_number == paginator.paged -%}
-    <span aria-current="page" class="page-numbers current">{{ page.page_number }}</span>
-  {%- else -%}
-    <a class="page-numbers" href="{{ page.url }}">{{ page.page_number }}</a>
-  {%- endif %}
-{%- endfor %}
-  </div>
-</div>
-{%- endif %}
+  {% include "partials/entry/pagination.html" %}
 {% endblock %}
