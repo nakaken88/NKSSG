@@ -170,6 +170,32 @@ img.emoji {
   width: 5rem;
 }
 
+a.card {
+  text-decoration: none;
+  font-weight: bold;
+}
+span.card-container {
+  display: block;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  width: 90%;
+  margin: 1.5rem auto;
+}
+span.card-container:hover {
+  background-color: #eee;
+}
+.card .thumbnail {
+  min-height: 100px;
+}
+.card img.emoji {
+  height: 2rem;
+  width: 2rem;
+}
+.card .page-item-body {
+  margin: 10px;
+  display: inline-block;
+}
+
 .page-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -274,6 +300,13 @@ img.emoji {
 }
 
 
+@media (min-width: 481px) {
+  span.card-container {
+    display: grid;
+    grid-template: auto / 180px auto;
+    width: 80%;
+  }
+}
 @media (min-width: 769px) {
   #inner-main {
     display: grid;

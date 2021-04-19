@@ -39,3 +39,18 @@
   <span class="thumbnail thumbnail-emoji">{{ theme.emoji[index] }}</span>
   {%- endif %}
 {%- endmacro %}
+
+
+{% macro get_card(file_id) -%}
+{% set page = singles.get_single_by_file_id(file_id) %}
+<a class="card" href="{{ page.url }}">
+  <span class="card-container">
+    <span class="page-image">
+      {{ get_thumb(page) }}
+    </span>
+    <span class="page-item-body">
+      {{ page.title }}
+    </span>
+  </span>
+</a>
+{%- endmacro %}
