@@ -120,7 +120,10 @@ class Singles(Pages):
 
 
     def get_single_by_file_id(self, file_id):
-        return self.file_ids.get(file_id) or None
+        single = self.file_ids.get(file_id)
+        if single is None:
+            print('file_id:' + file_id + ' is not found.')
+        return single
 
 
 
