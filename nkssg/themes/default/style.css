@@ -156,16 +156,16 @@ img.emoji {
 }
 
 
-.thumbnail-emoji {
+.thumbnail {
   background-color: #e3f2fd;
   display: grid;
   justify-content: center;
   place-items: center;
 }
-.top-thumbnail .thumbnail-emoji {
+.top-thumbnail .thumbnail {
   min-height: 200px;
 }
-.top-thumbnail .thumbnail-emoji img.emoji {
+.top-thumbnail img.emoji {
   height: 5rem;
   width: 5rem;
 }
@@ -179,10 +179,10 @@ img.emoji {
 .page-list.item-count-1, .page-list.item-count-2 {
   grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
 }
-.page-image .thumbnail-emoji {
+.page-image .thumbnail {
   min-height: 120px;
 }
-.page-image .thumbnail-emoji img.emoji {
+.page-image img.emoji {
   height: 3rem;
   width: 3rem;
 }
@@ -247,10 +247,10 @@ img.emoji {
   display: grid;
   grid-template: auto / 120px auto;
 }
-.widget-body .page-image .thumbnail-emoji {
+.widget-body .page-image .thumbnail {
   min-height: 80px;
 }
-.widget-body .page-image .thumbnail-emoji img.emoji {
+.widget-body .page-image img.emoji {
   height: 2rem;
   width: 2rem;
 }
