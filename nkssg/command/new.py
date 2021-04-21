@@ -49,6 +49,8 @@ site:
   site_name: "site name"
   site_url: ""
   site_desc: ""
+  site_image: ""
+  language: "en"
 
 post_type:
   - post:
@@ -75,6 +77,7 @@ plugins:
 
 theme:
   name: default
+  child: child
 
 taxonomy:
   - tag:
