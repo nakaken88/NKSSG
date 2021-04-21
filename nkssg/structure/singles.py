@@ -152,6 +152,7 @@ class Single(Page):
         self.status = ''
         self.is_draft = False
         self.is_expired = False
+        self.is_future = False
 
 
     def __str__(self):
@@ -198,6 +199,7 @@ class Single(Page):
         self.status = self._get_status()
         self.is_draft = self._is_draft()
         self.is_expired = self._is_expired()
+        self.is_future = self._is_future()
 
         self.date, self.modified = self._get_date()
         self.title = self._get_title()
@@ -251,6 +253,11 @@ class Single(Page):
             expire = datetime.datetime.combine(expire, datetime.time(0, 0, 0))
 
         return expire <= now
+
+
+    def _is_future(self):
+        now = datetime.datetime.now()
+        return self.date > now
 
 
     def _get_date(self):
