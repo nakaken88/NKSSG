@@ -55,7 +55,8 @@ class AwesomePageLinkPlugin(BasePlugin):
 
             else:
                 for strip_path in self.strip_paths:
-                    href = href.removeprefix(strip_path)
+                    if len(href) >= len(strip_path) and href[:len(strip_path)] == strip_path:
+                        href = href[len(strip_path):]
 
                 old_link, suffix = self.split_url(href)
 

@@ -38,7 +38,8 @@ class AwesomeImgLinkPlugin(BasePlugin):
 
             src = src[:-len(keyword)]
             for strip_path in self.strip_paths:
-                src = src.removeprefix(strip_path)
+                if len(src) >= len(strip_path) and src[:len(strip_path)] == strip_path:
+                    src = src[len(strip_path):]
 
             old_link = src
             if old_link[0] == '/':
