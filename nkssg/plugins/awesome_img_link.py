@@ -8,6 +8,10 @@ from nkssg.structure.plugins import BasePlugin
 
 class AwesomeImgLinkPlugin(BasePlugin):
     def after_update_singles_html(self, singles, **kwargs):
+        mode = singles.config.get('mode') or 'draft'
+        if mode == 'draft':
+            return singles
+
         self.site_config = singles.config
         self.keyword = self.config.get('keyword') or '?'
         self.strip_paths = self.config.get('strip_paths') or []

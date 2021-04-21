@@ -9,6 +9,10 @@ from nkssg.structure.plugins import BasePlugin
 
 class AwesomePageLinkPlugin(BasePlugin):
     def after_update_site(self, site, **kwargs):
+        mode = site.config.get('mode') or 'draft'
+        if mode == 'draft':
+            return site
+
         self.site_config = site.config
         self.singles = site.singles
         self.file_ids = self.singles.file_ids
