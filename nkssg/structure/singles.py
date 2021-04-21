@@ -19,6 +19,7 @@ class Singles(Pages):
     def __init__(self, config):
         self.config = config
         self.pages = self.get_pages_from_docs_directory()
+        self.file_ids = {}
         self.config['plugins'].do_action('after_initialize_singles', target=self)
 
     def get_pages_from_docs_directory(self):
