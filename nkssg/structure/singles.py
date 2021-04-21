@@ -74,7 +74,7 @@ class Singles(Pages):
         for page in self.pages:
             new_page = page.setup(config)
 
-            if new_page.is_draft or new_page.is_expired:
+            if new_page.is_draft:
                 continue
 
             new_pages.append(new_page)
@@ -197,11 +197,12 @@ class Single(Page):
         self.post_type_index = config['post_type_list'].index(self.post_type)
 
         self.status = self._get_status()
-        self.is_draft = self._is_draft()
-        self.is_expired = self._is_expired()
-        self.is_future = self._is_future()
 
         self.date, self.modified = self._get_date()
+        self.is_expired = self._is_expired()
+        self.is_future = self._is_future()
+        self.is_draft = self._is_draft()
+
         self.title = self._get_title()
         self.name = self._get_name()
         self.slug = self._get_slug()
@@ -231,12 +232,15 @@ class Single(Page):
         if not draft is None:
             return draft
 
-        private_status_list = ['draft', 'future', 'pending', 'private', 'trash', 'auto-draft']
+        status_list = ['draft', 'future', 'pending', 'private', 'trash', 'auto-draft']
 
-        if self.post_type in private_status_list:
+        if self.post_type in status_list:
             return True
 
-        if self.status in private_status_list:
+        if self.status in status_list:
+            return True
+
+        if self.is_expired or self.is_future:
             return True
 
         return False
