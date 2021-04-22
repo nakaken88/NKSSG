@@ -173,12 +173,13 @@ img.emoji {
 a.card {
   text-decoration: none;
   font-weight: bold;
+  display: block;
+  margin: 0 5%;
 }
 span.card-container {
   display: block;
   border: 2px solid #ccc;
   border-radius: 4px;
-  width: 90%;
   margin: 1.5rem auto;
 }
 span.card-container:hover {
@@ -301,10 +302,12 @@ span.card-container:hover {
 
 
 @media (min-width: 481px) {
+  a.card {
+    margin: 0 10%;
+  }
   span.card-container {
     display: grid;
     grid-template: auto / 180px auto;
-    width: 80%;
   }
 }
 @media (min-width: 769px) {
