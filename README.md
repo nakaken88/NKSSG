@@ -8,7 +8,7 @@ NakaKen Static Site Generator
 Install using pip:
 
 ```
-> pip install git+https://github.com/nakaken88/NKSSG
+> pip install -U git+https://github.com/nakaken88/NKSSG
 ```
 
 ## A Simple Example
