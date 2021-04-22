@@ -26,11 +26,14 @@ def build_command(clean):
 
 @cli.command(name='serve')
 @click.option('--static', '-s', is_flag=True)
+@click.option('--all', '-a', is_flag=True)
 @click.option('--port', '-p', default=5500)
-def build_serve(static, port):
+def build_serve(static, all, port):
 
     config = load_config(mode='serve')
     config['PKG_DIR'] = PKG_DIR
+    config['serve_all'] = all
+    
     build.serve(config, static, port)
 
 
