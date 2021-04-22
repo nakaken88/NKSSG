@@ -31,18 +31,16 @@ def site(project_dir, package_dir):
     Path(project_dir, 'static').mkdir(exist_ok=True)
     Path(project_dir, 'themes').mkdir(exist_ok=True)
     Path(project_dir, 'themes', 'default').mkdir(exist_ok=True)
+    Path(project_dir, 'themes', 'child').mkdir(exist_ok=True)
 
     default_theme_from = package_dir / 'themes' / 'default'
     default_theme_to = project_dir / 'themes' / 'default'
+    theme_copy(default_theme_from, default_theme_to)
 
-    for f in default_theme_from.glob('**/*'):
-        if f.is_file():
-            rel_path = f.relative_to(default_theme_from)
-            to_path = default_theme_to / rel_path
+    child_theme_from = package_dir / 'themes' / 'child'
+    child_theme_to = project_dir / 'themes' / 'child'
+    theme_copy(child_theme_from, child_theme_to)
 
-            if not to_path.parent.exists():
-                to_path.parent.mkdir(parents=True)
-            shutil.copyfile(str(f), str(to_path))
 
     Path(project_dir, 'nkssg.yml').write_text('''\
 site:
@@ -104,6 +102,15 @@ category: ["cat11"]
 This is a sample post.
 ''')
 
+def theme_copy(theme_from, theme_to):
+    for f in theme_from.glob('**/*'):
+        if f.is_file():
+            rel_path = f.relative_to(theme_from)
+            to_path = theme_to / rel_path
+
+            if not to_path.parent.exists():
+                to_path.parent.mkdir(parents=True)
+            shutil.copyfile(str(f), str(to_path))
 
 
 def page(name, path, config):
