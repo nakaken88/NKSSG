@@ -266,6 +266,9 @@ class Archive(Page):
             for single in singles:
                 if single.meta.get(root_name) is None:
                     continue
+                if type(single.meta[root_name]) != list:
+                    single.meta[root_name] = [single.meta[root_name]]
+
                 self.add_single_to_taxonomy_archive(single, root_name)
 
     def add_single_to_section_archive(self, single):
