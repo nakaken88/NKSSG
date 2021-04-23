@@ -11,6 +11,7 @@ class Archives(Pages):
         self.config = config
         self.archives = []
         self.root_archives = []
+        self.pages = []
 
     def __iter__(self):
         return iter(self.archives)
@@ -200,12 +201,9 @@ class Archives(Pages):
         self.config['plugins'].do_action('after_update_archives_url', target=self)
 
     def update_htmls(self, singles):
-        new_pages = []
-
         for root_archive in self.root_archives:
-            new_pages += root_archive.get_archives(singles, self)
+            self.pages += root_archive.get_archives(singles, self)
 
-        self.pages = new_pages
         self.config['plugins'].do_action('after_update_archives_html', target=self)
 
 
