@@ -25,6 +25,9 @@ class AwesomeImgLinkPlugin(BasePlugin):
         config = self.site_config
         keyword = self.keyword
 
+        if not keyword + '"' in page.html and not keyword + '"' in page.html:
+            return
+
         soup = BeautifulSoup(page.html, 'html.parser')
         imgs = soup.find_all('img')
         srcs = []

@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
 from nkssg.structure.plugins import BasePlugin
-
+import time
 
 class AwesomePageLinkPlugin(BasePlugin):
     def after_update_site(self, site, **kwargs):
@@ -29,6 +29,9 @@ class AwesomePageLinkPlugin(BasePlugin):
     def update_page_link(self, page):
         config = self.site_config
         keyword = self.keyword
+
+        if not keyword + '"' in page.html and not keyword + '"' in page.html:
+            return
 
         soup = BeautifulSoup(page.html, 'html.parser')
 
