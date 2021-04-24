@@ -74,7 +74,7 @@ class Singles(Pages):
         for page in self.pages:
             new_page = page.setup(config)
 
-            if new_page.is_draft and not config['serve_all']:
+            if new_page.is_draft and not config.get('serve_all'):
                 continue
 
             new_pages.append(new_page)
