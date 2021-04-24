@@ -553,12 +553,14 @@ class Single(Page):
                 if template_path.exists():
                     return template_file
 
+        for theme_dir in config['themes'].dirs:
             if config['mode'] == 'draft':
                 template_file = 'draft.html'
                 template_path = theme_dir / template_file
                 if template_path.exists():
                     return template_file
 
+        for theme_dir in config['themes'].dirs:
             template_file = 'single-' + self.post_type + '.html'
             template_path = theme_dir / template_file
             if template_path.exists():
