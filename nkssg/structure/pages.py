@@ -109,7 +109,9 @@ class Page:
             return
         
         site_url = get_config_by_list(config, ['site', 'site_url']) or '/'
-        self.abs_url = urljoin(site_url, self.rel_url)
+        _site_url = site_url.rstrip('/') + '/'
+        _rel_url = self.rel_url.lstrip('/')
+        self.abs_url = urljoin(_site_url, _rel_url)
 
         if config['use_abs_url']:
             self.url = self.abs_url
