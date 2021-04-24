@@ -54,6 +54,7 @@ def draft(config, path, port=5500):
         draft_path = config['base_dir'] / draft_path
 
     config['draft_path'] = draft_path
+    config['site']['site_url'] = 'http://127.0.0.1:' + str(port)
     config['public_dir'] = Path(tempfile.mkdtemp(prefix='nkssg_'))
 
     def reload():
