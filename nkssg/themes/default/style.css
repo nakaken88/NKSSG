@@ -144,15 +144,13 @@ a.blog-title:hover {
 .entry-info a {
   margin: 0 0.2rem;
 }
-.entry-info img.emoji {
-  display: inline;
-}
 
 img.emoji {
-  height: 1rem;
-  width: 1rem;
+  height: 1em;
+  width: 1em;
   margin: 0 .05em 0 .1em;
   vertical-align: -0.1em;
+  display: inline;
 }
 
 
