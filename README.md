@@ -1,6 +1,7 @@
 # NKSSG
 NakaKen Static Site Generator  
 (This is still alpha ver.)
+[日本語のドキュメントはこちら](https://nkssg.nakaken88.com/ja/)
 
 
 ## Install
