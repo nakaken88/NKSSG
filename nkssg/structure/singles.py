@@ -539,9 +539,10 @@ class Single(Page):
                 'meta': self.meta,
                 })
 
-        self.html = template.render({
-            'mypage': self,
-            })
+        if self.html == '':
+            self.html = template.render({
+                'mypage': self,
+                })
 
 
 
