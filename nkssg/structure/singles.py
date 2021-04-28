@@ -109,6 +109,8 @@ class Singles(Pages):
         self.dest_paths = {str(page.dest_path): page for page in self.pages}
 
     def update_htmls(self, archives):
+        self.config['plugins'].do_action('before_update_singles_html', target=self)
+
         for page in self.pages:
             page.update_html(self, archives)
 
