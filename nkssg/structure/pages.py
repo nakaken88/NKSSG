@@ -23,7 +23,7 @@ class Pages:
 
     def output(self):
         for page in self.pages:
-            page.output_page(self.config)
+            page.output(self.config)
 
 
 
@@ -57,7 +57,7 @@ class Page:
         self.archive_list = []
 
 
-    def output_page(self, config):
+    def output(self, config):
         output_path = config['public_dir'] / self.dest_path
         output_dir = output_path.parent
         output_dir.mkdir(parents=True, exist_ok=True)
