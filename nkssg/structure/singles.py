@@ -514,6 +514,9 @@ class Single(Page):
 
 
     def update_html(self, singles, archives):
+        if self.html != '':
+            return
+
         config = singles.config
         template_file = self.lookup_template(config)
         template = config['env'].get_template(template_file)
@@ -539,10 +542,9 @@ class Single(Page):
                 'meta': self.meta,
                 })
 
-        if self.html == '':
-            self.html = template.render({
-                'mypage': self,
-                })
+        self.html = template.render({
+            'mypage': self,
+            })
 
 
 
