@@ -55,9 +55,13 @@ class Page:
 
         self.page_type = ''
         self.archive_list = []
+        self.shouldOutput = True
 
 
     def output(self, config):
+        if not self.shouldOutput:
+            return
+
         output_path = config['public_dir'] / self.dest_path
         output_dir = output_path.parent
         output_dir.mkdir(parents=True, exist_ok=True)
