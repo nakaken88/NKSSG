@@ -13,6 +13,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
             return singles
 
         self.site_config = singles.config
+        self.parser = self.config.get('parser') or 'html.parser'
         self.keyword = self.config.get('keyword') or '?'
         self.strip_paths = self.config.get('strip_paths') or []
 
@@ -28,7 +29,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
         if not keyword + '"' in page.html and not keyword + '"' in page.html:
             return
 
-        soup = BeautifulSoup(page.html, 'html.parser')
+        soup = BeautifulSoup(page.html, self.parser)
         imgs = soup.find_all('img')
         srcs = []
 

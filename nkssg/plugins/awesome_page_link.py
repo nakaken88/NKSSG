@@ -17,6 +17,7 @@ class AwesomePageLinkPlugin(BasePlugin):
         self.singles = site.singles
         self.file_ids = self.singles.file_ids
 
+        self.parser = self.config.get('parser') or 'html.parser'
         self.keyword = self.config.get('keyword') or '?'
         self.strip_paths = self.config.get('strip_paths') or []
 
@@ -33,7 +34,7 @@ class AwesomePageLinkPlugin(BasePlugin):
         if not keyword + '"' in page.html and not keyword + '"' in page.html:
             return
 
-        soup = BeautifulSoup(page.html, 'html.parser')
+        soup = BeautifulSoup(page.html, self.parser)
 
         links = soup.find_all('a')
 
