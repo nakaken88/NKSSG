@@ -8,7 +8,6 @@ import re
 import shutil
 from urllib.parse import quote, unquote
 
-from bs4 import BeautifulSoup
 import jinja2
 
 from nkssg.structure.pages import Pages, Page
@@ -348,12 +347,13 @@ class Single(Page):
     def _get_summary(self):
         summary = self.meta.get('summary')
         if summary is None:
-            soup = BeautifulSoup(self.content, 'html.parser')
-            summary = soup.get_text()
-            summary = summary[:200]
+            summary = self.content
+            summary = re.sub(r'<script.*?script>', '', summary, flags=re.DOTALL)
+            summary = re.sub(r'<style.*?style>', '', summary, flags=re.DOTALL)
+            summary = re.sub(r'<[^>]*?>', '', summary, flags=re.DOTALL)
             summary = summary.replace('/', ' ').replace('\\', ' ')
             summary = summary.replace('"', ' ').replace("'", ' ')
-            summary = summary.replace('\n', '')
+            summary = summary.replace('\r\n', '').replace('\n', '')
             summary = summary[:110]
         return summary
 
