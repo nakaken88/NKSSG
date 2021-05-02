@@ -1,11 +1,8 @@
-import collections
 from pathlib import Path
-from urllib.parse import urljoin
-
-from bs4 import BeautifulSoup
+import re
 
 from nkssg.structure.plugins import BasePlugin
-import time
+
 
 class AwesomePageLinkPlugin(BasePlugin):
     def after_update_site(self, site, **kwargs):
@@ -16,10 +13,9 @@ class AwesomePageLinkPlugin(BasePlugin):
         self.site_config = site.config
         self.singles = site.singles
         self.file_ids = self.singles.file_ids
-
-        self.parser = self.config.get('parser') or 'html.parser'
         self.keyword = self.config.get('keyword') or '?'
         self.strip_paths = self.config.get('strip_paths') or []
+        self.pattern = re.compile(r'<a[^<>]+href\s*?=\s*?["\'](.*?)["\']', re.I)
 
         for page in site.singles:
             self.update_page_link(page)
@@ -34,14 +30,10 @@ class AwesomePageLinkPlugin(BasePlugin):
         if not keyword + '"' in page.html and not keyword + '"' in page.html:
             return
 
-        soup = BeautifulSoup(page.html, self.parser)
+        replacers = []
 
-        links = soup.find_all('a')
-
-        for link in links:
-            href = link.get('href')
-            if href is None:
-                continue
+        for tag in self.pattern.finditer(page.html):
+            href = tag.group(1)
             if not href.endswith(keyword):
                 continue
 
@@ -78,9 +70,18 @@ class AwesomePageLinkPlugin(BasePlugin):
                     single = self.singles.src_paths[str(new_path)]
                     new_link = single.url + suffix
 
-            link['href'] = new_link
+            old_text = tag.group(0)
+            new_text = old_text.replace(tag.group(1), new_link)
+            replacers.append([tag.start(), tag.end(), new_text])
 
-        page.html = str(soup)
+        text = page.html
+        for replacer in replacers[::-1]:
+            s = replacer[0]
+            e = replacer[1]
+            new_text = replacer[2]
+            text = text[:s] + new_text + text[e:]
+
+        page.html = text
 
     def split_url(self, url):
         index = -1

@@ -1,7 +1,6 @@
 from pathlib import Path
+import re
 import shutil
-
-from bs4 import BeautifulSoup
 
 from nkssg.structure.plugins import BasePlugin
 
@@ -13,9 +12,9 @@ class AwesomeImgLinkPlugin(BasePlugin):
             return singles
 
         self.site_config = singles.config
-        self.parser = self.config.get('parser') or 'html.parser'
         self.keyword = self.config.get('keyword') or '?'
         self.strip_paths = self.config.get('strip_paths') or []
+        self.pattern = re.compile(r'<img[^<>]+src\s*?=\s*?["\'](.*?)["\']', re.I)
 
         for page in singles.pages:
             page.imgs = []
@@ -29,14 +28,11 @@ class AwesomeImgLinkPlugin(BasePlugin):
         if not keyword + '"' in page.html and not keyword + '"' in page.html:
             return
 
-        soup = BeautifulSoup(page.html, self.parser)
-        imgs = soup.find_all('img')
         srcs = []
+        replacers = []
 
-        for img in imgs:
-            src = img['src']
-            if src is None:
-                continue
+        for tag in self.pattern.finditer(page.html):
+            src = tag.group(1)
             if not src.endswith(keyword):
                 continue
 
@@ -54,14 +50,20 @@ class AwesomeImgLinkPlugin(BasePlugin):
             new_path = page.dest_dir / old_path.name
             new_src = './' + old_path.name
 
+            old_text = tag.group(0)
+            new_text = old_text.replace(tag.group(1), new_src)
+            replacers.append([tag.start(), tag.end(), new_text])
+
             srcs.append({'old_path': old_path, 'new_path': new_path})
 
-            img['src'] = new_src
+        text = page.html
+        for replacer in replacers[::-1]:
+            s = replacer[0]
+            e = replacer[1]
+            new_text = replacer[2]
+            text = text[:s] + new_text + text[e:]
 
-        if not srcs:
-            return
-
-        page.html = str(soup)
+        page.html = text
         page.imgs = srcs
 
 
