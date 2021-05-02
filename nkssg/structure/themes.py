@@ -38,6 +38,11 @@ class Themes:
                 print(theme + ' is not found')
 
         if not self.dirs:
+            if config.get('theme') is None:
+                config['theme'] = {'name': 'default'}
+            elif config['theme'].get('name') is None:
+                config['theme']['name'] = 'default'
+
             theme_dir = config["PKG_DIR"] / 'themes' / 'default'
             self.dirs.append(theme_dir)
 
