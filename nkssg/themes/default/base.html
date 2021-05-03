@@ -39,7 +39,7 @@
             {%- endblock %}
           </article>
 
-          <aside>
+          <aside id="sidebar">
           {% block sidebar %}
             {% if config.sidebar %}
               {{ config.sidebar }}
@@ -53,12 +53,13 @@
       {%- endblock %}
 
       {%- block footer %}
-      <footer>
+      <footer id="footer">
         <div id="inner-footer">
           <a href="{{ config.site.site_url or '/' }}" class="blog-title">{{ config.site.site_name }}</a>
         </div>
       </footer>
       {%- endblock %}
+      {% include "partials/nav/global_footer_menu.html" %}
     </div>
     <script>twemoji.parse(document.body);</script>
   </body>

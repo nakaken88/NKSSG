@@ -28,7 +28,8 @@ a:visited {
 }
 
 #inner-header {
-  margin: 5rem auto;
+  margin: 0 auto;
+  padding: 5rem 0;
 }
 #inner-main {
   margin: 0 auto;
@@ -38,7 +39,7 @@ article, aside {
   padding: 10px 10px 30px;
 }
 #inner-footer {
-  margin: 2rem auto;
+  margin: 2rem auto 6rem;
 }
 
 
@@ -299,6 +300,36 @@ span.card-container:hover {
 }
 
 
+#global-footer-nav ul {
+  display: table;
+  table-layout: fixed;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px 0 0 0;
+  z-index: 99;
+  width: 100%;
+  background:#fff;
+  border-top: 2px solid #eee;
+}
+#global-footer-nav ul li {
+  display: table-cell;
+  text-align: center;
+}
+#global-footer-nav ul li a {
+  display: block;
+  color: #999;
+  font-size: 0.85em;
+}
+#global-footer-nav img.emoji {
+  height: 2em;
+  width: 2em;
+  margin: 0 auto;
+  display: block;
+}
+
+
 @media (min-width: 481px) {
   a.card {
     margin: 0 10%;
@@ -315,5 +346,8 @@ span.card-container:hover {
   }
   article {
     padding: 10px 20px 10px 10px;
+  }
+  #global-footer-nav ul {
+    display: none;
   }
 }
