@@ -111,7 +111,11 @@ class Singles(Pages):
         self.config['plugins'].do_action('before_update_singles_html', target=self)
 
         for page in self.pages:
-            page.update_html(self, archives)
+            try:
+                page.update_html(self, archives)
+            except:
+                print(page)
+                raise
 
         self.config['plugins'].do_action('after_update_singles_html', target=self)
 
