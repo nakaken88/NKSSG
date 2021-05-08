@@ -203,8 +203,8 @@ class Archives(Pages):
     def update_htmls(self, singles):
         self.config['plugins'].do_action('before_update_archives_html', target=self)
 
-        for root_archive in self.root_archives:
-            self.pages += root_archive.get_archives(singles, self)
+        for archive in self.archives:
+            self.pages += archive.get_archives(singles, self)
 
         self.config['plugins'].do_action('after_update_archives_html', target=self)
 
@@ -449,11 +449,6 @@ class Archive(Page):
                 'pages': target_singles[start:end],
                 'paginator': paginator,
                 })
-
-
-        if not self.children is None:
-            for child_archive in self.children:
-                paginator['pages'] += child_archive.get_archives(singles, archives)
 
         return paginator['pages']
 
