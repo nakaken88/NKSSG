@@ -296,6 +296,8 @@ class Archive(Page):
 
                     self.html = single.html
                     self.archive_list = single.archive_list
+                    self.shouldUpdateHtml = single.shouldUpdateHtml
+                    self.shouldOutput = single.shouldOutput
                     self.single_index = single
 
             else:
@@ -340,6 +342,9 @@ class Archive(Page):
 
 
     def get_archives(self, singles, archives):
+        if not self.shouldUpdateHtml:
+            return
+
         if self.singles_all is None or len(self.singles_all) == 0:
             return []
 
