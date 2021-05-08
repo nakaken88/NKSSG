@@ -55,6 +55,8 @@ class Page:
 
         self.page_type = ''
         self.archive_list = []
+
+        self.shouldUpdateHtml = True
         self.shouldOutput = True
 
 

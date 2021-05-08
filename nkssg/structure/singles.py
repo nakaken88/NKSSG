@@ -518,7 +518,7 @@ class Single(Page):
 
 
     def update_html(self, singles, archives):
-        if self.html != '':
+        if not self.shouldUpdateHtml:
             return
 
         config = singles.config
