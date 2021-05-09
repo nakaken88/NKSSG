@@ -140,6 +140,9 @@ class Site:
             if f.is_file():
                 rel_path = f.relative_to(static_dir)
                 to_path = public_dir / rel_path
+                if to_path.exists() and f.stat().st_mtime < to_path.stat().st_mtime:
+                    continue
+
                 to_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(str(f), str(to_path))
         
@@ -149,10 +152,15 @@ class Site:
                     continue
 
                 rel_path = f.relative_to(d.parent)
-                if self.is_target(rel_path):
-                    to_path = public_dir / 'themes' / rel_path
-                    to_path.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copyfile(str(f), str(to_path))
+                if not self.is_target(rel_path):
+                    continue
+
+                to_path = public_dir / 'themes' / rel_path
+                if to_path.exists() and f.stat().st_mtime < to_path.stat().st_mtime:
+                    continue
+
+                to_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(str(f), str(to_path))
 
     def is_target(self, rel_path):
         config = self.config['themes'].cnf
