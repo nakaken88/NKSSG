@@ -21,6 +21,7 @@ def build_command(clean):
 
     config = load_config(mode='build')
     config['PKG_DIR'] = PKG_DIR
+    config['build_clean'] = clean
     build.build(config, clean)
 
 
