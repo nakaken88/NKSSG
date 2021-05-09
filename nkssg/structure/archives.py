@@ -343,7 +343,7 @@ class Archive(Page):
 
     def get_archives(self, singles, archives):
         if not self.shouldUpdateHtml:
-            return
+            return []
 
         if self.singles_all is None or len(self.singles_all) == 0:
             return []
