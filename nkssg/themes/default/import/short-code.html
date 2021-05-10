@@ -29,8 +29,8 @@
 
 
 {% macro get_thumb(page) -%}
-  {% if page.meta and page.meta.image and page.meta.image.src -%}
-  <span class="thumbnail"><img src="{{page.meta.image.src}}" alt="{{page.title}}"></span>
+  {% if page.image and page.image.src -%}
+  <span class="thumbnail"><img src="{{page.image.src}}" alt="{{page.title}}"></span>
   {% elif page.meta and page.meta.emoji -%}
   <span class="thumbnail thumbnail-emoji">{{ page.meta.emoji }}</span>
   {% elif theme.emoji and page.page_type == "single" -%}
