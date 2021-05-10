@@ -281,21 +281,21 @@ span.card-container:hover {
   width: 2rem;
 }
 
-.widget.section-list summary {
+.widget-body summary {
   background-color: #e3f2fd;
   margin: 4px;
   padding: 0 4px;
 }
-.widget.section-list details {
+.widget-body details {
   border-left: 1px solid #aaa;
 }
-.widget.section-list details details {
+.widget-body details details {
   margin-left: 10px;
 }
-.widget.section-list li {
+.widget-body li {
   margin: 4px 0 4px 8px;
 }
-.widget.section-list .current {
+.widget-body .current {
   font-weight: bold;
 }
 
