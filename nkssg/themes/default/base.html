@@ -1,4 +1,4 @@
-{%- import "import/short-code.html" as sc -%}<!DOCTYPE html>
+{%- import "import/short-code.html" as sc with context -%}<!DOCTYPE html>
 <html lang="{{ config.site.language }}">
 {% block head_tag -%}
   {% block head_start_tag -%}
@@ -6,7 +6,7 @@
   {%- endblock %}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% block title_tag %}<title>{{ sc.title_tag(mypage) }}</title>{% endblock %}
+    {% block title_tag %}<title>{{ sc.title_tag() }}</title>{% endblock %}
     {% include "partials/head/description.html" %}
     {% include "partials/head/ogp.html" %}
     {% include "partials/head/twitter-card.html" %}

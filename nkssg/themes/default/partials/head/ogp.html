@@ -1,7 +1,7 @@
 {% if mypage -%}
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="{{ config.site.site_name }}">
-  <meta property="og:title" content="{{ sc.title_tag(mypage) }}" />
+  <meta property="og:title" content="{{ sc.title_tag() }}" />
   <meta property="og:url" content="{{ mypage.abs_url }}" />
   {% if mypage.summary -%}
     <meta property="og:description" content="{{ mypage.summary }}" />
