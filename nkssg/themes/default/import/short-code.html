@@ -54,3 +54,13 @@
   </span>
 </a>
 {%- endmacro %}
+
+
+{% macro get_link(file_id, text='') -%}
+{%- set page = singles.get_single_by_file_id(file_id) -%}
+{%- if text != '' -%}
+<a href="{{ page.url }}">{{text}}</a>
+{%- else -%}
+<a href="{{ page.url }}">{{page.title}}</a>
+{%- endif -%}
+{%- endmacro %}
