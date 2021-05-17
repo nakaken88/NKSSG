@@ -65,14 +65,3 @@ class AutoPPlugin(BasePlugin):
             i = i + 1
 
         return '\n'.join(lines)
-
-
-    def after_update_singles_html(self, singles, **kwargs):
-        block_tags = self.block_tags
-
-        for single in singles:
-            html = single.html
-            for block_tag in block_tags:
-                html = html.replace('<p><' + block_tag, '<' + block_tag)
-                html = html.replace(block_tag + '></p>', block_tag + '>')
-            single.html = html

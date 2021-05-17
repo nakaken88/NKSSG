@@ -540,11 +540,18 @@ class Single(Page):
                 if template_path.exists():
                     additional_statement = additional_statement + import_scc
 
-            pre_content = additional_statement + self.content
-            self.content = config['env'].from_string(pre_content).render({
+            content = additional_statement + self.content
+            content = config['env'].from_string(content).render({
                 'mypage': self,
                 'meta': self.meta,
                 })
+
+            for block_tag in config['block_tags']:
+                if not '<' + block_tag in content:
+                    continue
+                content = re.sub('<p>\s*<' + block_tag, '<' + block_tag, content)
+                content = re.sub(block_tag + '>\s*</p>', block_tag + '>', content)
+            self.content = content
 
         self.html = template.render({
             'mypage': self,
