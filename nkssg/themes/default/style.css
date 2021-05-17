@@ -35,8 +35,11 @@ a:visited {
   margin: 0 auto;
   padding: 20px 0;
 }
-article, aside {
+article {
   padding: 10px 10px 30px;
+}
+aside {
+  padding: 10px 0 30px;
 }
 #inner-footer {
   margin: 2rem auto 6rem;
@@ -345,7 +348,7 @@ span.card-container:hover {
     grid-template: auto / auto 320px;
   }
   article {
-    padding: 10px 20px 10px 10px;
+    padding: 10px 30px 10px 10px;
   }
   #global-footer-nav ul {
     display: none;
