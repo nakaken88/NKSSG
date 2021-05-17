@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import jinja2
 from ruamel.yaml import YAML
 
 from nkssg.structure.plugins import Plugins
