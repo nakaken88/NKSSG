@@ -78,5 +78,11 @@ def set_default_config(config):
     if get_config_by_list(config, ['use_abs_url']) is None:
         config['use_abs_url'] = True
 
+
+    default_block_tag_string = "address|article|aside|details|dialog|dd|div|dl|dt|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|li|main|nav|ol|p|pre|section|table|ul|legend|map|math|menu|script|style|summary"
+    
+    config['block_tag'] = get_config_by_list(config, ['block_tag']) or default_block_tag_string
+    config['block_tags'] = config['block_tag'].split('|')
+
     return config
 

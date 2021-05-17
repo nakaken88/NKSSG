@@ -3,11 +3,11 @@ from nkssg.structure.plugins import BasePlugin
 
 class AutoPPlugin(BasePlugin):
     def __init__(self):
-        block_tag_string = "address|article|aside|details|dialog|dd|div|dl|dt|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|li|main|nav|ol|p|pre|section|table|ul|legend|map|math|menu|script|style|summary"
-        self.block_tags = block_tag_string.split('|')
+        self.block_tags = []
 
 
     def on_get_content(self, doc, config, single, **kwargs):
+        self.block_tags = config['block_tags']
         if single.ext in ["html", "htm", "txt"]:
             content = self.autoP(doc)
         else:
