@@ -2,8 +2,6 @@ from pathlib import Path
 import shutil
 from urllib.parse import quote, unquote, urljoin
 
-from bs4 import BeautifulSoup
-
 from nkssg.utils import get_config_by_list
 
 
