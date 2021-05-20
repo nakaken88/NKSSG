@@ -1,4 +1,11 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
+  margin: 0;
   background-color: #fffde7;
   color: #555;
   font-family: sans-serif;
@@ -20,6 +27,10 @@ a:visited {
   color: #673ab7;
 }
 
+img {
+  max-width: 100%;
+  display: block;
+}
 
 #inner-header
 , #inner-main
