@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 
 from ruamel.yaml import YAML
@@ -35,6 +36,9 @@ def set_default_config(config):
     config['site']['language'] = get_config_by_list(config, ['site', 'language']) or 'en'
 
     config['site']['site_url'] = config['site']['site_url'].rstrip('/')
+
+
+    config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
 
     if get_config_by_list(config, ['plugins']) is None:
