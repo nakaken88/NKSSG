@@ -282,7 +282,10 @@ class Single(Page):
                 cdate = datetime.datetime.fromtimestamp(cdate_unix)
 
         elif type(cdate) != type(now):
-            cdate = datetime.datetime.combine(cdate, datetime.time(0, 0, 0))
+            if cdate.count(':') == 1: # yyyy-mm-dd HH:MM
+                cdate = datetime.datetime.strptime(cdate, '%Y-%m-%d %H:%M')
+            else: # yyyy-mm-dd
+                cdate = datetime.datetime.combine(cdate, datetime.time(0, 0, 0))
 
         mtime_unix = self.abs_src_path.stat().st_mtime
         mdate = datetime.datetime.fromtimestamp(mtime_unix)
