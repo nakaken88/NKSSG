@@ -32,6 +32,7 @@ setup(
             'awesome-page-link=nkssg.plugins.awesome_page_link:AwesomePageLinkPlugin',
             'awesome-img-link=nkssg.plugins.awesome_img_link:AwesomeImgLinkPlugin',
             'select-pages=nkssg.plugins.select_pages:SelectPagesPlugin',
+            'backlink=nkssg.plugins.backlink:BacklinkPlugin',
         ],
     },
 )

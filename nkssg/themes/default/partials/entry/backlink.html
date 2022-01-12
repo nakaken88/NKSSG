@@ -1,0 +1,5 @@
+{% for page in mypage.back_links |sort(attribute='modified', reverse = True) -%}
+{%- if loop.first %}<h2>バックリンク</h2><ul>{%- endif %}
+<li><a href="{{page.url}}">{{page.title}}</a></li>
+{%- if loop.last %}</ul>{%- endif %}
+{%- endfor %}
