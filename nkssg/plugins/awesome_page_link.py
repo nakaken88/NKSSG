@@ -5,7 +5,7 @@ from nkssg.structure.plugins import BasePlugin
 
 
 class AwesomePageLinkPlugin(BasePlugin):
-    def after_update_site(self, site, **kwargs):
+    def after_update_urls(self, site, **kwargs):
         mode = site.config.get('mode') or 'draft'
         if mode == 'draft':
             return site
@@ -27,12 +27,12 @@ class AwesomePageLinkPlugin(BasePlugin):
         config = self.site_config
         keyword = self.keyword
 
-        if not keyword + '"' in page.html and not keyword + '"' in page.html:
+        if not keyword + '"' in page.content and not keyword + '"' in page.content:
             return
 
         replacers = []
 
-        for tag in self.pattern.finditer(page.html):
+        for tag in self.pattern.finditer(page.content):
             href = tag.group(1)
             if not href.endswith(keyword):
                 continue
@@ -74,14 +74,14 @@ class AwesomePageLinkPlugin(BasePlugin):
             new_text = old_text.replace(tag.group(1), new_link)
             replacers.append([tag.start(), tag.end(), new_text])
 
-        text = page.html
+        text = page.content
         for replacer in replacers[::-1]:
             s = replacer[0]
             e = replacer[1]
             new_text = replacer[2]
             text = text[:s] + new_text + text[e:]
 
-        page.html = text
+        page.content = text
 
     def split_url(self, url):
         index = -1
