@@ -12,8 +12,8 @@ class BacklinkPlugin(BasePlugin):
             for tag in pattern.finditer(page.content):
                 href = tag.group(1)
                 if 'http' in href:
-                    if site.config['site']['site_url'] in href:
-                        href = href.replace(site.config['site']['site_url'], '')
+                    if site.config['site']['site_url_original'] in href:
+                        href = href.replace(site.config['site']['site_url_original'], '')
                     else:
                         continue
                 if '#' in href:
