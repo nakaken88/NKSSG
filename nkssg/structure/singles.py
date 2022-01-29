@@ -549,11 +549,6 @@ class Single(Page):
                 'meta': self.meta,
                 })
 
-            for block_tag in config['block_tags']:
-                if not '<' + block_tag in content:
-                    continue
-                content = re.sub('<p>\s*<' + block_tag, '<' + block_tag, content)
-                content = re.sub(block_tag + '>\s*</p>', block_tag + '>', content)
             self.content = content
 
         self.html = template.render({
