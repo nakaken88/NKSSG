@@ -1,12 +1,4 @@
 @charset "UTF-8";
-img.emoji {
-  height: 1em;
-  width: 1em;
-  margin: 0 0.05em 0 0.1em;
-  vertical-align: -0.1em;
-  display: inline;
-}
-
 /* reset */
 *,
 *::before,
@@ -153,6 +145,13 @@ header a.blog-title:hover {
   padding: 1rem;
   margin: 1.5rem 0;
   background-color: #eceff1;
+  border-left: 4px solid #bbdefb;
+}
+.entry blockquote p:first-child {
+  margin-top: 0;
+}
+.entry blockquote p:last-child {
+  margin-bottom: 0;
 }
 
 .entry pre {
@@ -208,9 +207,8 @@ header a.blog-title:hover {
   min-height: 200px;
 }
 
-.top-thumbnail img.emoji {
-  height: 5rem;
-  width: 5rem;
+.top-thumbnail .thumbnail-emoji {
+  font-size: 60px;
 }
 
 /* archive */
@@ -229,9 +227,8 @@ header a.blog-title:hover {
   min-height: 120px;
 }
 
-.page-image img.emoji {
-  height: 3rem;
-  width: 3rem;
+.page-image .thumbnail-emoji {
+  font-size: 30px;
 }
 
 .subsection-list ul {
@@ -267,7 +264,7 @@ header a.blog-title:hover {
 }
 .widget-body li {
   list-style: none;
-  margin: 4px 0 4px 8px;
+  margin-bottom: 5px;
 }
 .widget-body a {
   text-decoration: none;
@@ -283,9 +280,8 @@ header a.blog-title:hover {
 .widget-body .page-image .thumbnail {
   min-height: 80px;
 }
-.widget-body .page-image img.emoji {
-  height: 2rem;
-  width: 2rem;
+.widget-body .page-image .thumbnail-emoji {
+  font-size: 24px;
 }
 .widget-body summary {
   background-color: #e3f2fd;
@@ -297,6 +293,9 @@ header a.blog-title:hover {
 }
 .widget-body details details {
   margin-left: 10px;
+}
+.widget-body details li {
+  margin-left: 8px;
 }
 .widget-body .current {
   font-weight: bold;
@@ -326,7 +325,7 @@ footer a.blog-title:hover {
   bottom: 0;
   left: 0;
   margin: 0;
-  padding: 10px 0 0 0;
+  padding: 0;
   z-index: 99;
   width: 100%;
   background: #fff;
@@ -341,14 +340,9 @@ footer a.blog-title:hover {
 #global-footer-nav ul li a {
   display: block;
   color: #999;
-  font-size: 0.85em;
-}
-
-#global-footer-nav img.emoji {
-  height: 2em;
-  width: 2em;
-  margin: 0 auto;
-  display: block;
+  padding: 10px 0 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
 }
 
 @media (min-width: 769px) {
@@ -396,11 +390,6 @@ span.card-container:hover {
 
 .card .thumbnail {
   min-height: 100px;
-}
-
-.card img.emoji {
-  height: 2rem;
-  width: 2rem;
 }
 
 .card .page-item-body {
