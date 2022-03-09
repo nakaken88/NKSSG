@@ -1,6 +1,7 @@
 import collections
 import datetime
 import fnmatch
+import json
 import markdown
 from pathlib import Path
 import platform
@@ -27,10 +28,30 @@ class Singles(Pages):
 
         if config['mode'] == 'draft':
             src_path = config['draft_path'].relative_to(docs_dir)
+            self.config['cache_time'] = datetime.datetime.fromtimestamp(0)
             return [Single(src_path, docs_dir)]
 
-        pages = []
 
+        self.config['cache_time_unix'] = 0
+
+        cache_path = Path(config['base_dir'] / 'cache' / 'contents.json')
+        self.config['cache_contents'] = {}
+        if cache_path.exists():
+            self.config['cache_time_unix'] = cache_path.stat().st_mtime
+            with open(cache_path) as f:
+                self.config['cache_contents'] = json.load(f)
+
+        cache_path = Path(config['base_dir'] / 'cache' / 'htmls.json')
+        self.config['cache_htmls'] = {}
+        if cache_path.exists():
+            self.config['cache_time_unix'] = cache_path.stat().st_mtime
+            with open(cache_path) as f:
+                self.config['cache_htmls'] = json.load(f)
+
+        self.config['cache_time'] = datetime.datetime.fromtimestamp(self.config['cache_time_unix'])
+
+
+        pages = []
         for post_type in config['post_type_list']:
             target_dir = docs_dir / post_type
             files = [f for f in target_dir.glob('**/*') if f.is_file()]
@@ -327,6 +348,10 @@ class Single(Page):
         if not doc:
             return ''
 
+        if self.modified <= config['cache_time']:
+            if str(self.src_path) in config['cache_contents'].keys():
+                return config['cache_contents'][str(self.src_path)]
+
         content = config['plugins'].do_action('on_get_content', target=doc, config=config, single=self)
         if content and content != doc:
             return content
@@ -521,10 +546,15 @@ class Single(Page):
 
 
     def update_html(self, singles, archives):
+        config = singles.config
         if not self.shouldUpdateHtml:
             return
 
-        config = singles.config
+        if self.modified <= config['cache_time']:
+            if str(self.src_path) in config['cache_htmls'].keys():
+                self.html = config['cache_htmls'][str(self.src_path)]
+                return
+
         template_file = self.lookup_template(config)
         template = config['env'].get_template(template_file)
 
