@@ -1,6 +1,4 @@
-import datetime
 from pathlib import Path
-from urllib.parse import quote
 
 from nkssg.structure.pages import Pages, Page
 from nkssg.utils import clean_name, get_config_by_list, to_slug

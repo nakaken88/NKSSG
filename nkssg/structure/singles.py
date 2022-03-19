@@ -1,4 +1,3 @@
-import collections
 import datetime
 import fnmatch
 import json
@@ -6,10 +5,7 @@ import markdown
 from pathlib import Path
 import platform
 import re
-import shutil
 from urllib.parse import quote, unquote
-
-import jinja2
 
 from nkssg.structure.pages import Pages, Page
 from nkssg.utils import *

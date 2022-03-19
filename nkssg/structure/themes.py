@@ -1,5 +1,4 @@
 from pathlib import Path
-import pkg_resources
 
 from ruamel.yaml import YAML
 
