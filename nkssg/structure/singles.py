@@ -40,7 +40,6 @@ class Singles(Pages):
         cache_path = Path(config['base_dir'] / 'cache' / 'htmls.json')
         self.config['cache_htmls'] = {}
         if cache_path.exists():
-            self.config['cache_time_unix'] = cache_path.stat().st_mtime
             with open(cache_path) as f:
                 self.config['cache_htmls'] = json.load(f)
 

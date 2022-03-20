@@ -18,6 +18,10 @@ def load_config(mode):
     config['public_dir'] = config['base_dir'] / 'public'
     config['static_dir'] = config['base_dir'] / 'static'
 
+    config['cache_dir'] = config['base_dir'] / 'cache'
+    config['cache_contents_path'] = config['cache_dir'] / ('contents_' + mode + '.json')
+    config['cache_htmls_path'] = config['cache_dir'] / ('htmls_' + mode + '.json')
+
 
     config = set_default_config(config)
 

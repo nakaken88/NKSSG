@@ -133,14 +133,12 @@ class Site:
 
         self.config['plugins'].do_action('after_output_site', target=self)
 
-        cache_folder = self.config['base_dir'] / 'cache'
-
-        if cache_folder.exists():
-            with open(cache_folder / 'contents.json', mode='w') as f:
+        if self.config['cache_dir'].exists():
+            with open(self.config['cache_contents_path'], mode='w') as f:
                 cache_contents = {str(page.src_path): page.content for page in self.singles}
                 json.dump(cache_contents, f)
 
-            with open(cache_folder / 'htmls.json', mode='w') as f:
+            with open(self.config['cache_htmls_path'], mode='w') as f:
                 cache_htmls = {str(page.src_path): page.html for page in self.singles}
                 json.dump(cache_htmls, f)
 
