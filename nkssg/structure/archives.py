@@ -26,6 +26,10 @@ class Archives(Pages):
         for archive in self.archives:
             archive.singles_all_count = len(archive.singles_all)
 
+        self._root_archives = {str(archive.name): archive for archive in self.root_archives}
+
+        self._archives = {(str(archive.root_name), str(archive.name)): archive for archive in self.archives}
+
         self.config['plugins'].do_action('after_setup_archives', target=self)
 
 
@@ -134,7 +138,7 @@ class Archives(Pages):
 
     def setup_taxonomy_archives(self, singles):
         for tax_dict in self.config['taxonomy']:
-            tax_name = list(tax_dict.keys())[0] 
+            tax_name = list(tax_dict.keys())[0]
             term_list = tax_dict[tax_name]
             self.setup_taxonomy_archive(tax_name, term_list)
 
@@ -206,6 +210,20 @@ class Archives(Pages):
 
         self.config['plugins'].do_action('after_update_archives_html', target=self)
 
+
+    def get_root_archive_by_name(self, name):
+        name = str(name)
+        archive = self._root_archives.get(name)
+        if archive is None:
+            print('root archive:' + name + ' is not found.')
+        return archive
+
+    def get_archive_by_name(self, root_name, name):
+        root_name, name = str(root_name), str(name)
+        archive = self._archives.get((root_name, name))
+        if archive is None:
+            print('archive:(' + root_name + ', ' + name + ') is not found.')
+        return archive
 
 
 
