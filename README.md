@@ -24,7 +24,7 @@ or
 ```
 nkssg new site {site-name}
 cd {site-name}
-nkssg new build
+nkssg build
 ```
 
 {site-name} is your site name.
