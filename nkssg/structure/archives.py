@@ -149,6 +149,7 @@ class Archives(Pages):
         root_archive.dest_path = Path(root_archive.slug, 'index.html')
         root_archive.rel_url = root_archive._get_url_from_dest()
         root_archive._url_setup(self.config)
+        root_archive.meta = {}
 
 
         archive_dict = {tax_name: root_archive}
@@ -161,6 +162,7 @@ class Archives(Pages):
             name = list(term_item.keys())[0]
             term_dict = term_item[name]
             if type(term_dict) != dict:
+                root_archive.meta[name] = term_item[name]
                 continue # it is taxonomy setting
 
             slug = term_dict.get('slug', name)
@@ -169,6 +171,7 @@ class Archives(Pages):
             new_archive = self.create_archive('taxonomy', name, slug)
             archive_dict[name] = new_archive
             parent_names[name] = parent_name
+            new_archive.meta = term_dict
 
         for archive_item in archive_dict.values():
             parent_name = parent_names[archive_item.name]
