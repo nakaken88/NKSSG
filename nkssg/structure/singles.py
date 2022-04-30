@@ -286,25 +286,20 @@ class Single(Page):
 
 
     def _get_date(self):
-        cdate = self.meta.get('date')
-        now = datetime.datetime.now()
-        
-        if cdate is None:
-            try:
-                cdate = datetime.datetime.strptime(self.filename, '%Y%m%d')
-                cdate = datetime.datetime.combine(cdate, datetime.time(0, 0, 0))
-            except ValueError:
-                cdate_unix = self._creation_date(self.abs_src_path)
-                cdate = datetime.datetime.fromtimestamp(cdate_unix)
+        try:
+            cdate = datetime.datetime.strptime(self.filename, '%Y%m%d')
+        except ValueError:
+            cdate_unix = self._creation_date(self.abs_src_path)
+            cdate = datetime.datetime.fromtimestamp(cdate_unix)
 
-        elif type(cdate) != type(now):
-            if cdate.count(':') == 1: # yyyy-mm-dd HH:MM
-                cdate = datetime.datetime.strptime(cdate, '%Y-%m-%d %H:%M')
-            else: # yyyy-mm-dd
-                cdate = datetime.datetime.combine(cdate, datetime.time(0, 0, 0))
+        cdate = self.meta.get('date') or cdate
+        cdate = self._get_clean_date(cdate)
 
         mtime_unix = self.abs_src_path.stat().st_mtime
         mdate = datetime.datetime.fromtimestamp(mtime_unix)
+
+        mdate = self.meta.get('modified') or mdate
+        mdate = self._get_clean_date(mdate)
 
         return cdate, mdate
 
@@ -316,6 +311,16 @@ class Single(Page):
                 return self.abs_src_path.stat().st_birthtime
             except AttributeError:
                 return 0
+
+    def _get_clean_date(self, dirty_date):
+        clean_date = datetime.datetime.fromtimestamp(0)
+        if type(dirty_date) is datetime.datetime:
+            clean_date = dirty_date
+        elif type(dirty_date) is datetime.date: # yyyy-mm-dd
+            clean_date = datetime.datetime.combine(dirty_date, datetime.time(0, 0, 0))
+        elif dirty_date.count(':') == 1: # yyyy-mm-dd HH:MM
+            clean_date = datetime.datetime.strptime(dirty_date, '%Y-%m-%d %H:%M')
+        return clean_date
 
 
     def _get_title(self):
