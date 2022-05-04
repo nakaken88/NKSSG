@@ -57,12 +57,35 @@ class Archives(Pages):
             archive_type = archive_type.lower()
             if archive_type == 'none':
                 continue
+
+            elif archive_type == 'simple':
+                self.setup_simple_archive(post_type, singles, with_front)
+
             elif archive_type != 'section':
                 self.setup_date_archives(post_type, singles, with_front)
 
             else:
                 base_path = self.config['docs_dir'] / post_type
                 self.setup_section_archive(post_type, base_path, with_front)
+
+
+    def setup_simple_archive(self, post_type, singles, with_front):
+        slug = get_config_by_list(self.config, ['post_type', post_type, 'slug'])
+        root_archive = self.create_root_archive('none', post_type, slug)
+
+        if with_front:
+            root_archive.dest_path = Path(root_archive.slug, 'index.html')
+        else:
+            root_archive.dest_path = Path('index.html')
+
+        root_archive.rel_url = root_archive._get_url_from_dest()
+        root_archive._url_setup(self.config)
+
+        for single in singles:
+            if single.post_type == post_type:
+                root_archive.singles.append(single)
+                root_archive.singles_all.append(single)
+                single.archive_list.append(root_archive)
 
 
     def setup_date_archives(self, post_type, singles, with_front):
@@ -382,7 +405,7 @@ class Archive(Page):
             post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
             paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or 10
 
-        elif self.archive_type == 'section':
+        elif self.archive_type == 'section' or self.archive_type == 'simple':
             target_singles = self.singles
 
             post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
