@@ -40,6 +40,7 @@ class Archives(Pages):
 
     def create_root_archive(self, archive_type, name, slug=''):
         root_archive = self.create_archive(archive_type, name, slug)
+        root_archive.root_archive = root_archive
         root_archive.root_name = root_archive.name
         root_archive.is_root = True
         self.root_archives.append(root_archive)
@@ -147,6 +148,7 @@ class Archives(Pages):
 
         root_archive.path = basepath
         archive_dict = {basepath: root_archive}
+        flat_url = get_config_by_list(self.config, ['post_type', root_archive.name, 'flat-url']) or False
 
         dirs = [d for d in basepath.glob('**/*') if d.is_dir()]
         for dir in sorted(dirs):
@@ -155,7 +157,7 @@ class Archives(Pages):
             new_archive.path = dir
 
             parent_archive = archive_dict[dir.parent]
-            new_archive.set_parent(parent_archive, self.config)
+            new_archive.set_parent(parent_archive, self.config, flat_url)
             archive_dict[dir] = new_archive
 
 
@@ -196,11 +198,13 @@ class Archives(Pages):
             parent_names[name] = parent_name
             new_archive.meta = term_dict
 
+        flat_url = get_config_by_list(self.config, ['taxonomy', root_archive.name, 'flat-url']) or False
+
         for archive_item in archive_dict.values():
             parent_name = parent_names[archive_item.name]
             if parent_name != '' and parent_name in archive_dict.keys():
                 parent = archive_dict[parent_name]
-                archive_item.set_parent(parent, self.config)
+                archive_item.set_parent(parent, self.config, flat_url)
 
 
     def setup_parents(self):
@@ -268,6 +272,7 @@ class Archive(Page):
         self.page_type = 'archive'
 
         self.path = ''
+        self.root_archive = ''
         self.root_name = ''
         self.is_root = False
         self.parent = None
@@ -289,11 +294,17 @@ class Archive(Page):
                 return child
         return None
 
-    def set_parent(self, parent, config):
+    def set_parent(self, parent, config, flat_url=False):
         self.parent = parent
         parent.children.append(self)
+        self.root_archive = parent.root_archive
 
-        self.dest_path = parent.dest_path.parent / self.slug / 'index.html'
+        if flat_url:
+            base_path = self.root_archive.dest_path.parent
+        else:
+            base_path = parent.dest_path.parent
+
+        self.dest_path = base_path / self.slug / 'index.html'
         self.rel_url = self._get_url_from_dest()
         self._url_setup(config)
 
