@@ -72,7 +72,7 @@ class Archives(Pages):
 
     def setup_simple_archive(self, post_type, singles, with_front):
         slug = get_config_by_list(self.config, ['post_type', post_type, 'slug'])
-        root_archive = self.create_root_archive('none', post_type, slug)
+        root_archive = self.create_root_archive('simple', post_type, slug)
 
         if with_front:
             root_archive.dest_path = Path(root_archive.slug, 'index.html')

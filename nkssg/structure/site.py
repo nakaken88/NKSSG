@@ -68,7 +68,7 @@ class Site:
                     archive_type = 'section'
             
             archive_type = archive_type.lower()
-            if archive_type != 'date' and archive_type != 'none':
+            if not archive_type in ['none', 'date', 'simple']:
                 archive_type = 'section'
 
             if not has_home_template and index == 0:
