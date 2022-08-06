@@ -42,6 +42,8 @@ def set_default_config(config):
     config['site']['site_url'] = config['site']['site_url'].rstrip('/')
     config['site']['site_url_original'] = config['site']['site_url']
 
+    if config['site']['site_url'] in config['site']['site_image']:
+        config['site']['site_image'] = config['site']['site_image'].replace(config['site']['site_url'], '')
 
     config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
