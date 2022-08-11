@@ -10,7 +10,7 @@ class Themes:
         self.dirs = []
         self.cnf = {}
 
-        themes_dir = config['base_dir'] / 'themes'
+        themes_dir = config['themes_dir']
 
         theme = get_config_by_list(config, ['theme', 'child'])
         if theme is not None:

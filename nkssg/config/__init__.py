@@ -14,11 +14,11 @@ def load_config(mode):
     config['mode'] = mode
 
     config['base_dir'] = Path.cwd()
-    config['docs_dir'] = config['base_dir'] / 'docs'
-    config['public_dir'] = config['base_dir'] / 'public'
-    config['static_dir'] = config['base_dir'] / 'static'
+    for dir_type in ['docs', 'public', 'static', 'cache', 'themes']:
+        dir = dir_type + '_dir'
+        config[dir] = get_config_by_list(config, ['directory', dir_type]) or dir_type
+        config[dir] = config['base_dir'] / config[dir]
 
-    config['cache_dir'] = config['base_dir'] / 'cache'
     config['cache_contents_path'] = config['cache_dir'] / ('contents_' + mode + '.json')
     config['cache_htmls_path'] = config['cache_dir'] / ('htmls_' + mode + '.json')
 
