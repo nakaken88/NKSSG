@@ -352,15 +352,17 @@ class Single(Page):
             if str(self.src_path) in config['cache_contents'].keys():
                 return config['cache_contents'][str(self.src_path)]
 
-        content = config['plugins'].do_action('on_get_content', target=doc, config=config, single=self)
-        if content and content != doc:
+        content = doc
+        self.content_updated = False
+        content = config['plugins'].do_action('on_get_content', target=content, config=config, single=self)
+        if self.content_updated:
             return content
 
         ext = self.ext
         if ext == 'md' or ext == 'markdown':
             md_config = get_config_by_list(config, 'markdown')
             if md_config is None:
-                return markdown.markdown(doc)
+                return markdown.markdown(content)
             else:
                 extensions = []
                 ext_configs = {}
@@ -372,9 +374,9 @@ class Single(Page):
                             break
                     else:
                         extensions.append(item)
-                return markdown.markdown(doc, extensions=extensions, extension_configs=ext_configs)
+                return markdown.markdown(content, extensions=extensions, extension_configs=ext_configs)
         else:
-            return doc
+            return content
 
     def _get_summary(self):
         summary = self.meta.get('summary')
