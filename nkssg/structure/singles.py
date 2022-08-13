@@ -586,13 +586,13 @@ class Single(Page):
 
             self.content = content
 
-        self.content = config['plugins'].do_action('before_render_html', target=self.content, config=config, single=self)
+        self.content = config['plugins'].do_action('before_render_html', target=self.content, config=config, single=self, singles=singles, archives=archives)
 
         self.html = template.render({
             'mypage': self,
             })
 
-        self.html = config['plugins'].do_action('after_render_html', target=self.html, config=config, single=self)
+        self.html = config['plugins'].do_action('after_render_html', target=self.html, config=config, single=self, singles=singles, archives=archives)
 
 
 
