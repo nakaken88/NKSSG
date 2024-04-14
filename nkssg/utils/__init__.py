@@ -19,7 +19,7 @@ def get_config_by_list(config, keys):
             for item in cnf:
                 if isinstance(item, dict):
                     temp = item.get(key)
-                if not temp is None:
+                if temp is not None:
                     break
             cnf = temp
     return cnf
@@ -51,7 +51,7 @@ def clean_name(dirty_name):
 def front_matter_setup(doc):
     if doc[:3] != '---':
         return {}, doc
-        
+
     parts = doc.split('---')
     front_matter = YAML(typ='safe').load(parts[1]) or {}
 

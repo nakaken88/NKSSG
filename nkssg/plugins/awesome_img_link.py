@@ -1,4 +1,3 @@
-from pathlib import Path
 import re
 import shutil
 
@@ -46,7 +45,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
                 old_path = config['docs_dir'] / old_link[1:]
             else:
                 old_path = config['docs_dir'] / page.src_path.parent / old_link
-                
+
             new_path = page.dest_dir / old_path.name
             new_src = './' + old_path.name
 
@@ -65,7 +64,6 @@ class AwesomeImgLinkPlugin(BasePlugin):
 
         page.html = text
         page.imgs = srcs
-
 
     def after_output_singles(self, site, **kwargs):
         config = site.config

@@ -22,7 +22,6 @@ def load_config(mode):
     config['cache_contents_path'] = config['cache_dir'] / ('contents_' + mode + '.json')
     config['cache_htmls_path'] = config['cache_dir'] / ('htmls_' + mode + '.json')
 
-
     config = set_default_config(config)
 
     config['plugins'] = Plugins(config)
@@ -47,7 +46,6 @@ def set_default_config(config):
 
     config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
-
     if get_config_by_list(config, ['plugins']) is None:
         config['plugins'] = [
             'autop',
@@ -55,7 +53,6 @@ def set_default_config(config):
             'awesome-img-link',
             'select-pages'
             ]
-
 
     if get_config_by_list(config, ['doc_ext']) is None:
         config['doc_ext'] = [
@@ -89,4 +86,3 @@ def set_default_config(config):
         config['use_abs_url'] = True
 
     return config
-

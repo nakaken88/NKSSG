@@ -16,7 +16,6 @@ class Plugins():
         installed_plugins = pkg_resources.iter_entry_points(group='nkssg.plugins')
         self.installed_plugins = {plugin.name: plugin for plugin in installed_plugins}
 
-
         plugins = get_config_by_list(config, ['plugins'])
         if plugins is None:
             config['plugin_is_ready'] = True
@@ -40,11 +39,10 @@ class Plugins():
 
             else:
                 print('Warning: ' + plugin_name + ' plugin is not found')
-        
+
         config['plugins'] = self.plugins
         config['active_plugins'] = self.plugins
         config['plugin_is_ready'] = True
-
 
     def do_action(self, action_name, target=None, **kwargs):
         if not self.plugins:
@@ -52,7 +50,7 @@ class Plugins():
 
         for plugin in self.plugins.values():
             method = getattr(plugin, action_name, None)
-            
+
             if method is not None and callable(method):
                 temp_target = method(target, **kwargs)
                 if temp_target is not None:

@@ -20,7 +20,8 @@ class BacklinkPlugin(BasePlugin):
                     href = href[:(href.find('#'))]
                 if '?' in href:
                     href = href[:(href.find('?'))]
-                if href.replace('/', '') == '': continue
+                if href.replace('/', '') == '':
+                    continue
                 to_links_text.add(href)
             page.to_links_text = to_links_text
             page.to_links = set()

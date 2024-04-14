@@ -45,7 +45,7 @@ def serve(config, static=False, port=5500):
         server.serve(port=port, root=config['public_dir'], open_url_delay=None)
     finally:
         shutil.rmtree(config['public_dir'])
-    
+
 
 def draft(config, path, port=5500):
 
@@ -68,4 +68,3 @@ def draft(config, path, port=5500):
         server.serve(port=port, root=config['public_dir'], open_url_delay=None)
     finally:
         shutil.rmtree(config['public_dir'])
-    

@@ -5,10 +5,14 @@ import markdown
 from pathlib import Path
 import platform
 import re
-from urllib.parse import quote, unquote
+from urllib.parse import quote
 
 from nkssg.structure.pages import Pages, Page
-from nkssg.utils import *
+from nkssg.utils import get_config_by_list
+from nkssg.utils import to_slug
+from nkssg.utils import clean_name
+from nkssg.utils import front_matter_setup
+from nkssg.utils import dup_check
 
 
 class Singles(Pages):
@@ -27,7 +31,6 @@ class Singles(Pages):
             self.config['cache_time'] = datetime.datetime.fromtimestamp(0)
             return [Single(src_path, docs_dir)]
 
-
         self.config['cache_time_unix'] = 0
 
         cache_path = Path(config['base_dir'] / 'cache' / 'contents.json')
@@ -45,7 +48,6 @@ class Singles(Pages):
 
         self.config['cache_time'] = datetime.datetime.fromtimestamp(self.config['cache_time_unix'])
 
-
         pages = []
         for post_type in config['post_type_list']:
             target_dir = docs_dir / post_type
@@ -53,7 +55,7 @@ class Singles(Pages):
 
             for f in sorted(files):
                 ext = f.suffix[1:]
-                if not ext in config['doc_ext']:
+                if ext not in config['doc_ext']:
                     continue
 
                 relative_path = f.relative_to(docs_dir)
@@ -69,8 +71,6 @@ class Singles(Pages):
             if fnmatch.fnmatch(target, item):
                 return True
         return False
-
-
 
     def setup(self):
         config = self.config
@@ -93,7 +93,7 @@ class Singles(Pages):
                 continue
 
             new_pages.append(new_page)
-        
+
         self.config['plugins'].do_action('after_setup_singles', target=self)
 
         self.pages = sorted(new_pages)
@@ -108,12 +108,9 @@ class Singles(Pages):
         self.file_id_dup_check()
         self.file_ids = {str(page.file_id): page for page in self.pages}
 
-
     def file_id_dup_check(self):
         file_id_list = [(str(page.file_id), page) for page in self.pages]
         dup_check(file_id_list)
-
-
 
     def update_urls(self):
         for page in self.pages:
@@ -129,25 +126,21 @@ class Singles(Pages):
         for page in self.pages:
             try:
                 page.update_html(self, archives)
-            except:
+            except Exception:
                 print(page)
                 raise
 
         self.config['plugins'].do_action('after_update_singles_html', target=self)
 
-
     def dest_path_dup_check(self):
         dest_path_list = [(str(page.dest_path), page) for page in self.pages]
         dup_check(dest_path_list)
-
 
     def get_single_by_file_id(self, file_id):
         single = self.file_ids.get(file_id)
         if single is None:
             print('file_id:' + file_id + ' is not found.')
         return single
-
-
 
 
 class Single(Page):
@@ -175,7 +168,6 @@ class Single(Page):
         self.is_expired = False
         self.is_future = False
 
-
     def __str__(self):
         return "Single(src='{}')".format(self.src_path)
 
@@ -188,7 +180,6 @@ class Single(Page):
 
         if s_order < 0 or o_order < 0:
             return (s_order, self.src_path) < (o_order, other.src_path)
-
 
         if self.archive_type == 'date':
             if self.date != other.date:
@@ -203,14 +194,13 @@ class Single(Page):
 
         return (s_order, self.src_path) < (o_order, other.src_path)
 
-
     def setup(self, config):
         with open(self.abs_src_path, 'r', encoding='UTF-8') as f:
             doc = f.read()
 
         try:
             self.meta, doc = front_matter_setup(doc)
-        except:
+        except Exception:
             raise Exception('front matter error: ' + str(self.abs_src_path))
 
         self.post_type = self._get_post_type()
@@ -238,19 +228,16 @@ class Single(Page):
 
         return self
 
-
     def _get_post_type(self):
         return self.src_path.parts[0]
-
 
     def _get_status(self):
         status = self.meta.get('status') or 'publish'
         return status
 
-
     def _is_draft(self):
         draft = self.meta.get('draft')
-        if not draft is None:
+        if draft is not None:
             return draft
 
         status_list = ['draft', 'future', 'pending', 'private', 'trash', 'auto-draft']
@@ -266,7 +253,6 @@ class Single(Page):
 
         return False
 
-
     def _is_expired(self):
         expire = self.meta.get('expire')
         if expire is None:
@@ -274,16 +260,14 @@ class Single(Page):
 
         now = datetime.datetime.now()
 
-        if type(expire) != type(now):
+        if isinstance(expire, datetime):
             expire = datetime.datetime.combine(expire, datetime.time(0, 0, 0))
 
         return expire <= now
 
-
     def _is_future(self):
         now = datetime.datetime.now()
         return self.date > now
-
 
     def _get_date(self):
         try:
@@ -316,12 +300,11 @@ class Single(Page):
         clean_date = datetime.datetime.fromtimestamp(0)
         if type(dirty_date) is datetime.datetime:
             clean_date = dirty_date
-        elif type(dirty_date) is datetime.date: # yyyy-mm-dd
+        elif type(dirty_date) is datetime.date:  # yyyy-mm-dd
             clean_date = datetime.datetime.combine(dirty_date, datetime.time(0, 0, 0))
-        elif dirty_date.count(':') == 1: # yyyy-mm-dd HH:MM
+        elif dirty_date.count(':') == 1:  # yyyy-mm-dd HH:MM
             clean_date = datetime.datetime.strptime(dirty_date, '%Y-%m-%d %H:%M')
         return clean_date
-
 
     def _get_title(self):
         title = self.meta.get('title') or clean_name(self.filename)
@@ -341,8 +324,6 @@ class Single(Page):
             else:
                 slug = self.name
         return to_slug(slug)
-
-
 
     def _get_content(self, config, doc):
         if not doc:
@@ -367,7 +348,7 @@ class Single(Page):
                 extensions = []
                 ext_configs = {}
                 for item in md_config:
-                    if type(item) == dict:
+                    if isinstance(item, dict):
                         for k in item:
                             extensions.append(k)
                             ext_configs[k] = item[k]
@@ -394,7 +375,6 @@ class Single(Page):
             summary = summary[:110]
         return summary
 
-
     def _get_image(self, config):
         image = self.meta.get('image') or {}
         if image:
@@ -414,7 +394,6 @@ class Single(Page):
         if not image:
             return image
 
-
         if '/static' == src[:len('/static')]:
             image['rel_url'] = src[len('/static'):]
         else:
@@ -428,7 +407,6 @@ class Single(Page):
 
             image['rel_url'] = '/' + '/'.join(['thumb', year, month, image_name])
 
-
         image['abs_url'] = config['site']['site_url'] + image['rel_url']
         if config['use_abs_url']:
             image['url'] = image['abs_url']
@@ -437,25 +415,21 @@ class Single(Page):
         image['src'] = image['url']
         return image
 
-
     def _get_file_id(self):
         return self.meta.get('file_id') or self.src_path
 
     def _get_archive_type(self, config):
-        return  get_config_by_list(config, ['post_type', self.post_type, 'archive_type'])
-
-
+        return get_config_by_list(config, ['post_type', self.post_type, 'archive_type'])
 
     def update_url(self, config):
         self.rel_url, self.dest_path = self._get_url_and_dest_path(config)
         self.dest_dir = self.dest_path.parent
         self._url_setup(config)
 
-
     def _get_url_and_dest_path(self, config):
 
         url = self.meta.get('url')
-        
+
         if url is None:
             post_type = self.post_type
             permalink = get_config_by_list(config, ['post_type', post_type, 'permalink'])
@@ -472,7 +446,7 @@ class Single(Page):
                     dest_path = Path(str(dest_path).replace(post_type, slug, 1))
                 else:
                     dest_path = dest_path.relative_to(Path(post_type))
-                
+
                 parts = dest_path.parts
                 new_parts = []
                 for part in parts:
@@ -492,7 +466,6 @@ class Single(Page):
         url = url.replace('//', '/')
 
         return url.lower(), dest_path
-
 
     def get_url_from_permalink(self, permalink, config):
         permalink = '/' + permalink.strip('/') + '/'
@@ -531,7 +504,7 @@ class Single(Page):
                     if archive.root_name == part and not archive.is_root:
                         target_archive = archive
                         break
-                
+
                 if target_archive is None:
                     new_part.append('no-' + to_slug(part))
                 else:
@@ -548,7 +521,6 @@ class Single(Page):
                 url = url.replace(original_part, '/'.join(new_part))
 
         return quote(url).lower()
-
 
     def update_html(self, singles, archives):
         config = singles.config
@@ -586,21 +558,33 @@ class Single(Page):
 
             self.content = content
 
-        self.content = config['plugins'].do_action('before_render_html', target=self.content, config=config, single=self, singles=singles, archives=archives)
+        self.content = config['plugins'].do_action(
+            'before_render_html',
+            target=self.content,
+            config=config,
+            single=self,
+            singles=singles,
+            archives=archives
+            )
 
         self.html = template.render({
             'mypage': self,
             })
 
-        self.html = config['plugins'].do_action('after_render_html', target=self.html, config=config, single=self, singles=singles, archives=archives)
-
-
+        self.html = config['plugins'].do_action(
+            'after_render_html',
+            target=self.html,
+            config=config,
+            single=self,
+            singles=singles,
+            archives=archives
+            )
 
     def lookup_template(self, config):
         template_file = self.meta.get('template')
 
         for theme_dir in config['themes'].dirs:
-            if not template_file is None:
+            if template_file is not None:
                 template_file = template_file.replace('.html', '') + '.html'
                 template_path = theme_dir / template_file
                 if template_path.exists():

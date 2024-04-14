@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from ruamel.yaml import YAML
 
 from nkssg.utils import get_config_by_list

@@ -1,4 +1,3 @@
-from pathlib import Path
 import re
 
 from nkssg.structure.plugins import BasePlugin
@@ -60,10 +59,9 @@ class AwesomePageLinkPlugin(BasePlugin):
                     new_path = config['docs_dir'] / old_link[1:]
                 else:
                     new_path = config['docs_dir'] / page.src_path.parent / old_link
-                    
+
                 new_path = new_path.resolve()
                 new_path = new_path.relative_to(config['docs_dir'])
-
 
                 new_link = old_link + suffix
                 if str(new_path) in self.singles.src_paths.keys():

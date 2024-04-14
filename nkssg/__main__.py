@@ -35,7 +35,7 @@ def build_serve(static, all, port):
     config = load_config(mode='serve')
     config['PKG_DIR'] = PKG_DIR
     config['serve_all'] = all
-    
+
     build.serve(config, static, port)
 
 

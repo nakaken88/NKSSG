@@ -24,7 +24,6 @@ class Pages:
             page.output(self.config)
 
 
-
 class Page:
     def __init__(self):
         self._id = 0
@@ -57,7 +56,6 @@ class Page:
         self.shouldUpdateHtml = True
         self.shouldOutput = True
 
-
     def output(self, config):
         if not self.shouldOutput:
             return
@@ -80,17 +78,16 @@ class Page:
         if self.meta.get('aliases'):
             self.output_aliases(config)
 
-
     def _get_url_from_dest(self, dest_path=''):
         if dest_path == '':
             dest_path = self.dest_path
         if dest_path == '':
             try:
                 raise Exception
-            except:
+            except Exception:
                 print('Error: dest path error on ' + self.src_path)
 
-        parts = list( Path(dest_path).parts )
+        parts = list(Path(dest_path).parts)
 
         if parts[-1] == 'index.html':
             if len(parts) == 1:
@@ -103,7 +100,7 @@ class Page:
 
     def _get_dest_from_url(self, url):
         url = url.strip('/')
-        if not '.htm' in url:
+        if '.htm' not in url:
             url = url + '/index.html'
         parts = unquote(url).split('/')
         return Path(*parts)
@@ -111,7 +108,7 @@ class Page:
     def _url_setup(self, config):
         if self.rel_url == '':
             return
-        
+
         site_url = get_config_by_list(config, ['site', 'site_url']) or '/'
         _site_url = site_url.rstrip('/') + '/'
         _rel_url = self.rel_url.lstrip('/')
@@ -122,11 +119,10 @@ class Page:
         else:
             self.url = self.rel_url
 
-
     def output_aliases(self, config):
         for url in self.meta['aliases']:
             url = '/' + url.strip('/')
-            if not '.htm' in url:
+            if '.htm' not in url:
                 url = url + '/'
 
             output_path = self._get_dest_from_url(url)
@@ -150,7 +146,6 @@ class Page:
 </html>
 '''.format(url=self.url)
                 f.write(content)
-
 
     def lookup_template(self, config):
         return 'main.html'

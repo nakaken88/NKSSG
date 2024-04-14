@@ -21,10 +21,8 @@ class Site:
         self.config = self.setup_post_types()
         self.config = self.config['plugins'].do_action('after_setup_post_types', target=self.config)
 
-
         self.singles = Singles(self.config)
         self.archives = Archives(self.config)
-
 
     def setup_post_types(self):
         config = self.config
@@ -37,15 +35,15 @@ class Site:
                 temp_dict = temp_item
             else:
                 temp_dict[temp_item] = temp_item
-            
+
             for post_type in temp_dict.keys():
                 if Path(config['docs_dir'], post_type).exists():
                     config['post_type_list'].append(post_type)
-        
+
         for d in config['docs_dir'].glob('*'):
             if d.is_dir():
                 post_type = d.parts[-1]
-                if not post_type in config['post_type_list']:
+                if post_type not in config['post_type_list']:
                     config['post_type_list'].append(post_type)
 
         # update archive type, slug, and with front
@@ -66,9 +64,9 @@ class Site:
                     archive_type = 'date'
                 else:
                     archive_type = 'section'
-            
+
             archive_type = archive_type.lower()
-            if not archive_type in ['none', 'date', 'simple']:
+            if archive_type not in ['none', 'date', 'simple']:
                 archive_type = 'section'
 
             if not has_home_template and index == 0:
@@ -77,7 +75,7 @@ class Site:
                     archive_type = 'section'
             elif index > 0:
                 post_type_dict['with_front'] = True
-            
+
             post_type_dict['archive_type'] = archive_type
 
             slug = post_type_dict.get('slug') or post_type
@@ -89,20 +87,16 @@ class Site:
 
         return config
 
-
-
     def setup(self):
         self.singles.setup()
 
-
     def update(self):
-        self.config['env'] = jinja2.Environment(loader=jinja2.FileSystemLoader( self.config['themes'].dirs ))
+        self.config['env'] = jinja2.Environment(loader=jinja2.FileSystemLoader(self.config['themes'].dirs))
 
         self.config['env'].globals['config'] = self.config
         self.config['env'].globals['singles'] = self.singles
         self.config['env'].globals['archives'] = self.archives
         self.config['env'].globals['theme'] = self.config['themes'].cnf
-
 
         self.config = self.config['plugins'].do_action('after_setup_env', target=self.config)
 
@@ -118,7 +112,6 @@ class Site:
             self.archives.update_htmls(self.singles)
 
         self.config['plugins'].do_action('after_update_site', target=self)
-
 
     def output(self):
         self.copy_static_files()
@@ -144,7 +137,6 @@ class Site:
 
         self.config['plugins'].do_action('on_end', target=self)
 
-
     def copy_static_files(self):
         static_dir = self.config['base_dir'] / 'static'
         public_dir = self.config['public_dir']
@@ -158,7 +150,7 @@ class Site:
 
                 to_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(str(f), str(to_path))
-        
+
         for d in self.config['themes'].dirs:
             for f in d.glob('**/*'):
                 if not f.is_file():
@@ -188,7 +180,6 @@ class Site:
                 return True
         return False
 
-
     def output_extra_pages(self):
         config = self.config['themes'].cnf
         extra_pages = get_config_by_list(config, ['extra_pages']) or []
@@ -196,7 +187,7 @@ class Site:
         default_extra_pages = ['home.html', '404.html', 'sitemap.html', 'sitemap.xml']
 
         for default_extra_page in default_extra_pages:
-            if not default_extra_page in extra_pages:
+            if default_extra_page not in extra_pages:
                 extra_pages.append(default_extra_page)
 
         for extra_page in extra_pages:
@@ -209,8 +200,6 @@ class Site:
 
             if extra_page in config_extra_pages and not exist_check:
                 print(extra_page + ' is not found on extra pages')
-
-
 
     def output_extra_page(self, extra_page):
         template = self.config['env'].get_template(extra_page)

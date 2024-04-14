@@ -41,7 +41,6 @@ def site(project_dir, package_dir):
     child_theme_to = project_dir / 'themes' / 'child'
     theme_copy(child_theme_from, child_theme_to)
 
-
     Path(project_dir, 'nkssg.yml').write_text('''\
 site:
   site_name: "site name"
@@ -80,7 +79,7 @@ theme:
 taxonomy:
   - tag:
     - tag1
-    - tag 2: 
+    - tag 2:
         slug: tag2
     - tag3
 
@@ -102,6 +101,7 @@ category: ["cat11"]
 This is a sample post.
 ''')
 
+
 def theme_copy(theme_from, theme_to):
     for f in theme_from.glob('**/*'):
         if f.is_file():
@@ -119,14 +119,14 @@ def page(name, path, config):
     template_file = None
 
     for d in config['themes'].dirs:
-        if not template_file is None:
+        if template_file is not None:
             break
         for f in d.glob('**/*'):
-            if not template_file is None:
+            if template_file is not None:
                 break
             if f.is_file() and f.stem == 'new_' + name:
                 template_file = f
-    
+
     if template_file is None:
         log.warn(name + ' is not found')
         return
@@ -147,7 +147,7 @@ def page(name, path, config):
 
             if line == '---':
                 dash_count = dash_count + 1
-            
+
             if dash_count == 1 and line[0] != '#':
                 parts = r'%Y %m %d %H %M %S'.split(' ')
                 for part in parts:
@@ -166,7 +166,6 @@ def page(name, path, config):
                     new_lines.append(line)
             else:
                 new_lines.append(line)
-
 
         if to_path == '':
             to_path = config['docs_dir'] / name / now.strftime(r'%Y%m%d-%H%M%S.html')
