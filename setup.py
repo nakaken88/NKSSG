@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='nkssg',
-    version='0.0.1-alpha',
+    version='0.0.2-alpha',
     description='NakaKen Static Site Generator',
     author='nakaken88',
     packages=find_packages(),
     include_package_data=True,
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     install_requires=[
         'beautifulsoup4',
         'click',
@@ -15,6 +15,7 @@ setup(
         'livereload',
         'Markdown',
         'ruamel.yaml',
+        'setuptools',
         'tornado',
     ],
     extras_require={
