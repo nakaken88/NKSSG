@@ -1,5 +1,6 @@
 from nkssg.plugins.auto_p import AutoPPlugin
 
+
 def test_block_one_line():
     plugin = AutoPPlugin()
     before_text = '<p>sample</p>'

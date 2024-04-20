@@ -1,5 +1,6 @@
 import nkssg.config as cfg
 
+
 def test_default_config_no_content():
     config = {}
     config = cfg.set_default_config(config)
@@ -11,7 +12,7 @@ def test_default_config_no_content():
     assert config['post_type'][0]['post']['permalink'] == '/%Y/%m/%d/%H%M%S/'
 
     assert config['taxonomy'] == {}
-    assert config['use_abs_url'] == True
+    assert config['use_abs_url'] is True
 
 
 def test_default_config_some_content():
@@ -35,10 +36,10 @@ def test_default_config_some_content():
 
     assert config['site']['site_url'] == 'http://example.com'
     assert 'autop' in config['plugins']
-    assert not 'select-pages' in config['plugins']
+    assert 'select-pages' not in config['plugins']
 
-    assert not 'md' in config['doc_ext']
+    assert 'md' not in config['doc_ext']
     assert config['post_type'][0]['post']['permalink'] == '/%Y/%m/%d/'
 
     assert config['taxonomy'] == ['category']
-    assert config['use_abs_url'] == False
+    assert config['use_abs_url'] is False
