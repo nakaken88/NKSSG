@@ -7,9 +7,21 @@ from nkssg.structure.plugins import Plugins
 from nkssg.utils import get_config_by_list
 
 
+class Config(dict):
+    def __init__(self) -> None:
+        super().__init__(self)
+
+    def load_config(self, yaml_file_path):
+        with open(yaml_file_path, encoding='utf8') as f:
+            data = YAML(typ='safe').load(f)
+
+            for k, v in data.items():
+                super().update({k: v})
+
+
 def load_config(mode):
-    with open('nkssg.yml', encoding='utf8') as f:
-        config: dict = YAML(typ='safe').load(f)
+    config = Config()
+    config.load_config('nkssg.yml')
 
     config['mode'] = mode
 
