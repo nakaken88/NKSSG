@@ -8,8 +8,8 @@ from nkssg.utils import get_config_by_list
 
 
 def load_config(mode):
-    with open('nkssg.yml', encoding='utf8') as stream:
-        config = YAML(typ='safe').load(stream)
+    with open('nkssg.yml', encoding='utf8') as f:
+        config: dict = YAML(typ='safe').load(f)
 
     config['mode'] = mode
 
@@ -30,38 +30,36 @@ def load_config(mode):
     return config
 
 
-def set_default_config(config):
-    config['site'] = get_config_by_list(config, ['site']) or {}
-    config['site']['site_name'] = get_config_by_list(config, ['site', 'site_name']) or 'Site Title'
-    config['site']['site_url'] = get_config_by_list(config, ['site', 'site_url']) or ''
-    config['site']['site_desc'] = get_config_by_list(config, ['site', 'site_desc']) or ''
-    config['site']['site_image'] = get_config_by_list(config, ['site', 'site_image']) or ''
-    config['site']['language'] = get_config_by_list(config, ['site', 'language']) or 'en'
+def set_default_config(config: dict):
+    site_config: dict = config.setdefault('site', {})
+    site_config.setdefault('site_name', 'Site Title')
+    site_config.setdefault('site_url', '')
+    site_config.setdefault('site_desc', '')
+    site_config.setdefault('site_image', '')
+    site_config.setdefault('language', 'en')
 
-    config['site']['site_url'] = config['site']['site_url'].rstrip('/')
-    config['site']['site_url_original'] = config['site']['site_url']
+    site_config['site_url'] = site_config['site_url'].rstrip('/')
+    site_config['site_url_original'] = site_config['site_url']
 
-    if config['site']['site_url'] in config['site']['site_image']:
-        config['site']['site_image'] = config['site']['site_image'].replace(config['site']['site_url'], '')
+    if site_config['site_url'] in site_config['site_image']:
+        site_config['site_image'] = site_config['site_image'].replace(site_config['site_url'], '')
 
     config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
-    if get_config_by_list(config, ['plugins']) is None:
-        config['plugins'] = [
-            'autop',
-            'awesome-page-link',
-            'awesome-img-link',
-            'select-pages'
-            ]
+    config.setdefault('plugins', [
+        'autop',
+        'awesome-page-link',
+        'awesome-img-link',
+        'select-pages'
+    ])
 
-    if get_config_by_list(config, ['doc_ext']) is None:
-        config['doc_ext'] = [
-            'md', 'markdown',
-            'html', 'htm',
-            'txt',
-            ]
-    if get_config_by_list(config, ['exclude']) is None:
-        config['exclude'] = []
+    config.setdefault('doc_ext', [
+        'md', 'markdown',
+        'html', 'htm',
+        'txt',
+    ])
+
+    config.setdefault('exclude', [])
 
     if get_config_by_list(config, ['post_type']) is None:
         config['post_type'] = []
@@ -80,9 +78,8 @@ def set_default_config(config):
             }
         })
 
-    config['taxonomy'] = get_config_by_list(config, ['taxonomy']) or {}
+    config.setdefault('taxonomy', {})
 
-    if get_config_by_list(config, ['use_abs_url']) is None:
-        config['use_abs_url'] = True
+    config.setdefault('use_abs_url', True)
 
     return config
