@@ -1,5 +1,7 @@
+from dataclasses import dataclass, field
 import datetime
 from pathlib import Path
+from typing import Any
 
 from ruamel.yaml import YAML
 
@@ -7,9 +9,69 @@ from nkssg.structure.plugins import Plugins
 from nkssg.utils import get_config_by_list
 
 
-class Config(dict):
-    def __init__(self) -> None:
-        super().__init__(self)
+@dataclass
+class BaseConfig:
+    extras: dict[str, Any] = field(default_factory=dict)
+
+    def __getitem__(self, k):
+        if k in self.__dict__:
+            return self.__dict__[k]
+        elif k in self.extras:
+            return self.extras[k]
+        else:
+            raise KeyError(f"{k} not found in {self.__class__.__name__}.")
+
+    def get(self, k):
+        if k in self.__dict__:
+            return self.__dict__[k]
+        elif k in self.extras:
+            return self.extras[k]
+        else:
+            return None
+
+    def __setitem__(self, k, v):
+        if k in self.__dict__:
+            self.__dict__[k] = v
+        else:
+            self.extras[k] = v
+
+    def update(self, myDict: dict):
+        for k, v in myDict.items():
+            self.__setitem__(k, v)
+
+
+@dataclass
+class Config(BaseConfig):
+
+    site: dict[str, Any] = field(default_factory=lambda: {
+        'site_name': 'Site Title',
+        'site_url': '',
+        'site_desc': '',
+        'site_image': '',
+        'language': 'en'
+    })
+
+    plugins: list[str] = field(default_factory=lambda: [
+        'autop',
+        'awesome-page-link',
+        'awesome-img-link',
+        'select-pages'
+    ])
+
+    doc_ext: list[str] = field(default_factory=lambda: [
+        'md', 'markdown', 'html', 'htm', 'txt'
+    ])
+
+    exclude: list = field(default_factory=list)
+
+    post_type: list = field(default_factory=lambda: [
+        {'post': {'permalink': r'/%Y/%m/%d/%H%M%S/', 'archive_type': 'date'}},
+        {'page': {'permalink': r'/{slug}/', 'archive_type': 'section'}}
+    ])
+
+    taxonomy: dict = field(default_factory=dict)
+
+    use_abs_url: bool = True
 
     def load_config(self, yaml_file_path):
         with open(yaml_file_path, encoding='utf8') as f:
@@ -42,14 +104,9 @@ def load_config(mode):
     return config
 
 
-def set_default_config(config: dict):
-    site_config: dict = config.setdefault('site', {})
-    site_config.setdefault('site_name', 'Site Title')
-    site_config.setdefault('site_url', '')
-    site_config.setdefault('site_desc', '')
-    site_config.setdefault('site_image', '')
-    site_config.setdefault('language', 'en')
+def set_default_config(config: Config):
 
+    site_config = config['site']
     site_config['site_url'] = site_config['site_url'].rstrip('/')
     site_config['site_url_original'] = site_config['site_url']
 
@@ -57,41 +114,5 @@ def set_default_config(config: dict):
         site_config['site_image'] = site_config['site_image'].replace(site_config['site_url'], '')
 
     config['now'] = datetime.datetime.now(datetime.timezone.utc)
-
-    config.setdefault('plugins', [
-        'autop',
-        'awesome-page-link',
-        'awesome-img-link',
-        'select-pages'
-    ])
-
-    config.setdefault('doc_ext', [
-        'md', 'markdown',
-        'html', 'htm',
-        'txt',
-    ])
-
-    config.setdefault('exclude', [])
-
-    if get_config_by_list(config, ['post_type']) is None:
-        config['post_type'] = []
-
-        config['post_type'].append({
-            'post': {
-                'permalink': r'/%Y/%m/%d/%H%M%S/',
-                'archive_type': 'date',
-            }
-        })
-
-        config['post_type'].append({
-            'page': {
-                'permalink': r'/{slug}/',
-                'archive_type': 'section',
-            }
-        })
-
-    config.setdefault('taxonomy', {})
-
-    config.setdefault('use_abs_url', True)
 
     return config
