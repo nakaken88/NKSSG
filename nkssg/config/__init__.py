@@ -41,15 +41,19 @@ class BaseConfig:
 
 
 @dataclass
+class SiteConfig(BaseConfig):
+
+    site_name: str = 'Site Title'
+    site_url: str = ''
+    site_desc: str = ''
+    site_image: str = ''
+    language: str = 'en'
+
+
+@dataclass
 class Config(BaseConfig):
 
-    site: dict[str, Any] = field(default_factory=lambda: {
-        'site_name': 'Site Title',
-        'site_url': '',
-        'site_desc': '',
-        'site_image': '',
-        'language': 'en'
-    })
+    site: SiteConfig = field(default_factory=SiteConfig)
 
     plugins: list[str] = field(default_factory=lambda: [
         'autop',
@@ -78,7 +82,10 @@ class Config(BaseConfig):
             data = YAML(typ='safe').load(f)
 
             for k, v in data.items():
-                super().update({k: v})
+                if k == 'site':
+                    self.site.update(v)
+                else:
+                    super().update({k: v})
 
 
 def load_config(mode):

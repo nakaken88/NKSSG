@@ -1,9 +1,8 @@
-import nkssg.config as cfg
+from nkssg.config import Config, BaseConfig
 
 
 def test_default_config_no_content():
-    config = {}
-    config = cfg.set_default_config(config)
+    config = Config()
 
     assert config['site']['site_url'] == ''
     assert config['plugins'] == ['autop', 'awesome-page-link', 'awesome-img-link', 'select-pages']
@@ -16,7 +15,8 @@ def test_default_config_no_content():
 
 
 def test_default_config_some_content():
-    config = {
+    config = Config()
+    config_dict = {
         'site': {
             'site_url': 'http://example.com'
         },
@@ -32,7 +32,15 @@ def test_default_config_some_content():
         'taxonomy': ['category'],
         'use_abs_url': False
     }
-    config = cfg.set_default_config(config)
+    for k, v in config_dict.items():
+        config[k] = v
+        if k in config.__dict__:
+            if isinstance(config.__dict__[k], BaseConfig):
+                config.__dict__[k].update(v)
+            else:
+                config.__dict__[k] = v
+        else:
+            config.__dict__[k] = v
 
     assert config['site']['site_url'] == 'http://example.com'
     assert 'autop' in config['plugins']
