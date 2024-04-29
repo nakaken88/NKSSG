@@ -91,12 +91,7 @@ class Config(BaseConfig):
         try:
             with open(yaml_file_path, 'r', encoding='utf8') as f:
                 data = yaml.load(f)
-
-                for k, v in data.items():
-                    if k == 'site':
-                        self.site.update(v)
-                    else:
-                        super().update({k: v})
+                self.update(data)
 
         except FileNotFoundError:
             msg = f"The YAML file was not found: {yaml_file_path}"
@@ -108,6 +103,13 @@ class Config(BaseConfig):
         except Exception as e:
             msg = f"An error occurred while loading the config file: {e}"
             raise Exception(msg)
+
+    def update(self, data: dict):
+        for k, v in data.items():
+            if k == 'site':
+                self.site.update(v)
+            else:
+                super().update({k: v})
 
 
 def load_config(mode):

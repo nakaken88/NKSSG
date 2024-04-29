@@ -1,4 +1,4 @@
-from nkssg.config import Config, BaseConfig
+from nkssg.config import Config
 
 
 def test_default_config_no_content():
@@ -15,7 +15,6 @@ def test_default_config_no_content():
 
 
 def test_default_config_some_content():
-    config = Config()
     config_dict = {
         'site': {
             'site_url': 'http://example.com'
@@ -32,17 +31,12 @@ def test_default_config_some_content():
         'taxonomy': ['category'],
         'use_abs_url': False
     }
-    for k, v in config_dict.items():
-        config[k] = v
-        if k in config.__dict__:
-            if isinstance(config.__dict__[k], BaseConfig):
-                config.__dict__[k].update(v)
-            else:
-                config.__dict__[k] = v
-        else:
-            config.__dict__[k] = v
+
+    config = Config()
+    config.update(config_dict)
 
     assert config['site']['site_url'] == 'http://example.com'
+    assert config['site']['site_name'] == 'Site Title'
     assert 'autop' in config['plugins']
     assert 'select-pages' not in config['plugins']
 
