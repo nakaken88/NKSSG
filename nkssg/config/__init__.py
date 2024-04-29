@@ -49,6 +49,15 @@ class SiteConfig(BaseConfig):
     site_image: str = ''
     language: str = 'en'
 
+    site_url_original: str = ''
+
+    def update(self, myDict: dict):
+        super().update(myDict)
+
+        self.site_url = self.site_url.rstrip('/')
+        self.site_url_original = self.site_url
+        self.site_image = self.site_image.replace(self.site_url, '')
+
 
 @dataclass
 class Config(BaseConfig):
@@ -103,23 +112,9 @@ def load_config(mode):
     config['cache_contents_path'] = config['cache_dir'] / ('contents_' + mode + '.json')
     config['cache_htmls_path'] = config['cache_dir'] / ('htmls_' + mode + '.json')
 
-    config = set_default_config(config)
+    config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
     config['plugins'] = Plugins(config)
     config = config['plugins'].do_action('after_load_config', target=config)
-
-    return config
-
-
-def set_default_config(config: Config):
-
-    site_config = config['site']
-    site_config['site_url'] = site_config['site_url'].rstrip('/')
-    site_config['site_url_original'] = site_config['site_url']
-
-    if site_config['site_url'] in site_config['site_image']:
-        site_config['site_image'] = site_config['site_image'].replace(site_config['site_url'], '')
-
-    config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
     return config
