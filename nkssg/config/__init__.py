@@ -6,7 +6,6 @@ from typing import Any
 from ruamel.yaml import YAML, YAMLError
 
 from nkssg.structure.plugins import Plugins
-from nkssg.utils import get_config_by_list
 
 
 @dataclass
@@ -71,6 +70,10 @@ class Config(BaseConfig):
         'select-pages'
     ])
 
+    dir_types: list[str] = field(default_factory=lambda: [
+        'docs', 'public', 'static', 'cache', 'themes'
+    ])
+
     doc_ext: list[str] = field(default_factory=lambda: [
         'md', 'markdown', 'html', 'htm', 'txt'
     ])
@@ -85,6 +88,17 @@ class Config(BaseConfig):
     taxonomy: dict = field(default_factory=dict)
 
     use_abs_url: bool = True
+
+    def __post_init__(self):
+        default_dirs = {dir_type: dir_type for dir_type in self.dir_types}
+        self.set_directory_path(default_dirs)
+
+    def set_directory_path(self, data: dict):
+        self.base_dir = Path.cwd()
+
+        for k, v in data.items():
+            dir_key = f'{k}_dir'
+            self.update({dir_key: self.base_dir / Path(v)})
 
     def load_config(self, yaml_file_path):
         yaml = YAML(typ='safe')
@@ -108,6 +122,8 @@ class Config(BaseConfig):
         for k, v in data.items():
             if k == 'site':
                 self.site.update(v)
+            elif k == 'directory':
+                self.set_directory_path(v)
             else:
                 super().update({k: v})
 
@@ -118,14 +134,9 @@ def load_config(mode):
 
     config['mode'] = mode
 
-    config['base_dir'] = Path.cwd()
-    for dir_type in ['docs', 'public', 'static', 'cache', 'themes']:
-        dir = dir_type + '_dir'
-        config[dir] = get_config_by_list(config, ['directory', dir_type]) or dir_type
-        config[dir] = config['base_dir'] / config[dir]
-
-    config['cache_contents_path'] = config['cache_dir'] / ('contents_' + mode + '.json')
-    config['cache_htmls_path'] = config['cache_dir'] / ('htmls_' + mode + '.json')
+    cache_dir = config['cache_dir']
+    config['cache_contents_path'] = cache_dir / ('contents_' + mode + '.json')
+    config['cache_htmls_path'] = cache_dir / ('htmls_' + mode + '.json')
 
     config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
