@@ -3,7 +3,7 @@ import datetime
 from pathlib import Path
 from typing import Any
 
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, YAMLError
 
 from nkssg.structure.plugins import Plugins
 from nkssg.utils import get_config_by_list
@@ -87,14 +87,27 @@ class Config(BaseConfig):
     use_abs_url: bool = True
 
     def load_config(self, yaml_file_path):
-        with open(yaml_file_path, encoding='utf8') as f:
-            data = YAML(typ='safe').load(f)
+        yaml = YAML(typ='safe')
+        try:
+            with open(yaml_file_path, 'r', encoding='utf8') as f:
+                data = yaml.load(f)
 
-            for k, v in data.items():
-                if k == 'site':
-                    self.site.update(v)
-                else:
-                    super().update({k: v})
+                for k, v in data.items():
+                    if k == 'site':
+                        self.site.update(v)
+                    else:
+                        super().update({k: v})
+
+        except FileNotFoundError:
+            msg = f"The YAML file was not found: {yaml_file_path}"
+            raise FileNotFoundError(msg)
+
+        except YAMLError as e:
+            raise ValueError(f"The YAML file format is incorrect: {e}")
+
+        except Exception as e:
+            msg = f"An error occurred while loading the config file: {e}"
+            raise Exception(msg)
 
 
 def load_config(mode):
