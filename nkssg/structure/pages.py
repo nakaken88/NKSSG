@@ -2,12 +2,12 @@ from pathlib import Path
 import shutil
 from urllib.parse import quote, unquote, urljoin
 
-from nkssg.utils import get_config_by_list
+from nkssg.config import Config
 
 
 class Pages:
     def __init__(self):
-        self.config = None
+        self.config: Config = None
         self.pages = []
 
     def __iter__(self):
@@ -56,7 +56,7 @@ class Page:
         self.shouldUpdateHtml = True
         self.shouldOutput = True
 
-    def output(self, config):
+    def output(self, config: Config):
         if not self.shouldOutput:
             return
 
@@ -105,21 +105,21 @@ class Page:
         parts = unquote(url).split('/')
         return Path(*parts)
 
-    def _url_setup(self, config):
+    def _url_setup(self, config: Config):
         if self.rel_url == '':
             return
 
-        site_url = get_config_by_list(config, ['site', 'site_url']) or '/'
+        site_url = config.site.site_url or '/'
         _site_url = site_url.rstrip('/') + '/'
         _rel_url = self.rel_url.lstrip('/')
         self.abs_url = urljoin(_site_url, _rel_url)
 
-        if config['use_abs_url']:
+        if config.use_abs_url:
             self.url = self.abs_url
         else:
             self.url = self.rel_url
 
-    def output_aliases(self, config):
+    def output_aliases(self, config: Config):
         for url in self.meta['aliases']:
             url = '/' + url.strip('/')
             if '.htm' not in url:
@@ -141,11 +141,14 @@ class Page:
 <meta http-equiv="refresh" content="0;url={url}">
 </head>
 <body>
-<p>This page has moved. Click <a href="{url}">here</a> to go to the new page.</p>
+<p>
+This page has moved.
+Click <a href="{url}">here</a> to go to the new page.
+</p>
 /body>
 </html>
 '''.format(url=self.url)
                 f.write(content)
 
-    def lookup_template(self, config):
+    def lookup_template(self, config: Config):
         return 'main.html'
