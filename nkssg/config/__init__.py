@@ -91,11 +91,10 @@ class Config(BaseConfig):
 
     def __post_init__(self):
         default_dirs = {dir_type: dir_type for dir_type in self.dir_types}
+        self.base_dir = Path.cwd()
         self.set_directory_path(default_dirs)
 
     def set_directory_path(self, data: dict):
-        self.base_dir = Path.cwd()
-
         for k, v in data.items():
             dir_key = f'{k}_dir'
             self.update({dir_key: self.base_dir / Path(v)})
