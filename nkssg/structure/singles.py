@@ -50,8 +50,8 @@ class Singles(Pages):
         self.config['cache_time'] = datetime.datetime.fromtimestamp(self.config['cache_time_unix'])
 
         pages = []
-        for post_type in config['post_type_list']:
-            target_dir = docs_dir / post_type
+        for post_type_name in config.post_type.keys():
+            target_dir = docs_dir / post_type_name
             files = [f for f in target_dir.glob('**/*') if f.is_file()]
 
             for f in sorted(files):
@@ -206,7 +206,7 @@ class Single(Page):
 
         self.post_type = self._get_post_type()
         self.post_type_slug = config.post_type[self.post_type].slug
-        self.post_type_index = config['post_type_list'].index(self.post_type)
+        self.post_type_index = list(config.post_type).index(self.post_type)
 
         self.status = self._get_status()
 

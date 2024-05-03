@@ -52,11 +52,9 @@ class Site:
                 has_home_template = True
                 break
 
-        config['post_type_list'] = list(config.post_type)
-
         for post_type_name, post_type_config in config.post_type.items():
 
-            index = config['post_type_list'].index(post_type_name)
+            index = list(config.post_type).index(post_type_name)
             archive_type = post_type_config.archive_type
 
             if not has_home_template and index == 0:

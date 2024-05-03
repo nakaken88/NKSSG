@@ -46,25 +46,25 @@ class Archives(Pages):
         return root_archive
 
     def setup_post_type_archives(self, singles):
-        for post_type in self.config['post_type_list']:
-            post_type_dict = self.config.post_type[post_type]
+        for post_type_name, post_type_config in self.config.post_type.items():
 
-            with_front = post_type_dict.with_front
-            archive_type = post_type_dict.archive_type
+            with_front = post_type_config.with_front
+            archive_type = post_type_config.archive_type
 
             archive_type = archive_type.lower()
             if archive_type == 'none':
                 continue
 
             elif archive_type == 'simple':
-                self.setup_simple_archive(post_type, singles, with_front)
+                self.setup_simple_archive(post_type_name, singles, with_front)
 
             elif archive_type != 'section':
-                self.setup_date_archives(post_type, singles, with_front)
+                self.setup_date_archives(post_type_name, singles, with_front)
 
             else:
-                base_path = self.config.docs_dir / post_type
-                self.setup_section_archive(post_type, base_path, with_front)
+                base_path = self.config.docs_dir / post_type_name
+                self.setup_section_archive(
+                    post_type_name, base_path, with_front)
 
     def setup_simple_archive(self, post_type, singles, with_front):
         slug = self.config.post_type[post_type].slug
