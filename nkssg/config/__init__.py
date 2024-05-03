@@ -59,6 +59,31 @@ class SiteConfig(BaseConfig):
 
 
 @dataclass
+class PostTypeConfig(BaseConfig):
+
+    permalink: str = ''
+    archive_type: str = ''
+
+
+class PostTypeConfigManager(dict[str, PostTypeConfig]):
+
+    def __init__(self):
+        super().__init__()
+        self['post'] = PostTypeConfig(
+            permalink=r'/%Y/%m/%d/%H%M%S/', archive_type='date')
+        self['page'] = PostTypeConfig(
+            permalink=r'/{slug}/', archive_type='section')
+
+    def update_by_list(self, li: list[dict]):
+        for d in li:
+            for k, v in d.items():
+                if k in self:
+                    self[k].update(v)
+                else:
+                    self[k] = PostTypeConfig(**v)
+
+
+@dataclass
 class Config(BaseConfig):
 
     site: SiteConfig = field(default_factory=SiteConfig)
@@ -80,10 +105,8 @@ class Config(BaseConfig):
 
     exclude: list = field(default_factory=list)
 
-    post_type: list = field(default_factory=lambda: [
-        {'post': {'permalink': r'/%Y/%m/%d/%H%M%S/', 'archive_type': 'date'}},
-        {'page': {'permalink': r'/{slug}/', 'archive_type': 'section'}}
-    ])
+    post_type: PostTypeConfigManager
+    post_type = field(default_factory=PostTypeConfigManager)
 
     taxonomy: dict = field(default_factory=dict)
 
@@ -123,6 +146,8 @@ class Config(BaseConfig):
                 self.site.update(v)
             elif k == 'directory':
                 self.set_directory_path(v)
+            elif k == 'post_type':
+                self.post_type.update_by_list(v)
             else:
                 super().update({k: v})
 
