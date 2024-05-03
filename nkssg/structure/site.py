@@ -33,7 +33,7 @@ class Site:
         for post_type in config.post_type.keys():
             if not Path(config['docs_dir'], post_type).exists():
                 keys_to_remove.append(post_type)
-        
+
         for post_type in keys_to_remove:
             config.post_type.pop(post_type)
 
@@ -44,6 +44,7 @@ class Site:
             if d.is_dir():
                 post_type = d.parts[-1]
                 if post_type not in config['post_type_list']:
+                    config.post_type.update({post_type: {}})
                     config['post_type_list'].append(post_type)
 
         # update archive type, slug, and with front
@@ -54,9 +55,9 @@ class Site:
                 has_home_template = True
                 break
 
-        config_post_type = []
+        config_post_type = {}
         for index, post_type in enumerate(config['post_type_list']):
-            post_type_dict = get_config_by_list(config, ['post_type', post_type]) or {}
+            post_type_dict = config.post_type[post_type]
 
             archive_type = post_type_dict.get('archive_type')
             if archive_type is None:
@@ -81,7 +82,7 @@ class Site:
             slug = post_type_dict.get('slug') or post_type
             post_type_dict['slug'] = to_slug(slug)
 
-            config_post_type.append({post_type: post_type_dict})
+            config_post_type[post_type] = post_type_dict
 
         config['post_type'] = config_post_type
 
