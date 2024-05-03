@@ -7,6 +7,7 @@ import platform
 import re
 from urllib.parse import quote
 
+from nkssg.config import Config
 from nkssg.structure.pages import Pages, Page
 from nkssg.utils import get_config_by_list
 from nkssg.utils import to_slug
@@ -194,7 +195,7 @@ class Single(Page):
 
         return (s_order, self.src_path) < (o_order, other.src_path)
 
-    def setup(self, config):
+    def setup(self, config: Config):
         with open(self.abs_src_path, 'r', encoding='UTF-8') as f:
             doc = f.read()
 
@@ -204,7 +205,7 @@ class Single(Page):
             raise Exception('front matter error: ' + str(self.abs_src_path))
 
         self.post_type = self._get_post_type()
-        self.post_type_slug = get_config_by_list(config, ['post_type', self.post_type, 'slug'])
+        self.post_type_slug = config.post_type[self.post_type].slug
         self.post_type_index = config['post_type_list'].index(self.post_type)
 
         self.status = self._get_status()
@@ -418,31 +419,31 @@ class Single(Page):
     def _get_file_id(self):
         return self.meta.get('file_id') or self.src_path
 
-    def _get_archive_type(self, config):
-        return get_config_by_list(config, ['post_type', self.post_type, 'archive_type'])
+    def _get_archive_type(self, config: Config):
+        return config.post_type[self.post_type].archive_type
 
     def update_url(self, config):
         self.rel_url, self.dest_path = self._get_url_and_dest_path(config)
         self.dest_dir = self.dest_path.parent
         self._url_setup(config)
 
-    def _get_url_and_dest_path(self, config):
+    def _get_url_and_dest_path(self, config: Config):
 
         url = self.meta.get('url')
 
         if url is None:
             post_type = self.post_type
-            permalink = get_config_by_list(config, ['post_type', post_type, 'permalink'])
+            permalink = config.post_type[post_type].permalink
 
             if permalink is None:
                 dest_path = self.src_dir / self.filename / 'index.html'
                 if self.filename == 'index':
                     dest_path = self.src_dir / 'index.html'
 
-                with_front = get_config_by_list(config, ['post_type', post_type, 'with_front'])
+                with_front = config.post_type[post_type].with_front
 
                 if with_front:
-                    slug = get_config_by_list(config, ['post_type', post_type, 'slug'])
+                    slug = config.post_type[post_type].slug
                     dest_path = Path(str(dest_path).replace(post_type, slug, 1))
                 else:
                     dest_path = dest_path.relative_to(Path(post_type))
@@ -467,7 +468,7 @@ class Single(Page):
 
         return url.lower(), dest_path
 
-    def get_url_from_permalink(self, permalink, config):
+    def get_url_from_permalink(self, permalink, config: Config):
         permalink = '/' + permalink.strip('/') + '/'
         url = self.date.strftime(permalink)
         url = url.replace('{slug}', self.slug)
@@ -477,7 +478,7 @@ class Single(Page):
             if filename == 'index':
                 part_list = list(self.src_dir.parts)
                 if len(part_list) == 1:
-                    filename = get_config_by_list(config, ['post_type', self.post_type, 'slug'])
+                    filename = config.post_type[self.post_type].slug
                 else:
                     filename = clean_name(part_list[-1])
 

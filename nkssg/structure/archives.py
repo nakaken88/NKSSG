@@ -47,10 +47,10 @@ class Archives(Pages):
 
     def setup_post_type_archives(self, singles):
         for post_type in self.config['post_type_list']:
-            post_type_dict = get_config_by_list(self.config, ['post_type', post_type])
+            post_type_dict = self.config.post_type[post_type]
 
-            with_front = get_config_by_list(post_type_dict, 'with_front')
-            archive_type = get_config_by_list(post_type_dict, 'archive_type') or ''
+            with_front = post_type_dict.with_front
+            archive_type = post_type_dict.archive_type
 
             archive_type = archive_type.lower()
             if archive_type == 'none':
@@ -67,7 +67,7 @@ class Archives(Pages):
                 self.setup_section_archive(post_type, base_path, with_front)
 
     def setup_simple_archive(self, post_type, singles, with_front):
-        slug = get_config_by_list(self.config, ['post_type', post_type, 'slug'])
+        slug = self.config.post_type[post_type].slug
         root_archive = self.create_root_archive('simple', post_type, slug)
 
         if with_front:
@@ -85,7 +85,7 @@ class Archives(Pages):
                 single.archive_list.append(root_archive)
 
     def setup_date_archives(self, post_type, singles, with_front):
-        slug = get_config_by_list(self.config, ['post_type', post_type, 'slug'])
+        slug = self.config.post_type[post_type].slug
         date_archive = self.create_root_archive('date', post_type, slug)
 
         if with_front:
@@ -126,7 +126,7 @@ class Archives(Pages):
             single.archive_list.append(month_archive)
 
     def setup_section_archive(self, post_type, basepath, with_front):
-        slug = get_config_by_list(self.config, ['post_type', post_type, 'slug'])
+        slug = self.config.post_type[post_type].slug
         root_archive = self.create_root_archive('section', post_type, slug)
 
         if with_front:
