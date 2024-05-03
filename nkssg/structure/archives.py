@@ -475,7 +475,7 @@ class Archive(Page):
                 paginator['next'] = None
 
             template_file = self.lookup_template(config)
-            template = config['env'].get_template(template_file)
+            template = config.env.get_template(template_file)
 
             paginator['pages'][i].html = template.render({
                 'mypage': self,

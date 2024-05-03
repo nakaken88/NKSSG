@@ -75,12 +75,14 @@ class Site:
         self.singles.setup()
 
     def update(self):
-        self.config['env'] = jinja2.Environment(loader=jinja2.FileSystemLoader(self.config['themes'].dirs))
+        self.config.env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(self.config['themes'].dirs)
+            )
 
-        self.config['env'].globals['config'] = self.config
-        self.config['env'].globals['singles'] = self.singles
-        self.config['env'].globals['archives'] = self.archives
-        self.config['env'].globals['theme'] = self.config['themes'].cnf
+        self.config.env.globals['config'] = self.config
+        self.config.env.globals['singles'] = self.singles
+        self.config.env.globals['archives'] = self.archives
+        self.config.env.globals['theme'] = self.config['themes'].cnf
 
         self.config = self.config['plugins'].do_action(
             'after_setup_env', target=self.config)
@@ -193,7 +195,7 @@ class Site:
                 print(extra_page + ' is not found on extra pages')
 
     def output_extra_page(self, extra_page):
-        template = self.config['env'].get_template(extra_page)
+        template = self.config.env.get_template(extra_page)
 
         html = template.render()
 

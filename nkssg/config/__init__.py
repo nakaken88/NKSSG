@@ -3,6 +3,7 @@ import datetime
 from pathlib import Path
 from typing import Any
 
+import jinja2
 from ruamel.yaml import YAML, YAMLError
 
 from nkssg.structure.plugins import Plugins
@@ -124,6 +125,8 @@ class Config(BaseConfig):
     taxonomy: dict = field(default_factory=dict)
 
     use_abs_url: bool = True
+
+    env: jinja2.Environment = jinja2.Environment()
 
     def __post_init__(self):
         default_dirs = {dir_type: dir_type for dir_type in self._dir_types}

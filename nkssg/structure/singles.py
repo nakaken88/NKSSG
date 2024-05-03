@@ -531,7 +531,7 @@ class Single(Page):
 
         return quote(url).lower()
 
-    def update_html(self, singles, archives):
+    def update_html(self, singles: Singles, archives):
         config = singles.config
         if not self.shouldUpdateHtml:
             return
@@ -542,7 +542,7 @@ class Single(Page):
                 return
 
         template_file = self.lookup_template(config)
-        template = config['env'].get_template(template_file)
+        template = config.env.get_template(template_file)
 
         if '{{' in self.content or '{#' in self.content or '{%' in self.content:
             # add "import short code" statement
@@ -560,7 +560,7 @@ class Single(Page):
                     additional_statement = additional_statement + import_scc
 
             content = additional_statement + self.content
-            content = config['env'].from_string(content).render({
+            content = config.env.from_string(content).render({
                 'mypage': self,
                 'meta': self.meta,
                 })
