@@ -21,13 +21,11 @@ def test_default_config_some_content():
         },
         'plugins': ['autop'],
         'doc_ext': ['html'],
-        'post_type': [
-            {
-                'post': {
-                    'permalink': '/%Y/%m/%d/'
-                }
+        'post_type': {
+            'post': {
+                'permalink': '/%Y/%m/%d/'
             }
-        ],
+        },
         'taxonomy': ['category'],
         'use_abs_url': False
     }

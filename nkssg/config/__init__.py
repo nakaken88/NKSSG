@@ -74,13 +74,12 @@ class PostTypeConfigManager(dict[str, PostTypeConfig]):
         self['page'] = PostTypeConfig(
             permalink=r'/{slug}/', archive_type='section')
 
-    def update_by_list(self, li: list[dict]):
-        for d in li:
-            for k, v in d.items():
-                if k in self:
-                    self[k].update(v)
-                else:
-                    self[k] = PostTypeConfig(**v)
+    def update(self, d: dict):
+        for k, v in d.items():
+            if k in self:
+                self[k].update(v)
+            else:
+                self[k] = PostTypeConfig(**v)
 
 
 @dataclass
@@ -147,7 +146,7 @@ class Config(BaseConfig):
             elif k == 'directory':
                 self.set_directory_path(v)
             elif k == 'post_type':
-                self.post_type.update_by_list(v)
+                self.post_type.update(v)
             else:
                 super().update({k: v})
 
