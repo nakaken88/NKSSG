@@ -13,7 +13,7 @@ from nkssg.utils import get_config_by_list, to_slug
 
 
 class Site:
-    def __init__(self, config):
+    def __init__(self, config: Config):
         self.config = config
 
         self.config['themes'] = Themes(self.config)
@@ -31,14 +31,14 @@ class Site:
         # remove post_types for which folder does not exist
         keys_to_remove = []
         for post_type in config.post_type.keys():
-            if not Path(config['docs_dir'], post_type).exists():
+            if not Path(config.docs_dir, post_type).exists():
                 keys_to_remove.append(post_type)
 
         for post_type in keys_to_remove:
             config.post_type.pop(post_type)
 
         # add post_types for which folder exists but is not included in config"
-        for d in config['docs_dir'].glob('*'):
+        for d in config.docs_dir.glob('*'):
             if d.is_dir():
                 post_type = d.parts[-1]
                 if post_type not in config.post_type.keys():
@@ -110,7 +110,7 @@ class Site:
 
         self.config['plugins'].do_action('after_output_site', target=self)
 
-        if self.config['cache_dir'].exists():
+        if self.config.cache_dir.exists():
             with open(self.config['cache_contents_path'], mode='w') as f:
                 cache_contents = {str(page.src_path): page.content for page in self.singles}
                 json.dump(cache_contents, f)
@@ -122,13 +122,11 @@ class Site:
         self.config['plugins'].do_action('on_end', target=self)
 
     def copy_static_files(self):
-        static_dir = self.config['base_dir'] / 'static'
-        public_dir = self.config['public_dir']
 
-        for f in static_dir.glob('**/*'):
+        for f in self.config.static_dir.glob('**/*'):
             if f.is_file():
-                rel_path = f.relative_to(static_dir)
-                to_path = public_dir / rel_path
+                rel_path = f.relative_to(self.config.static_dir)
+                to_path = self.config.public_dir / rel_path
                 if to_path.exists() and f.stat().st_mtime < to_path.stat().st_mtime:
                     continue
 
@@ -144,7 +142,7 @@ class Site:
                 if not self.is_target(rel_path):
                     continue
 
-                to_path = public_dir / 'themes' / rel_path
+                to_path = self.config.public_dir / 'themes' / rel_path
                 if to_path.exists() and f.stat().st_mtime < to_path.stat().st_mtime:
                     continue
 
@@ -191,9 +189,9 @@ class Site:
         html = template.render()
 
         if extra_page == 'home.html':
-            output_path = self.config['public_dir'] / 'index.html'
+            output_path = self.config.public_dir / 'index.html'
         else:
-            output_path = Path(self.config['public_dir'], extra_page)
+            output_path = Path(self.config.public_dir, extra_page)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
 

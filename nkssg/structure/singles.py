@@ -17,7 +17,7 @@ from nkssg.utils import dup_check
 
 
 class Singles(Pages):
-    def __init__(self, config):
+    def __init__(self, config: Config):
         self.config = config
         self.pages = self.get_pages_from_docs_directory()
         self.file_ids = {}
@@ -25,7 +25,7 @@ class Singles(Pages):
 
     def get_pages_from_docs_directory(self):
         config = self.config
-        docs_dir = config['docs_dir']
+        docs_dir = config.docs_dir
 
         if config['mode'] == 'draft':
             src_path = config['draft_path'].relative_to(docs_dir)
@@ -34,14 +34,14 @@ class Singles(Pages):
 
         self.config['cache_time_unix'] = 0
 
-        cache_path = Path(config['base_dir'] / 'cache' / 'contents.json')
+        cache_path = Path(config.cache_dir / 'contents.json')
         self.config['cache_contents'] = {}
         if cache_path.exists():
             self.config['cache_time_unix'] = cache_path.stat().st_mtime
             with open(cache_path) as f:
                 self.config['cache_contents'] = json.load(f)
 
-        cache_path = Path(config['base_dir'] / 'cache' / 'htmls.json')
+        cache_path = Path(config.cache_dir / 'htmls.json')
         self.config['cache_htmls'] = {}
         if cache_path.exists():
             with open(cache_path) as f:
@@ -376,7 +376,7 @@ class Single(Page):
             summary = summary[:110]
         return summary
 
-    def _get_image(self, config):
+    def _get_image(self, config: Config):
         image = self.meta.get('image') or {}
         if image:
             src = image.get('src') or ''
@@ -384,7 +384,7 @@ class Single(Page):
                 if 'http' == src[:len('http')]:
                     return image
                 elif '/' == src[:len('/')]:
-                    image_path = config['base_dir'] / src.strip('/')
+                    image_path = config.base_dir / src.strip('/')
                 else:
                     image_path = self.abs_src_path.parent / src
 
@@ -403,12 +403,12 @@ class Single(Page):
             month = str(cdate.month).zfill(2)
 
             image_name = image_path.name
-            new_path = Path(config['public_dir'], 'thumb', year, month, image_name)
+            new_path = Path(config.public_dir, 'thumb', year, month, image_name)
             image['new_path'] = new_path
 
             image['rel_url'] = '/' + '/'.join(['thumb', year, month, image_name])
 
-        image['abs_url'] = config['site']['site_url'] + image['rel_url']
+        image['abs_url'] = config.site.site_url + image['rel_url']
         if config['use_abs_url']:
             image['url'] = image['abs_url']
         else:

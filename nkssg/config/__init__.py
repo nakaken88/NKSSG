@@ -102,9 +102,15 @@ class Config(BaseConfig):
         'select-pages'
     ])
 
-    dir_types: list[str] = field(default_factory=lambda: [
-        'docs', 'public', 'static', 'cache', 'themes'
+    _dir_types: list[str] = field(default_factory=lambda: [
+        'docs', 'public', 'static', 'themes', 'cache'
     ])
+    base_dir: Path = Path()
+    docs_dir: Path = Path()
+    public_dir: Path = Path()
+    static_dir: Path = Path()
+    themes_dir: Path = Path()
+    cache_dir: Path = Path()
 
     doc_ext: list[str] = field(default_factory=lambda: [
         'md', 'markdown', 'html', 'htm', 'txt'
@@ -120,7 +126,7 @@ class Config(BaseConfig):
     use_abs_url: bool = True
 
     def __post_init__(self):
-        default_dirs = {dir_type: dir_type for dir_type in self.dir_types}
+        default_dirs = {dir_type: dir_type for dir_type in self._dir_types}
         self.base_dir = Path.cwd()
         self.set_directory_path(default_dirs)
 

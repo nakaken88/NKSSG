@@ -63,7 +63,7 @@ class Archives(Pages):
                 self.setup_date_archives(post_type, singles, with_front)
 
             else:
-                base_path = self.config['docs_dir'] / post_type
+                base_path = self.config.docs_dir / post_type
                 self.setup_section_archive(post_type, base_path, with_front)
 
     def setup_simple_archive(self, post_type, singles, with_front):
