@@ -9,7 +9,6 @@ from urllib.parse import quote
 
 from nkssg.config import Config
 from nkssg.structure.pages import Pages, Page
-from nkssg.utils import get_config_by_list
 from nkssg.utils import to_slug
 from nkssg.utils import clean_name
 from nkssg.utils import front_matter_setup
@@ -332,7 +331,7 @@ class Single(Page):
                 slug = self.name
         return to_slug(slug)
 
-    def _get_content(self, config, doc):
+    def _get_content(self, config: Config, doc):
         if not doc:
             return ''
 
@@ -350,21 +349,12 @@ class Single(Page):
 
         ext = self.ext
         if ext == 'md' or ext == 'markdown':
-            md_config = get_config_by_list(config, 'markdown')
-            if md_config is None:
-                return markdown.markdown(content)
-            else:
-                extensions = []
-                ext_configs = {}
-                for item in md_config:
-                    if isinstance(item, dict):
-                        for k in item:
-                            extensions.append(k)
-                            ext_configs[k] = item[k]
-                            break
-                    else:
-                        extensions.append(item)
-                return markdown.markdown(content, extensions=extensions, extension_configs=ext_configs)
+            md_config: dict = config.markdown
+
+            return markdown.markdown(
+                content,
+                extensions=md_config.keys(),
+                extension_configs=md_config)
         else:
             return content
 
