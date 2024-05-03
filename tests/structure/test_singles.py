@@ -1,6 +1,7 @@
 import datetime
 from pathlib import Path
 
+from nkssg.config import Config
 from nkssg.structure.singles import Single
 
 
@@ -66,6 +67,7 @@ def test_get_url_from_permalink_filename_top_index():
     single.filename = 'index'
     single.post_type = 'sample_post_type'
     single.src_dir = Path(single.post_type)
-    config = {'post_type': [{'sample_post_type': {'slug': 'new_post_type'}}]}
+    config = Config()
+    config.update({'post_type': {'sample_post_type': {'slug': 'new_post_type'}}})
     ret = single.get_url_from_permalink('/{filename}/', config)
     assert ret == '/new_post_type/'
