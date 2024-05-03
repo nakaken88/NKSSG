@@ -21,7 +21,8 @@ class Singles(Pages):
         self.config = config
         self.pages = self.get_pages_from_docs_directory()
         self.file_ids = {}
-        self.config['plugins'].do_action('after_initialize_singles', target=self)
+        self.config['plugins'].do_action(
+            'after_initialize_singles', target=self)
 
     def get_pages_from_docs_directory(self):
         config = self.config
@@ -83,7 +84,8 @@ class Singles(Pages):
             new_page.dest_path = 'index.html'
             new_page.dest_dir = ''
             self.pages = [new_page]
-            self.config['plugins'].do_action('after_setup_draft_singles', target=self)
+            self.config['plugins'].do_action(
+                'after_setup_draft_singles', target=self)
             return
 
         new_pages = []
@@ -117,12 +119,15 @@ class Singles(Pages):
         for page in self.pages:
             page.update_url(self.config)
 
-        self.config['plugins'].do_action('after_update_singles_url', target=self)
+        self.config['plugins'].do_action(
+            'after_update_singles_url', target=self)
+
         self.dest_path_dup_check()
         self.dest_paths = {str(page.dest_path): page for page in self.pages}
 
     def update_htmls(self, archives):
-        self.config['plugins'].do_action('before_update_singles_html', target=self)
+        self.config['plugins'].do_action(
+            'before_update_singles_html', target=self)
 
         for page in self.pages:
             try:
@@ -131,7 +136,8 @@ class Singles(Pages):
                 print(page)
                 raise
 
-        self.config['plugins'].do_action('after_update_singles_html', target=self)
+        self.config['plugins'].do_action(
+            'after_update_singles_html', target=self)
 
     def dest_path_dup_check(self):
         dest_path_list = [(str(page.dest_path), page) for page in self.pages]
@@ -336,7 +342,9 @@ class Single(Page):
 
         content = doc
         self.content_updated = False
-        content = config['plugins'].do_action('on_get_content', target=content, config=config, single=self)
+        content = config['plugins'].do_action(
+            'on_get_content', target=content, config=config, single=self)
+
         if self.content_updated:
             return content
 

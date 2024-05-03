@@ -25,9 +25,10 @@ class Archives(Pages):
         for archive in self.archives:
             archive.singles_all_count = len(archive.singles_all)
 
-        self._root_archives = {str(archive.name): archive for archive in self.root_archives}
+        self._root_archives = {str(a.name): a for a in self.root_archives}
 
-        self._archives = {(str(archive.root_name), str(archive.name)): archive for archive in self.archives}
+        self._archives = {
+            (str(a.root_name), str(a.name)): a for a in self.archives}
 
         self.config['plugins'].do_action('after_setup_archives', target=self)
 
@@ -139,7 +140,7 @@ class Archives(Pages):
 
         root_archive.path = basepath
         archive_dict = {basepath: root_archive}
-        flat_url = get_config_by_list(self.config, ['post_type', root_archive.name, 'flat-url']) or False
+        flat_url = self.config.post_type[root_archive.name].get('flat-url') or False
 
         dirs = [d for d in basepath.glob('**/*') if d.is_dir()]
         for dir in sorted(dirs):
@@ -217,15 +218,18 @@ class Archives(Pages):
         for root_archive in self.root_archives:
             root_archive.update_url()
 
-        self.config['plugins'].do_action('after_update_archives_url', target=self)
+        self.config['plugins'].do_action(
+            'after_update_archives_url', target=self)
 
     def update_htmls(self, singles):
-        self.config['plugins'].do_action('before_update_archives_html', target=self)
+        self.config['plugins'].do_action(
+            'before_update_archives_html', target=self)
 
         for archive in self.archives:
             self.pages += archive.get_archives(singles, self)
 
-        self.config['plugins'].do_action('after_update_archives_html', target=self)
+        self.config['plugins'].do_action(
+            'after_update_archives_html', target=self)
 
     def get_root_archive_by_name(self, name):
         name = str(name)
@@ -373,7 +377,7 @@ class Archive(Page):
             for child_archive in self.children:
                 child_archive.update_url()
 
-    def get_archives(self, singles, archives):
+    def get_archives(self, singles, archives: Archives):
         if not self.shouldUpdateHtml:
             return []
 
@@ -392,14 +396,14 @@ class Archive(Page):
         if self.archive_type == 'date':
             target_singles = self.singles_all
 
-            post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
-            paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or 10
+            post_type_dict = config.post_type[self.root_name]
+            paginator['limit'] = post_type_dict.get('limit') or 10
 
         elif self.archive_type == 'section' or self.archive_type == 'simple':
             target_singles = self.singles
 
-            post_type_dict = get_config_by_list(config, ['post_type', self.root_name])
-            paginator['limit'] = get_config_by_list(post_type_dict, 'limit') or len(target_singles)
+            post_type_dict = config.post_type[self.root_name]
+            paginator['limit'] = post_type_dict.get('limit') or len(target_singles)
 
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all

@@ -17,10 +17,12 @@ class Site:
         self.config = config
 
         self.config['themes'] = Themes(self.config)
-        self.config = self.config['plugins'].do_action('after_load_theme', target=self.config)
+        self.config = self.config['plugins'].do_action(
+            'after_load_theme', target=self.config)
 
         self.config = self.setup_post_types()
-        self.config = self.config['plugins'].do_action('after_setup_post_types', target=self.config)
+        self.config = self.config['plugins'].do_action(
+            'after_setup_post_types', target=self.config)
 
         self.singles = Singles(self.config)
         self.archives = Archives(self.config)
@@ -80,7 +82,8 @@ class Site:
         self.config['env'].globals['archives'] = self.archives
         self.config['env'].globals['theme'] = self.config['themes'].cnf
 
-        self.config = self.config['plugins'].do_action('after_setup_env', target=self.config)
+        self.config = self.config['plugins'].do_action(
+            'after_setup_env', target=self.config)
 
         if self.config['mode'] != 'draft':
             self.archives.setup(self.singles)
@@ -102,7 +105,8 @@ class Site:
 
         if self.config['mode'] != 'draft':
             self.archives.output()
-            self.config['plugins'].do_action('after_output_archives', target=self)
+            self.config['plugins'].do_action(
+                'after_output_archives', target=self)
 
             self.output_extra_pages()
 
@@ -110,11 +114,15 @@ class Site:
 
         if self.config.cache_dir.exists():
             with open(self.config['cache_contents_path'], mode='w') as f:
-                cache_contents = {str(page.src_path): page.content for page in self.singles}
+                cache_contents = {
+                    str(page.src_path): page.content for page in self.singles
+                    }
                 json.dump(cache_contents, f)
 
             with open(self.config['cache_htmls_path'], mode='w') as f:
-                cache_htmls = {str(page.src_path): page.html for page in self.singles}
+                cache_htmls = {
+                    str(page.src_path): page.html for page in self.singles
+                    }
                 json.dump(cache_htmls, f)
 
         self.config['plugins'].do_action('on_end', target=self)
@@ -164,7 +172,10 @@ class Site:
         config = self.config['themes'].cnf
         extra_pages = get_config_by_list(config, ['extra_pages']) or []
         config_extra_pages = extra_pages[:]
-        default_extra_pages = ['home.html', '404.html', 'sitemap.html', 'sitemap.xml']
+
+        default_extra_pages = [
+            'home.html', '404.html', 'sitemap.html', 'sitemap.xml'
+            ]
 
         for default_extra_page in default_extra_pages:
             if default_extra_page not in extra_pages:
