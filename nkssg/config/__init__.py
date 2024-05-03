@@ -91,17 +91,6 @@ class PostTypeConfigManager(dict[str, PostTypeConfig]):
             self[k].archive_type = archive_type
 
 
-class MarkdownConfig(dict):
-
-    def update_by_list(self, li: list):
-        for item in li:
-            if isinstance(item, dict):
-                for k, v in item.items():
-                    self[k] = v or {}
-            else:
-                self[item] = {}
-
-
 @dataclass
 class Config(BaseConfig):
 
@@ -128,8 +117,7 @@ class Config(BaseConfig):
         'md', 'markdown', 'html', 'htm', 'txt'
     ])
 
-    markdown: MarkdownConfig
-    markdown = field(default_factory=MarkdownConfig)
+    markdown: dict = field(default_factory=dict)
 
     exclude: list = field(default_factory=list)
 
@@ -178,8 +166,6 @@ class Config(BaseConfig):
                 self.set_directory_path(v)
             elif k == 'post_type':
                 self.post_type.update(v)
-            elif k == 'markdown':
-                self.markdown.update_by_list(v)
             else:
                 super().update({k: v})
 
