@@ -38,14 +38,11 @@ class Site:
             config.post_type.pop(post_type)
 
         # add post_types for which folder exists but is not included in config"
-        config['post_type_list'] = list(config.post_type)
-
         for d in config['docs_dir'].glob('*'):
             if d.is_dir():
                 post_type = d.parts[-1]
-                if post_type not in config['post_type_list']:
+                if post_type not in config.post_type.keys():
                     config.post_type.update({post_type: {}})
-                    config['post_type_list'].append(post_type)
 
         # update archive type, slug, and with front
         has_home_template = False
@@ -55,36 +52,22 @@ class Site:
                 has_home_template = True
                 break
 
-        config_post_type = {}
-        for index, post_type in enumerate(config['post_type_list']):
-            post_type_dict = config.post_type[post_type]
+        config['post_type_list'] = list(config.post_type)
 
-            archive_type = post_type_dict.get('archive_type')
-            if archive_type is None:
-                if post_type == 'post':
-                    archive_type = 'date'
-                else:
-                    archive_type = 'section'
+        for post_type_name, post_type_config in config.post_type.items():
 
-            archive_type = archive_type.lower()
-            if archive_type not in ['none', 'date', 'simple']:
-                archive_type = 'section'
+            index = config['post_type_list'].index(post_type_name)
+            archive_type = post_type_config.archive_type
 
             if not has_home_template and index == 0:
-                post_type_dict['with_front'] = False
+                post_type_config.with_front = False
                 if archive_type == 'none':
                     archive_type = 'section'
-            elif index > 0:
-                post_type_dict['with_front'] = True
 
-            post_type_dict['archive_type'] = archive_type
+            post_type_config.archive_type = archive_type
 
-            slug = post_type_dict.get('slug') or post_type
-            post_type_dict['slug'] = to_slug(slug)
-
-            config_post_type[post_type] = post_type_dict
-
-        config['post_type'] = config_post_type
+            slug = post_type_config.slug or post_type_name
+            post_type_config.slug = to_slug(slug)
 
         return config
 

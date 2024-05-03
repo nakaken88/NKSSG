@@ -61,8 +61,10 @@ class SiteConfig(BaseConfig):
 @dataclass
 class PostTypeConfig(BaseConfig):
 
-    permalink: str = ''
-    archive_type: str = ''
+    permalink: str = r'/{slug}/'
+    archive_type: str = 'section'
+    slug: str = ''
+    with_front: bool = True
 
 
 class PostTypeConfigManager(dict[str, PostTypeConfig]):
@@ -80,6 +82,12 @@ class PostTypeConfigManager(dict[str, PostTypeConfig]):
                 self[k].update(v)
             else:
                 self[k] = PostTypeConfig(**v)
+
+            archive_type = self[k].archive_type
+            archive_type = archive_type.lower()
+            if archive_type not in ['date', 'simple', 'none']:
+                archive_type = 'section'
+            self[k].archive_type = archive_type
 
 
 @dataclass
