@@ -45,16 +45,12 @@ class Plugins():
         config['plugin_is_ready'] = True
 
     def do_action(self, action_name, target=None, **kwargs):
-        if not self.plugins:
-            return target
 
         for plugin in self.plugins.values():
             method = getattr(plugin, action_name, None)
 
-            if method is not None and callable(method):
-                temp_target = method(target, **kwargs)
-                if temp_target is not None:
-                    target = temp_target
+            if callable(method):
+                target = method(target, **kwargs) or target
 
         return target
 
