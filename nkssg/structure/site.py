@@ -5,6 +5,7 @@ import shutil
 
 import jinja2
 
+from nkssg.config import Config
 from nkssg.structure.archives import Archives
 from nkssg.structure.singles import Singles
 from nkssg.structure.themes import Themes
@@ -25,20 +26,19 @@ class Site:
         self.archives = Archives(self.config)
 
     def setup_post_types(self):
-        config = self.config
+        config: Config = self.config
 
-        # update post type list
-        config['post_type_list'] = []
-        for temp_item in config['post_type']:
-            temp_dict = {}
-            if type(temp_item) is dict:
-                temp_dict = temp_item
-            else:
-                temp_dict[temp_item] = temp_item
+        # remove post_types for which folder does not exist
+        keys_to_remove = []
+        for post_type in config.post_type.keys():
+            if not Path(config['docs_dir'], post_type).exists():
+                keys_to_remove.append(post_type)
+        
+        for post_type in keys_to_remove:
+            config.post_type.pop(post_type)
 
-            for post_type in temp_dict.keys():
-                if Path(config['docs_dir'], post_type).exists():
-                    config['post_type_list'].append(post_type)
+        # add post_types for which folder exists but is not included in config"
+        config['post_type_list'] = list(config.post_type)
 
         for d in config['docs_dir'].glob('*'):
             if d.is_dir():
