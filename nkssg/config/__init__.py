@@ -94,12 +94,14 @@ class Config(BaseConfig):
 
     site: SiteConfig = field(default_factory=SiteConfig)
 
-    plugins: list[str] = field(default_factory=lambda: [
-        'autop',
-        'awesome-page-link',
-        'awesome-img-link',
-        'select-pages'
-    ])
+    plugins: dict = field(default_factory=lambda: {
+        'autop': {},
+        'awesome-page-link': {},
+        'awesome-img-link': {},
+        'select-pages': {}
+    })
+
+    plugin_is_ready: bool = False
 
     _dir_types: list[str] = field(default_factory=lambda: [
         'docs', 'public', 'static', 'themes', 'cache'

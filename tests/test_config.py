@@ -7,7 +7,7 @@ def test_default_config():
     assert config['site']['site_name'] == 'Site Title'
     assert config.site.site_name == 'Site Title'
     assert config.site.site_url == ''
-    assert config.plugins == ['autop', 'awesome-page-link', 'awesome-img-link', 'select-pages']
+    assert config.plugins.get('select-pages') == {}
 
     assert 'md' in config.doc_ext
     assert config.post_type['post'].permalink == '/%Y/%m/%d/%H%M%S/'
