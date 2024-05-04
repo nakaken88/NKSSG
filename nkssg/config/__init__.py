@@ -122,6 +122,8 @@ class Config(BaseConfig):
     post_type: PostTypeConfigManager
     post_type = field(default_factory=PostTypeConfigManager)
 
+    theme: dict = field(default_factory=dict)
+
     taxonomy: dict = field(default_factory=dict)
 
     use_abs_url: bool = True

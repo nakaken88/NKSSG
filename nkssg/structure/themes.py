@@ -1,48 +1,43 @@
+from pathlib import Path
+
 from ruamel.yaml import YAML
 
-from nkssg.utils import get_config_by_list
+from nkssg.config import Config
 
 
 class Themes:
-    def __init__(self, config):
+    def __init__(self, config: Config):
         self.dirs = []
         self.cnf = {}
 
-        themes_dir = config['themes_dir']
-
-        theme = get_config_by_list(config, ['theme', 'child'])
-        if theme is not None:
-            theme_dir = themes_dir / theme
-            if theme_dir.exists():
-                self.dirs.append(theme_dir)
-                cnf_path = theme_dir / (theme + '.yml')
-                if cnf_path.exists():
-                    cnf = YAML(typ='safe').load(cnf_path) or {}
-                    self.cnf = cnf
-            else:
-                print(theme + ' is not found')
-
-        theme = get_config_by_list(config, ['theme', 'name'])
-        if theme is not None:
-            theme_dir = themes_dir / theme
-            if theme_dir.exists():
-                self.dirs.append(theme_dir)
-                cnf_path = theme_dir / (theme + '.yml')
-                if cnf_path.exists():
-                    cnf = YAML(typ='safe').load(cnf_path) or {}
-                    self.cnf = {**cnf, **self.cnf}
-            else:
-                print(theme + ' is not found')
+        self.load_theme(config, 'name')
+        self.load_theme(config, 'child')
 
         if not self.dirs:
-            if config.get('theme') is None:
-                config['theme'] = {'name': 'default'}
-            elif config['theme'].get('name') is None:
-                config['theme']['name'] = 'default'
+            self.set_default_theme(config)
 
-            theme_dir = config["PKG_DIR"] / 'themes' / 'default'
-            self.dirs.append(theme_dir)
+    def load_theme(self, config: Config, path):
+        theme = config.theme.get(path)
+        if theme:
+            theme_dir = config.themes_dir / Path(theme)
+            if theme_dir.exists():
+                self.dirs.append(theme_dir)
+                self.load_theme_config(theme_dir, theme)
+            else:
+                print(f"{theme} is not found")
 
-            cnf_path = theme_dir / 'default.yml'
+    def load_theme_config(self, theme_dir: Path, theme_name):
+        cnf_path = theme_dir / Path(theme_name + '.yml')
+        try:
             cnf = YAML(typ='safe').load(cnf_path) or {}
-            self.cnf = cnf
+            self.cnf = {**self.cnf, **cnf}
+        except Exception as e:
+            print(f"Failed to load config for {theme_name}: {e}")
+
+    def set_default_theme(self, config: Config):
+        default_theme_name = 'default'
+        config.theme['name'] = default_theme_name
+
+        default_theme_dir = config["PKG_DIR"] / 'themes' / default_theme_name
+        self.dirs.append(default_theme_dir)
+        self.load_theme_config(default_theme_dir, default_theme_name)
