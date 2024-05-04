@@ -10,8 +10,10 @@ class Plugins():
             return
 
         self.plugins = {}
-        installed_plugins = pkg_resources.iter_entry_points(group='nkssg.plugins')
-        self.installed_plugins = {plugin.name: plugin for plugin in installed_plugins}
+        self.installed_plugins = {
+            plugin.name: plugin
+            for plugin in pkg_resources.iter_entry_points('nkssg.plugins')
+        }
 
         for plugin_name, plugin_config in config.plugins.items():
 
