@@ -153,7 +153,7 @@ class Singles(Pages):
 
 class Single(Page):
 
-    def __init__(self, src_path, docs_dir, plugins: Plugins, id=0):
+    def __init__(self, src_path, docs_dir, plugins: Plugins = None, id=0):
         super().__init__()
 
         self._id = id
