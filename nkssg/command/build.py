@@ -4,10 +4,11 @@ import tempfile
 
 from livereload import Server
 
+from nkssg.config import Config
 from nkssg.structure.site import Site
 
 
-def build(config, clean=False):
+def build(config: Config, clean=False):
 
     site = Site(config)
 
@@ -15,7 +16,7 @@ def build(config, clean=False):
     site.update()
 
     if clean:
-        public_dir = config['public_dir']
+        public_dir = config.public_dir
         if public_dir.exists():
             shutil.rmtree(public_dir)
 
@@ -24,11 +25,11 @@ def build(config, clean=False):
     site.output()
 
 
-def serve(config, static=False, port=5500):
+def serve(config: Config, static=False, port=5500):
 
-    config['site']['site_url'] = 'http://127.0.0.1:' + str(port)
-    config['public_dir'] = Path(tempfile.mkdtemp(prefix='nkssg_'))
-    print(str(config['public_dir']) + ' is created.')
+    config.site.site_url = 'http://127.0.0.1:' + str(port)
+    config.public_dir = Path(tempfile.mkdtemp(prefix='nkssg_'))
+    print(str(config.public_dir) + ' is created.')
 
     def reload():
         build(config)
@@ -38,24 +39,24 @@ def serve(config, static=False, port=5500):
     try:
         server = Server()
         if not static:
-            server.watch(config['docs_dir'], reload)
-            if config['themes_dir'].exists():
-                server.watch(config['themes_dir'], reload)
+            server.watch(config.docs_dir, reload)
+            if config.themes_dir.exists():
+                server.watch(config.themes_dir, reload)
 
-        server.serve(port=port, root=config['public_dir'], open_url_delay=None)
+        server.serve(port=port, root=config.public_dir, open_url_delay=None)
     finally:
-        shutil.rmtree(config['public_dir'])
+        shutil.rmtree(config.public_dir)
 
 
-def draft(config, path, port=5500):
+def draft(config: Config, path, port=5500):
 
     draft_path = Path(path)
     if not draft_path.is_absolute():
-        draft_path = config['base_dir'] / draft_path
+        draft_path = config.base_dir / draft_path
 
     config['draft_path'] = draft_path
-    config['site']['site_url'] = 'http://127.0.0.1:' + str(port)
-    config['public_dir'] = Path(tempfile.mkdtemp(prefix='nkssg_'))
+    config.site.site_url = 'http://127.0.0.1:' + str(port)
+    config.public_dir = Path(tempfile.mkdtemp(prefix='nkssg_'))
 
     def reload():
         build(config)
@@ -65,6 +66,6 @@ def draft(config, path, port=5500):
     try:
         server = Server()
         server.watch(config['draft_path'].parent, reload)
-        server.serve(port=port, root=config['public_dir'], open_url_delay=None)
+        server.serve(port=port, root=config.public_dir, open_url_delay=None)
     finally:
-        shutil.rmtree(config['public_dir'])
+        shutil.rmtree(config.public_dir)
