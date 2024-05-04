@@ -50,27 +50,27 @@ site:
   language: "en"
 
 post_type:
-  - post:
-      permalink: /%Y/%m/%d/%H%M%S/
-      archive_type: "date"
-  - page:
-      permalink: /{slug}/
-      archive_type: "section"
+  post:
+    permalink: /%Y/%m/%d/%H%M%S/
+    archive_type: "date"
+  page:
+    permalink: /{slug}/
+    archive_type: "section"
 
 markdown:
-  - fenced_code
-  - toc:
-      marker: "[toc]"
+  fenced_code: {}
+  toc:
+    marker: "[toc]"
 
 plugins:
-  - autop
-  - awesome-img-link
-  - awesome-page-link:
-      strip_paths:
-        - /docs
-  - select-pages:
-      start: 0
-      step: 1
+  autop: {}
+  awesome-img-link {}
+  awesome-page-link:
+    strip_paths:
+      - /docs
+  select-pages:
+    start: 0
+    step: 1
 
 theme:
   name: default
