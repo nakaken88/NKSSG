@@ -17,20 +17,20 @@ class Site:
     def __init__(self, config: Config):
         self.config = config
 
-        self.config['plugins'] = Plugins(config)
-        self.config = self.config['plugins'].do_action(
+        self.plugins: Plugins = Plugins(config)
+        self.config = self.plugins.do_action(
             'after_load_config', target=self.config)
 
         self.config['themes'] = Themes(self.config)
-        self.config = self.config['plugins'].do_action(
+        self.config = self.plugins.do_action(
             'after_load_theme', target=self.config)
 
         self.config = self.setup_post_types()
-        self.config = self.config['plugins'].do_action(
+        self.config = self.plugins.do_action(
             'after_setup_post_types', target=self.config)
 
-        self.singles = Singles(self.config)
-        self.archives = Archives(self.config)
+        self.singles = Singles(self.config, self.plugins)
+        self.archives = Archives(self.config, self.plugins)
 
     def setup_post_types(self):
         config: Config = self.config
@@ -89,7 +89,7 @@ class Site:
         self.config.env.globals['archives'] = self.archives
         self.config.env.globals['theme'] = self.config['themes'].cnf
 
-        self.config = self.config['plugins'].do_action(
+        self.config = self.plugins.do_action(
             'after_setup_env', target=self.config)
 
         if self.config['mode'] != 'draft':
@@ -97,27 +97,27 @@ class Site:
             self.singles.update_urls()
             self.archives.update_urls()
 
-        self.config['plugins'].do_action('after_update_urls', target=self)
+        self.plugins.do_action('after_update_urls', target=self)
 
         self.singles.update_htmls(self.archives)
         if self.config['mode'] != 'draft':
             self.archives.update_htmls(self.singles)
 
-        self.config['plugins'].do_action('after_update_site', target=self)
+        self.plugins.do_action('after_update_site', target=self)
 
     def output(self):
         self.copy_static_files()
         self.singles.output()
-        self.config['plugins'].do_action('after_output_singles', target=self)
+        self.plugins.do_action('after_output_singles', target=self)
 
         if self.config['mode'] != 'draft':
             self.archives.output()
-            self.config['plugins'].do_action(
+            self.plugins.do_action(
                 'after_output_archives', target=self)
 
             self.output_extra_pages()
 
-        self.config['plugins'].do_action('after_output_site', target=self)
+        self.plugins.do_action('after_output_site', target=self)
 
         if self.config.cache_dir.exists():
             with open(self.config['cache_contents_path'], mode='w') as f:
@@ -132,7 +132,7 @@ class Site:
                     }
                 json.dump(cache_htmls, f)
 
-        self.config['plugins'].do_action('on_end', target=self)
+        self.plugins.do_action('on_end', target=self)
 
     def copy_static_files(self):
 

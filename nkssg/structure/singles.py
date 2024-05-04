@@ -8,6 +8,7 @@ import re
 from urllib.parse import quote
 
 from nkssg.config import Config
+from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.utils import to_slug
 from nkssg.utils import clean_name
@@ -16,11 +17,12 @@ from nkssg.utils import dup_check
 
 
 class Singles(Pages):
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, plugins: Plugins):
         self.config = config
+        self.plugins = plugins
         self.pages = self.get_pages_from_docs_directory()
         self.file_ids = {}
-        self.config['plugins'].do_action(
+        self.plugins.do_action(
             'after_initialize_singles', target=self)
 
     def get_pages_from_docs_directory(self):
@@ -30,7 +32,7 @@ class Singles(Pages):
         if config['mode'] == 'draft':
             src_path = config['draft_path'].relative_to(docs_dir)
             self.config['cache_time'] = datetime.datetime.fromtimestamp(0)
-            return [Single(src_path, docs_dir)]
+            return [Single(src_path, docs_dir, self.plugins)]
 
         self.config['cache_time_unix'] = 0
 
@@ -63,7 +65,7 @@ class Singles(Pages):
                 if self.is_exclude(relative_path):
                     continue
 
-                pages.append(Single(relative_path, docs_dir, len(pages) + 1))
+                pages.append(Single(relative_path, docs_dir, self.plugins, len(pages) + 1))
 
         return pages
 
@@ -83,7 +85,7 @@ class Singles(Pages):
             new_page.dest_path = 'index.html'
             new_page.dest_dir = ''
             self.pages = [new_page]
-            self.config['plugins'].do_action(
+            self.plugins.do_action(
                 'after_setup_draft_singles', target=self)
             return
 
@@ -96,10 +98,10 @@ class Singles(Pages):
 
             new_pages.append(new_page)
 
-        self.config['plugins'].do_action('after_setup_singles', target=self)
+        self.plugins.do_action('after_setup_singles', target=self)
 
         self.pages = sorted(new_pages)
-        self.config['plugins'].do_action('after_sort_singles', target=self)
+        self.plugins.do_action('after_sort_singles', target=self)
 
         bookended = [None] + self.pages + [None]
         zipped = zip(bookended[:-2], bookended[1:-1], bookended[2:])
@@ -118,14 +120,14 @@ class Singles(Pages):
         for page in self.pages:
             page.update_url(self.config)
 
-        self.config['plugins'].do_action(
+        self.plugins.do_action(
             'after_update_singles_url', target=self)
 
         self.dest_path_dup_check()
         self.dest_paths = {str(page.dest_path): page for page in self.pages}
 
     def update_htmls(self, archives):
-        self.config['plugins'].do_action(
+        self.plugins.do_action(
             'before_update_singles_html', target=self)
 
         for page in self.pages:
@@ -135,7 +137,7 @@ class Singles(Pages):
                 print(page)
                 raise
 
-        self.config['plugins'].do_action(
+        self.plugins.do_action(
             'after_update_singles_html', target=self)
 
     def dest_path_dup_check(self):
@@ -151,7 +153,7 @@ class Singles(Pages):
 
 class Single(Page):
 
-    def __init__(self, src_path, docs_dir, id=0):
+    def __init__(self, src_path, docs_dir, plugins: Plugins, id=0):
         super().__init__()
 
         self._id = id
@@ -173,6 +175,8 @@ class Single(Page):
         self.is_draft = False
         self.is_expired = False
         self.is_future = False
+
+        self.plugins = plugins
 
     def __str__(self):
         return "Single(src='{}')".format(self.src_path)
@@ -341,7 +345,7 @@ class Single(Page):
 
         content = doc
         self.content_updated = False
-        content = config['plugins'].do_action(
+        content = self.plugins.do_action(
             'on_get_content', target=content, config=config, single=self)
 
         if self.content_updated:
@@ -557,7 +561,7 @@ class Single(Page):
 
             self.content = content
 
-        self.content = config['plugins'].do_action(
+        self.content = self.plugins.do_action(
             'before_render_html',
             target=self.content,
             config=config,
@@ -570,7 +574,7 @@ class Single(Page):
             'mypage': self,
             })
 
-        self.html = config['plugins'].do_action(
+        self.html = self.plugins.do_action(
             'after_render_html',
             target=self.html,
             config=config,

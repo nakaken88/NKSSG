@@ -1,12 +1,15 @@
 from pathlib import Path
 
+from nkssg.config import Config
+from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.utils import clean_name, get_config_by_list, to_slug
 
 
 class Archives(Pages):
-    def __init__(self, config):
+    def __init__(self, config: Config, plugins: Plugins):
         self.config = config
+        self.plugins = plugins
         self.archives = []
         self.root_archives = []
         self.pages = []
@@ -30,7 +33,7 @@ class Archives(Pages):
         self._archives = {
             (str(a.root_name), str(a.name)): a for a in self.archives}
 
-        self.config['plugins'].do_action('after_setup_archives', target=self)
+        self.plugins.do_action('after_setup_archives', target=self)
 
     def create_archive(self, archive_type, name, slug=''):
         archive = Archive(len(self.archives) + 1, archive_type, name, slug)
@@ -218,17 +221,17 @@ class Archives(Pages):
         for root_archive in self.root_archives:
             root_archive.update_url()
 
-        self.config['plugins'].do_action(
+        self.plugins.do_action(
             'after_update_archives_url', target=self)
 
     def update_htmls(self, singles):
-        self.config['plugins'].do_action(
+        self.plugins.do_action(
             'before_update_archives_html', target=self)
 
         for archive in self.archives:
             self.pages += archive.get_archives(singles, self)
 
-        self.config['plugins'].do_action(
+        self.plugins.do_action(
             'after_update_archives_html', target=self)
 
     def get_root_archive_by_name(self, name):

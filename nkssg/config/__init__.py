@@ -101,8 +101,6 @@ class Config(BaseConfig):
         'select-pages': {}
     })
 
-    plugin_is_ready: bool = False
-
     _dir_types: list[str] = field(default_factory=lambda: [
         'docs', 'public', 'static', 'themes', 'cache'
     ])
