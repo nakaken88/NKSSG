@@ -7,6 +7,7 @@ import jinja2
 
 from nkssg.config import Config
 from nkssg.structure.archives import Archives
+from nkssg.structure.plugins import Plugins
 from nkssg.structure.singles import Singles
 from nkssg.structure.themes import Themes
 from nkssg.utils import get_config_by_list, to_slug
@@ -15,6 +16,10 @@ from nkssg.utils import get_config_by_list, to_slug
 class Site:
     def __init__(self, config: Config):
         self.config = config
+
+        self.config['plugins'] = Plugins(config)
+        self.config = self.config['plugins'].do_action(
+            'after_load_config', target=self.config)
 
         self.config['themes'] = Themes(self.config)
         self.config = self.config['plugins'].do_action(

@@ -6,8 +6,6 @@ from typing import Any
 import jinja2
 from ruamel.yaml import YAML, YAMLError
 
-from nkssg.structure.plugins import Plugins
-
 
 @dataclass
 class BaseConfig:
@@ -181,8 +179,5 @@ def load_config(mode):
     config['cache_htmls_path'] = cache_dir / ('htmls_' + mode + '.json')
 
     config['now'] = datetime.datetime.now(datetime.timezone.utc)
-
-    config['plugins'] = Plugins(config)
-    config = config['plugins'].do_action('after_load_config', target=config)
 
     return config
