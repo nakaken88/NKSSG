@@ -39,8 +39,8 @@ def serve(config, static=False, port=5500):
         server = Server()
         if not static:
             server.watch(config['docs_dir'], reload)
-            for dir in config['themes'].dirs:
-                server.watch(dir, reload)
+            if config['themes_dir'].exists():
+                server.watch(config['themes_dir'], reload)
 
         server.serve(port=port, root=config['public_dir'], open_url_delay=None)
     finally:

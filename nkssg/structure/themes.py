@@ -36,8 +36,6 @@ class Themes:
 
     def set_default_theme(self, config: Config):
         default_theme_name = 'default'
-        config.theme['name'] = default_theme_name
-
         default_theme_dir = config["PKG_DIR"] / 'themes' / default_theme_name
         self.dirs.append(default_theme_dir)
         self.load_theme_config(default_theme_dir, default_theme_name)

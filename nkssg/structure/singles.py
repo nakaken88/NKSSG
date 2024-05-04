@@ -10,6 +10,7 @@ from urllib.parse import quote
 from nkssg.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
+from nkssg.structure.themes import Themes
 from nkssg.utils import to_slug
 from nkssg.utils import clean_name
 from nkssg.utils import front_matter_setup
@@ -126,13 +127,13 @@ class Singles(Pages):
         self.dest_path_dup_check()
         self.dest_paths = {str(page.dest_path): page for page in self.pages}
 
-    def update_htmls(self, archives):
+    def update_htmls(self, archives, themes: Themes):
         self.plugins.do_action(
             'before_update_singles_html', target=self)
 
         for page in self.pages:
             try:
-                page.update_html(self, archives)
+                page.update_html(self, archives, themes)
             except Exception:
                 print(page)
                 raise
@@ -525,7 +526,7 @@ class Single(Page):
 
         return quote(url).lower()
 
-    def update_html(self, singles: Singles, archives):
+    def update_html(self, singles: Singles, archives, themes: Themes):
         config = singles.config
         if not self.shouldUpdateHtml:
             return
@@ -535,7 +536,7 @@ class Single(Page):
                 self.html = config['cache_htmls'][str(self.src_path)]
                 return
 
-        template_file = self.lookup_template(config)
+        template_file = self.lookup_template(config, themes)
         template = config.env.get_template(template_file)
 
         if '{{' in self.content or '{#' in self.content or '{%' in self.content:
@@ -544,7 +545,7 @@ class Single(Page):
             import_sc = '{% import "import/short-code.html" as sc %}'
             import_scc = '{% import "import/short-code-child.html" as scc %}'
 
-            for theme_dir in config['themes'].dirs:
+            for theme_dir in themes.dirs:
                 template_path = theme_dir / 'import' / 'short-code.html'
                 if template_path.exists():
                     additional_statement = additional_statement + import_sc
@@ -583,24 +584,24 @@ class Single(Page):
             archives=archives
             )
 
-    def lookup_template(self, config):
+    def lookup_template(self, config: Config, themes: Themes):
         template_file = self.meta.get('template')
 
-        for theme_dir in config['themes'].dirs:
+        for theme_dir in themes.dirs:
             if template_file is not None:
                 template_file = template_file.replace('.html', '') + '.html'
                 template_path = theme_dir / template_file
                 if template_path.exists():
                     return template_file
 
-        for theme_dir in config['themes'].dirs:
+        for theme_dir in themes.dirs:
             if config['mode'] == 'draft':
                 template_file = 'draft.html'
                 template_path = theme_dir / template_file
                 if template_path.exists():
                     return template_file
 
-        for theme_dir in config['themes'].dirs:
+        for theme_dir in themes.dirs:
             template_file = 'single-' + self.post_type + '.html'
             template_path = theme_dir / template_file
             if template_path.exists():

@@ -3,6 +3,7 @@ from pathlib import Path
 from nkssg.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
+from nkssg.structure.themes import Themes
 from nkssg.utils import clean_name, get_config_by_list, to_slug
 
 
@@ -224,12 +225,12 @@ class Archives(Pages):
         self.plugins.do_action(
             'after_update_archives_url', target=self)
 
-    def update_htmls(self, singles):
+    def update_htmls(self, singles, themes: Themes):
         self.plugins.do_action(
             'before_update_archives_html', target=self)
 
         for archive in self.archives:
-            self.pages += archive.get_archives(singles, self)
+            self.pages += archive.get_archives(singles, self, themes)
 
         self.plugins.do_action(
             'after_update_archives_html', target=self)
@@ -380,7 +381,7 @@ class Archive(Page):
             for child_archive in self.children:
                 child_archive.update_url()
 
-    def get_archives(self, singles, archives: Archives):
+    def get_archives(self, singles, archives: Archives, themes: Themes):
         if not self.shouldUpdateHtml:
             return []
 
@@ -477,7 +478,7 @@ class Archive(Page):
             else:
                 paginator['next'] = None
 
-            template_file = self.lookup_template(config)
+            template_file = self.lookup_template(config, themes)
             template = config.env.get_template(template_file)
 
             paginator['pages'][i].html = template.render({
@@ -488,10 +489,10 @@ class Archive(Page):
 
         return paginator['pages']
 
-    def lookup_template(self, config):
+    def lookup_template(self, config, themes: Themes):
         prefix = 'archive-' + self.archive_type
 
-        for theme_dir in config['themes'].dirs:
+        for theme_dir in themes.dirs:
 
             template_file = prefix + '-' + self.slug + '.html'
             template_path = theme_dir / template_file

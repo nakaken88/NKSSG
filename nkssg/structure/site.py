@@ -21,7 +21,7 @@ class Site:
         self.config = self.plugins.do_action(
             'after_load_config', target=self.config)
 
-        self.config['themes'] = Themes(self.config)
+        self.themes = Themes(self.config)
         self.config = self.plugins.do_action(
             'after_load_theme', target=self.config)
 
@@ -53,7 +53,7 @@ class Site:
 
         # update archive type, slug, and with front
         has_home_template = False
-        for theme_dir in config['themes'].dirs:
+        for theme_dir in self.themes.dirs:
             target_file = Path(theme_dir) / 'home.html'
             if target_file.exists():
                 has_home_template = True
@@ -81,13 +81,13 @@ class Site:
 
     def update(self):
         self.config.env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(self.config['themes'].dirs)
+            loader=jinja2.FileSystemLoader(self.themes.dirs)
             )
 
         self.config.env.globals['config'] = self.config
         self.config.env.globals['singles'] = self.singles
         self.config.env.globals['archives'] = self.archives
-        self.config.env.globals['theme'] = self.config['themes'].cnf
+        self.config.env.globals['theme'] = self.themes.cnf
 
         self.config = self.plugins.do_action(
             'after_setup_env', target=self.config)
@@ -99,9 +99,9 @@ class Site:
 
         self.plugins.do_action('after_update_urls', target=self)
 
-        self.singles.update_htmls(self.archives)
+        self.singles.update_htmls(self.archives, self.themes)
         if self.config['mode'] != 'draft':
-            self.archives.update_htmls(self.singles)
+            self.archives.update_htmls(self.singles, self.themes)
 
         self.plugins.do_action('after_update_site', target=self)
 
@@ -146,7 +146,7 @@ class Site:
                 to_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(str(f), str(to_path))
 
-        for d in self.config['themes'].dirs:
+        for d in self.themes.dirs:
             for f in d.glob('**/*'):
                 if not f.is_file():
                     continue
@@ -163,7 +163,7 @@ class Site:
                 shutil.copyfile(str(f), str(to_path))
 
     def is_target(self, rel_path):
-        config = self.config['themes'].cnf
+        config = self.themes.cnf
         exclude = get_config_by_list(config, ['static_exclude']) or []
         for item in exclude:
             if fnmatch.fnmatch(rel_path, item):
@@ -176,7 +176,7 @@ class Site:
         return False
 
     def output_extra_pages(self):
-        config = self.config['themes'].cnf
+        config = self.themes.cnf
         extra_pages = get_config_by_list(config, ['extra_pages']) or []
         config_extra_pages = extra_pages[:]
 
@@ -190,7 +190,7 @@ class Site:
 
         for extra_page in extra_pages:
             exist_check = False
-            for theme_dir in self.config['themes'].dirs:
+            for theme_dir in self.themes.dirs:
                 if Path(theme_dir, extra_page).exists():
                     self.output_extra_page(extra_page)
                     exist_check = True
