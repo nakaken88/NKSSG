@@ -1,8 +1,6 @@
 import collections
 import inspect
 
-from ruamel.yaml import YAML
-
 
 def get_config_by_list(config, keys):
     try:
