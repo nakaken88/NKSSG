@@ -15,23 +15,27 @@ post_type:
     archive_type: "section"
 
 plugins:
-  - autop:
-  - awesome-img-link
-  - awesome-page-link
-  - select-pages:
-      start: 0
+  autop: {}
+  awesome-img-link: {}
+  awesome-page-link: {}
+  select-pages:
+    start: 0
 
 taxonomy:
-  - tag:
-    - tag1
-    - tag 2: 
-        slug: tag2
-    - tag3
+  tag:
+    label: Tag
+    term:
+      - tag1
+      - name: tag2
+        slug: tag_two
+      - tag3
 
-  - category:
-    - cat1
-    - cat11:
+  category:
+    label: Category
+    term:
+      - cat1
+      - name: cat11
         parent: cat1
-    - cat12:
+      - name: cat12
         parent: cat1
-    - cat2
+      - cat2
