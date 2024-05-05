@@ -106,6 +106,7 @@ class TaxonomyConfig(BaseConfig):
     slug: str = ''
     desc: str = ''
     label: str = ''
+    limit: int = 10
     term: list[TermConfig] = field(default_factory=list)
 
     def update(self, d: dict):

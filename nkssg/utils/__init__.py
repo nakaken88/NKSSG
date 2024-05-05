@@ -2,31 +2,6 @@ import collections
 import inspect
 
 
-def get_config_by_list(config, keys):
-    try:
-        if not isinstance(keys, list):
-            keys = [keys]
-
-        cnf = config
-        for key in keys:
-            if cnf is None:
-                return None
-            elif isinstance(cnf, list):
-                temp = None
-                for item in cnf:
-                    if isinstance(item, dict):
-                        temp = item.get(key)
-                    if temp is not None:
-                        break
-                cnf = temp
-            else:
-                cnf = cnf.get(key)
-        return cnf
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-
-
 def to_slug(dirty_slug):
     slug = dirty_slug.replace(' ', '-').lower()
     return slug

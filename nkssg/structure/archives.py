@@ -4,7 +4,7 @@ from nkssg.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
-from nkssg.utils import get_config_by_list, to_slug
+from nkssg.utils import to_slug
 
 
 class Archives(Pages):
@@ -411,21 +411,14 @@ class Archive(Page):
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
 
-            post_type_dict = get_config_by_list(config, ['taxonomy', self.root_name])
-
-            paginator['limit'] = get_config_by_list(post_type_dict, 'limit')
-            if paginator['limit'] is None or isinstance(paginator['limit'], dict):
-                paginator['limit'] = 10
+            post_type_dict = config.taxonomy[self.root_name]
+            paginator['limit'] = post_type_dict.limit
 
         paginator['total_elements'] = len(target_singles)
 
-        paginator['first_limit'] = get_config_by_list(post_type_dict, 'first_limit')
-        if paginator['first_limit'] is None or isinstance(paginator['first_limit'], dict):
-            paginator['first_limit'] = paginator['limit']
+        paginator['first_limit'] = post_type_dict.get('first_limit') or paginator['limit']
 
-        paginator['path'] = get_config_by_list(post_type_dict, 'path')
-        if paginator['path'] is None or isinstance(paginator['path'], dict):
-            paginator['path'] = 'path'
+        paginator['path'] = post_type_dict.get('path') or 'path'
 
         # count archive page
         start = 0

@@ -9,7 +9,7 @@ from nkssg.structure.archives import Archives
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.singles import Singles
 from nkssg.structure.themes import Themes
-from nkssg.utils import get_config_by_list, to_slug
+from nkssg.utils import to_slug
 
 
 class Site:
@@ -160,12 +160,12 @@ class Site:
 
     def is_target(self, rel_path):
         config = self.themes.cnf
-        exclude = get_config_by_list(config, ['static_exclude']) or []
+        exclude = config.get('static_exclude', [])
         for item in exclude:
             if fnmatch.fnmatch(rel_path, item):
                 return False
 
-        include = get_config_by_list(config, ['static_include']) or []
+        include = config.get('static_include', [])
         for item in include:
             if fnmatch.fnmatch(rel_path, item):
                 return True
@@ -173,7 +173,7 @@ class Site:
 
     def output_extra_pages(self):
         config = self.themes.cnf
-        extra_pages = get_config_by_list(config, ['extra_pages']) or []
+        extra_pages = config.get('extra_pages', [])
         config_extra_pages = extra_pages[:]
 
         default_extra_pages = [
