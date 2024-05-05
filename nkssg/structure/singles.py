@@ -12,9 +12,7 @@ from nkssg.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
-from nkssg.utils import to_slug
-from nkssg.utils import clean_name
-from nkssg.utils import dup_check
+from nkssg.utils import to_slug, dup_check
 
 
 class Singles(Pages):
@@ -329,9 +327,9 @@ class Single(Page):
         return clean_date
 
     def _get_title(self):
-        title = self.meta.get('title') or clean_name(self.filename)
+        title = self.meta.get('title') or Page.clean_name(self.filename)
         if self.filename == 'index' and title == 'index':
-            title = clean_name(self.src_dir.parts[-1])
+            title = Page.clean_name(self.src_dir.parts[-1])
         return title
 
     def _get_name(self):
@@ -461,7 +459,7 @@ class Single(Page):
                 parts = dest_path.parts
                 new_parts = []
                 for part in parts:
-                    new_parts.append(to_slug(clean_name(part)))
+                    new_parts.append(to_slug(Page.clean_name(part)))
                 dest_path = Path(*new_parts)
 
                 url = self._get_url_from_dest(dest_path)
@@ -484,13 +482,13 @@ class Single(Page):
         url = url.replace('{slug}', self.slug)
 
         if '{filename}' in url:
-            filename = clean_name(self.filename)
+            filename = Page.clean_name(self.filename)
             if filename == 'index':
                 part_list = list(self.src_dir.parts)
                 if len(part_list) == 1:
                     filename = config.post_type[self.post_type].slug
                 else:
-                    filename = clean_name(part_list[-1])
+                    filename = Page.clean_name(part_list[-1])
 
             filename = to_slug(filename)
             url = url.replace('{filename}', filename)

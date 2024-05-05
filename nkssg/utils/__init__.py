@@ -32,24 +32,6 @@ def to_slug(dirty_slug):
     return slug
 
 
-def clean_name(dirty_name):
-    if dirty_name[0] != '_':
-        return dirty_name
-    if dirty_name[1] == '_':
-        return dirty_name[1:]
-
-    parts = dirty_name.split('_')
-    if len(parts) == 2:
-        return dirty_name
-
-    prefix = '_' + parts[1] + '_'
-
-    if len(prefix) == len(dirty_name):
-        return dirty_name
-    else:
-        return dirty_name[len(prefix):]
-
-
 def dup_check(tuple_list):
     key_list = [t[0] for t in tuple_list]
     counter = collections.Counter(key_list)

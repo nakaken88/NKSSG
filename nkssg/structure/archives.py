@@ -4,7 +4,7 @@ from nkssg.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
-from nkssg.utils import clean_name, get_config_by_list, to_slug
+from nkssg.utils import get_config_by_list, to_slug
 
 
 class Archives(Pages):
@@ -148,7 +148,7 @@ class Archives(Pages):
 
         dirs = [d for d in basepath.glob('**/*') if d.is_dir()]
         for dir in sorted(dirs):
-            name = clean_name(dir.parts[-1])
+            name = Page.clean_name(dir.parts[-1])
             new_archive = self.create_archive('section', name)
             new_archive.path = dir
 
