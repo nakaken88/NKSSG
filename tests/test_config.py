@@ -1,3 +1,5 @@
+from ruamel.yaml import YAML
+
 from nkssg.config import Config
 
 
@@ -68,3 +70,35 @@ def test_markdown_config():
     assert config.markdown['fenced_code'] == {}
     assert config.markdown['tables'] == {}
     assert config.markdown['toc']['marker'] == '[toc]'
+
+
+def test_taxonomy_config():
+    yaml_text = """
+taxonomy:
+  tag:
+    label: Tag
+    term:
+      - tag1
+      - name: tag2
+        slug: tag_two
+      - tag3
+
+  category:
+    label: Category
+    term:
+      - cat1
+      - name: cat11
+        parent: cat1
+      - name: cat12
+        parent: cat1
+      - cat2
+"""
+
+    config = Config()
+    yaml = YAML(typ='safe')
+    config.update(yaml.load(yaml_text))
+
+    assert config.taxonomy['tag'].term[1].name == 'tag2'
+    assert config.taxonomy['tag'].term[2].name == 'tag3'
+    assert config.taxonomy['tag'].label == 'Tag'
+    assert config.taxonomy['category'].term[1].parent == 'cat1'
