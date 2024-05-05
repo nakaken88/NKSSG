@@ -90,6 +90,55 @@ class PostTypeConfigManager(dict[str, PostTypeConfig]):
 
 
 @dataclass
+class TermConfig(BaseConfig):
+
+    name: str = ''
+    slug: str = ''
+    desc: str = ''
+    label: str = ''
+    parent: str = ''
+
+
+@dataclass
+class TaxonomyConfig(BaseConfig):
+
+    name: str = ''
+    slug: str = ''
+    desc: str = ''
+    label: str = ''
+    term: list[TermConfig] = field(default_factory=list)
+
+    def update(self, d: dict):
+        for k, v in d.items():
+            if k == 'term':
+                self.update_terms(v)
+            else:
+                super().update({k: v})
+
+    def update_terms(self, terms):
+        for term_config in terms:
+            term = TermConfig()
+            if isinstance(term_config, dict):
+                term.update(term_config)
+            else:
+                try:
+                    term.update({'name': str(term_config)})
+                except ValueError as e:
+                    raise ValueError(
+                        f"Invalid data for term: {term_config}"
+                        ) from e
+            self.term.append(term)
+
+
+class TaxonomyConfigManager(dict[str, TaxonomyConfig]):
+
+    def update(self, d: dict):
+        for k, v in d.items():
+            self[k] = TaxonomyConfig()
+            self[k].update(v)
+
+
+@dataclass
 class Config(BaseConfig):
 
     site: SiteConfig = field(default_factory=SiteConfig)
@@ -124,7 +173,8 @@ class Config(BaseConfig):
 
     theme: dict = field(default_factory=dict)
 
-    taxonomy: dict = field(default_factory=dict)
+    taxonomy: TaxonomyConfigManager
+    taxonomy = field(default_factory=TaxonomyConfigManager)
 
     use_abs_url: bool = True
 
@@ -166,6 +216,8 @@ class Config(BaseConfig):
                 self.set_directory_path(v)
             elif k == 'post_type':
                 self.post_type.update(v)
+            elif k == 'taxonomy':
+                self.taxonomy.update(v)
             else:
                 super().update({k: v})
 

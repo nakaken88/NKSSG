@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from nkssg.config import Config
+from nkssg.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
@@ -157,42 +157,41 @@ class Archives(Pages):
             archive_dict[dir] = new_archive
 
     def setup_taxonomy_archives(self, singles):
-        for tax_dict in self.config['taxonomy']:
-            tax_name = list(tax_dict.keys())[0]
-            term_list = tax_dict[tax_name]
-            self.setup_taxonomy_archive(tax_name, term_list)
+        for tax_name, tax_config in self.config.taxonomy.items():
 
-    def setup_taxonomy_archive(self, tax_name, term_list):
-        slug = get_config_by_list(term_list, ['slug']) or tax_name
+            slug = tax_config.slug or tax_name
 
-        root_archive = self.create_root_archive('taxonomy', tax_name, slug)
-        root_archive.dest_path = Path(root_archive.slug, 'index.html')
-        root_archive.rel_url = root_archive._get_url_from_dest()
-        root_archive._url_setup(self.config)
-        root_archive.meta = {}
+            root_archive = self.create_root_archive('taxonomy', tax_name, slug)
+            root_archive.dest_path = Path(root_archive.slug, 'index.html')
+            root_archive.rel_url = root_archive._get_url_from_dest()
+            root_archive._url_setup(self.config)
+            root_archive.meta = {}
+
+            self.setup_taxonomy_archive(
+                root_archive, tax_name, tax_config.term)
+
+    def setup_taxonomy_archive(
+            self,
+            root_archive,
+            tax_name,
+            term_list: list[TermConfig]
+            ):
 
         archive_dict = {tax_name: root_archive}
         parent_names = {tax_name: ''}
 
-        for term_item in term_list:
-            if not isinstance(term_item, dict):
-                term_item = {term_item: {}}
+        for term in term_list:
 
-            name = list(term_item.keys())[0]
-            term_dict = term_item[name]
-            if not isinstance(term_dict, dict):
-                root_archive.meta[name] = term_item[name]
-                continue  # it is taxonomy setting
-
-            slug = term_dict.get('slug', name)
-            parent_name = term_dict.get('parent', tax_name)
+            name = term.name
+            slug = term.slug or name
+            parent_name = term.parent or tax_name
 
             new_archive = self.create_archive('taxonomy', name, slug)
             archive_dict[name] = new_archive
             parent_names[name] = parent_name
-            new_archive.meta = term_dict
+            new_archive.meta = term
 
-        flat_url = get_config_by_list(self.config, ['taxonomy', root_archive.name, 'flat-url']) or False
+        flat_url = self.config.taxonomy[root_archive.name].get('flat-url') or False
 
         for archive_item in archive_dict.values():
             parent_name = parent_names[archive_item.name]
