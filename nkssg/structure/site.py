@@ -34,7 +34,13 @@ class Site:
     def setup_post_types(self):
         config: Config = self.config
 
-        # remove post_types for which folder does not exist
+        config = self.remove_invalid_post_types(config)
+        config = self.add_missing_post_types(config)
+        config = self.update_post_type_properties(config)
+
+        return config
+
+    def remove_invalid_post_types(self, config: Config):
         keys_to_remove = []
         for post_type in config.post_type.keys():
             if not Path(config.docs_dir, post_type).exists():
@@ -42,15 +48,17 @@ class Site:
 
         for post_type in keys_to_remove:
             config.post_type.pop(post_type)
+        return config
 
-        # add post_types for which folder exists but is not included in config"
+    def add_missing_post_types(self, config: Config):
         for d in config.docs_dir.glob('*'):
             if d.is_dir():
                 post_type = d.parts[-1]
                 if post_type not in config.post_type.keys():
                     config.post_type.update({post_type: {}})
+        return config
 
-        # update archive type, slug, and with front
+    def update_post_type_properties(self, config: Config):
         has_home_template = False
         for theme_dir in self.themes.dirs:
             target_file = Path(theme_dir) / 'home.html'
@@ -126,8 +134,9 @@ class Site:
             if f.is_file():
                 rel_path = f.relative_to(self.config.static_dir)
                 to_path = self.config.public_dir / rel_path
-                if to_path.exists() and f.stat().st_mtime < to_path.stat().st_mtime:
-                    continue
+                if to_path.exists():
+                    if f.stat().st_mtime < to_path.stat().st_mtime:
+                        continue
 
                 to_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(str(f), str(to_path))
@@ -142,8 +151,9 @@ class Site:
                     continue
 
                 to_path = self.config.public_dir / 'themes' / rel_path
-                if to_path.exists() and f.stat().st_mtime < to_path.stat().st_mtime:
-                    continue
+                if to_path.exists():
+                    if f.stat().st_mtime < to_path.stat().st_mtime:
+                        continue
 
                 to_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(str(f), str(to_path))
