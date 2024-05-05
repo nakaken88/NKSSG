@@ -52,20 +52,6 @@ def clean_name(dirty_name):
         return dirty_name[len(prefix):]
 
 
-def front_matter_setup(doc):
-    if doc[:3] != '---':
-        return {}, doc
-
-    parts = doc.split('---')
-    front_matter = YAML(typ='safe').load(parts[1]) or {}
-
-    doc = ''
-    if len(parts) >= 2:
-        doc = '---'.join(parts[2:])
-
-    return front_matter, doc
-
-
 def dup_check(tuple_list):
     key_list = [t[0] for t in tuple_list]
     counter = collections.Counter(key_list)

@@ -6,13 +6,14 @@ import platform
 import re
 from urllib.parse import quote
 
+from ruamel.yaml import YAML, YAMLError
+
 from nkssg.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
 from nkssg.utils import to_slug
 from nkssg.utils import clean_name
-from nkssg.utils import front_matter_setup
 from nkssg.utils import dup_check
 
 
@@ -187,13 +188,8 @@ class Single(Page):
         return (s_order, self.src_path) < (o_order, other.src_path)
 
     def setup(self, config: Config):
-        with open(self.abs_src_path, 'r', encoding='UTF-8') as f:
-            doc = f.read()
 
-        try:
-            self.meta, doc = front_matter_setup(doc)
-        except Exception:
-            raise Exception('front matter error: ' + str(self.abs_src_path))
+        self.meta, doc = self.parse_front_matter(self.abs_src_path)
 
         self.post_type = self._get_post_type()
         self.post_type_slug = config.post_type[self.post_type].slug
@@ -219,6 +215,40 @@ class Single(Page):
         self.archive_type = self._get_archive_type(config)
 
         return self
+
+    @staticmethod
+    def parse_front_matter(path):
+        try:
+            doc = Single.read_document(path)
+
+            parts = doc.split('---')
+            if len(parts) < 3 or parts[0].strip() != '':
+                return {}, doc
+
+            try:
+                front_matter = YAML(typ='safe').load(parts[1]) or {}
+            except YAMLError as e:
+                raise ValueError(f"YAML parsing error in {path}: {str(e)}")
+
+            doc = '---'.join(parts[2:])
+            return front_matter, doc
+
+        except FileNotFoundError:
+            raise FileNotFoundError(f"File not found: {path}")
+        except Exception as e:
+            raise Exception(
+                f"front matter parse error in {path}: {str(e)}")
+
+    @staticmethod
+    def read_document(path):
+        try:
+            with open(path, 'r', encoding='UTF-8') as f:
+                return f.read()
+        except FileNotFoundError:
+            raise FileNotFoundError(f"File not found: {path}")
+        except Exception as e:
+            raise Exception(
+                f"An error occurred while reading {path}: {str(e)}")
 
     def _get_post_type(self):
         return self.src_path.parts[0]
