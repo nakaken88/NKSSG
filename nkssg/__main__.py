@@ -3,7 +3,6 @@ from pathlib import Path
 import click
 
 from nkssg.command import build
-from nkssg.command import clean
 from nkssg.command import new
 from nkssg.config import load_config
 
@@ -47,14 +46,6 @@ def build_draft(path, port):
     config = load_config(mode='draft')
     config['PKG_DIR'] = PKG_DIR
     build.draft(config, path, port)
-
-
-@cli.command(name='clean')
-@click.argument('name')
-def clean_dirs(name):
-
-    config = load_config(mode='clean')
-    clean.clean(config, name)
 
 
 @cli.command(name="new")
