@@ -7,6 +7,7 @@ from nkssg.config import Config
 
 class Themes:
     def __init__(self, config: Config):
+
         self.dirs = []
         self.cnf = {}
 
@@ -16,6 +17,8 @@ class Themes:
         if not self.dirs:
             self.set_default_theme(config)
 
+        config.theme['updated'] = True
+
     def load_theme(self, config: Config, path):
         theme = config.theme.get(path)
         if theme:
@@ -23,7 +26,8 @@ class Themes:
             if theme_dir.exists():
                 self.dirs.append(theme_dir)
                 self.load_theme_config(theme_dir, theme)
-            else:
+
+            elif not config.theme.get('updated'):
                 print(f"{theme} is not found")
 
     def load_theme_config(self, theme_dir: Path, theme_name):
@@ -37,5 +41,6 @@ class Themes:
     def set_default_theme(self, config: Config):
         default_theme_name = 'default'
         default_theme_dir = config["PKG_DIR"] / 'themes' / default_theme_name
+        config.theme['name'] = default_theme_name
         self.dirs.append(default_theme_dir)
         self.load_theme_config(default_theme_dir, default_theme_name)
