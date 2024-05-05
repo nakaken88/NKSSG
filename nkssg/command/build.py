@@ -14,10 +14,9 @@ def build(config: Config, clean=False):
     site.setup()
     site.update()
 
-    if clean:
-        public_dir = config.public_dir
-        if public_dir.exists():
-            shutil.rmtree(public_dir)
+    public_dir = config.public_dir
+    if clean and public_dir.exists():
+        shutil.rmtree(public_dir)
 
     public_dir.mkdir(exist_ok=True)
     site.output()
