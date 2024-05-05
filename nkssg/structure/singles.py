@@ -1,6 +1,5 @@
 import datetime
 import fnmatch
-import json
 import markdown
 from pathlib import Path
 import platform
@@ -32,25 +31,7 @@ class Singles(Pages):
 
         if config['mode'] == 'draft':
             src_path = config['draft_path'].relative_to(docs_dir)
-            self.config['cache_time'] = datetime.datetime.fromtimestamp(0)
             return [Single(src_path, docs_dir, self.plugins)]
-
-        self.config['cache_time_unix'] = 0
-
-        cache_path = Path(config.cache_dir / 'contents.json')
-        self.config['cache_contents'] = {}
-        if cache_path.exists():
-            self.config['cache_time_unix'] = cache_path.stat().st_mtime
-            with open(cache_path) as f:
-                self.config['cache_contents'] = json.load(f)
-
-        cache_path = Path(config.cache_dir / 'htmls.json')
-        self.config['cache_htmls'] = {}
-        if cache_path.exists():
-            with open(cache_path) as f:
-                self.config['cache_htmls'] = json.load(f)
-
-        self.config['cache_time'] = datetime.datetime.fromtimestamp(self.config['cache_time_unix'])
 
         pages = []
         for post_type_name in config.post_type.keys():
@@ -340,10 +321,6 @@ class Single(Page):
         if not doc:
             return ''
 
-        if self.modified <= config['cache_time']:
-            if str(self.src_path) in config['cache_contents'].keys():
-                return config['cache_contents'][str(self.src_path)]
-
         content = doc
         self.content_updated = False
         content = self.plugins.do_action(
@@ -530,11 +507,6 @@ class Single(Page):
         config = singles.config
         if not self.shouldUpdateHtml:
             return
-
-        if self.modified <= config['cache_time']:
-            if str(self.src_path) in config['cache_htmls'].keys():
-                self.html = config['cache_htmls'][str(self.src_path)]
-                return
 
         template_file = self.lookup_template(config, themes)
         template = config.env.get_template(template_file)

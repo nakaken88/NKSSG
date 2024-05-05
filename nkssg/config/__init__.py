@@ -151,14 +151,13 @@ class Config(BaseConfig):
     })
 
     _dir_types: list[str] = field(default_factory=lambda: [
-        'docs', 'public', 'static', 'themes', 'cache'
+        'docs', 'public', 'static', 'themes'
     ])
     base_dir: Path = Path()
     docs_dir: Path = Path()
     public_dir: Path = Path()
     static_dir: Path = Path()
     themes_dir: Path = Path()
-    cache_dir: Path = Path()
 
     doc_ext: list[str] = field(default_factory=lambda: [
         'md', 'markdown', 'html', 'htm', 'txt'
@@ -227,11 +226,6 @@ def load_config(mode):
     config.load_config('nkssg.yml')
 
     config['mode'] = mode
-
-    cache_dir = config['cache_dir']
-    config['cache_contents_path'] = cache_dir / ('contents_' + mode + '.json')
-    config['cache_htmls_path'] = cache_dir / ('htmls_' + mode + '.json')
-
     config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
     return config

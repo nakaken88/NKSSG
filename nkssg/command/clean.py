@@ -3,7 +3,7 @@ import shutil
 
 
 log = logging.getLogger(__name__)
-valid_values = ['public', 'cache']
+valid_values = ['public']
 
 
 def clean(config, name):
