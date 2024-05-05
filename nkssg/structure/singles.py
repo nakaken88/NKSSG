@@ -1,7 +1,7 @@
 import datetime
 import fnmatch
 import markdown
-from pathlib import Path
+from pathlib import Path, PurePath
 import platform
 import re
 from urllib.parse import quote
@@ -46,7 +46,7 @@ class Singles(Pages):
                 if self.is_exclude(relative_path):
                     continue
 
-                pages.append(Single(relative_path, docs_dir, self.plugins, len(pages) + 1))
+                pages.append(Single(relative_path, docs_dir, self.plugins))
 
         return pages
 
@@ -134,10 +134,10 @@ class Singles(Pages):
 
 class Single(Page):
 
-    def __init__(self, src_path, docs_dir, plugins: Plugins = None, id=0):
+    def __init__(self, src_path, docs_dir, plugins: Plugins = None):
         super().__init__()
 
-        self._id = id
+        self.id = PurePath('/', src_path)
 
         self.src_path = Path(src_path)
         self.abs_src_path = docs_dir / self.src_path
@@ -160,7 +160,7 @@ class Single(Page):
         self.plugins = plugins
 
     def __str__(self):
-        return "Single(src='{}')".format(self.src_path)
+        return f"Single(src='{self.id}')"
 
     def __lt__(self, other):
         if self.post_type != other.post_type:
