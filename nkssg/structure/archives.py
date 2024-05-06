@@ -17,8 +17,8 @@ class Archives(Pages):
 
         self.date_root_archive = Archive(None, '/date')
         self.simple_root_archive = Archive(None, '/simple')
-        self.section_root_archive = Archive(None, '/sec')
-        self.taxonomy_root_archive = Archive(None, '/tax')
+        self.section_root_archive = Archive(None, '/section')
+        self.taxonomy_root_archive = Archive(None, '/taxonomy')
 
     def __iter__(self):
         return iter(self.archives)
@@ -152,6 +152,7 @@ class Archives(Pages):
 
         slug = self.config.post_type[post_type].slug or post_type
         root_archive.slug = to_slug(slug)
+        root_archive.archive_type = 'section'
 
         if with_front:
             root_archive.dest_path = Path(root_archive.slug, 'index.html')
@@ -184,6 +185,7 @@ class Archives(Pages):
 
             slug = tax_config.slug or tax_name
             root_archive.slug = to_slug(slug)
+            root_archive.archive_type = 'taxonomy'
 
             root_archive.dest_path = Path(root_archive.slug, 'index.html')
             root_archive.rel_url = root_archive._get_url_from_dest()
@@ -306,6 +308,7 @@ class Archive(Page):
     def set_id(self, parent, name):
         if parent is not None:
             self.id = PurePath(parent.id, name)
+            self.archive_type = self.id.parents[-2].name
         else:
             self.id = PurePath(name)
 
@@ -435,13 +438,13 @@ class Archive(Page):
             post_type_dict = config.post_type[self.root_name]
             paginator['limit'] = post_type_dict.get('limit') or 10
 
-        elif self.archive_type == 'sec' or self.archive_type == 'simple':
+        elif self.archive_type == 'section' or self.archive_type == 'simple':
             target_singles = self.singles
 
             post_type_dict = config.post_type[self.root_name]
             paginator['limit'] = post_type_dict.get('limit') or len(target_singles)
 
-        elif self.archive_type == 'tax':
+        elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
 
             post_type_dict = config.taxonomy[self.root_name]
