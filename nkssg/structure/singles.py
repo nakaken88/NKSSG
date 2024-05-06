@@ -166,8 +166,8 @@ class Single(Page):
         if self.post_type != other.post_type:
             return self.post_type_index < other.post_type_index
 
-        s_order = 0 if self.meta.get('order') is None else self.meta.get('order')
-        o_order = 0 if other.meta.get('order') is None else other.meta.get('order')
+        s_order = self.meta.get('order', 0)
+        o_order = other.meta.get('order', 0)
 
         if s_order < 0 or o_order < 0:
             return (s_order, self.src_path) < (o_order, other.src_path)
@@ -260,7 +260,8 @@ class Single(Page):
         if draft is not None:
             return draft
 
-        status_list = ['draft', 'future', 'pending', 'private', 'trash', 'auto-draft']
+        status_list = ['auto-draft', 'draft', 'future', 'inherit',
+                       'pending', 'private', 'trash']
 
         if self.post_type in status_list:
             return True
@@ -317,14 +318,23 @@ class Single(Page):
                 return 0
 
     def _get_clean_date(self, dirty_date):
-        clean_date = datetime.datetime.fromtimestamp(0)
-        if type(dirty_date) is datetime.datetime:
-            clean_date = dirty_date
-        elif type(dirty_date) is datetime.date:  # yyyy-mm-dd
-            clean_date = datetime.datetime.combine(dirty_date, datetime.time(0, 0, 0))
-        elif dirty_date.count(':') == 1:  # yyyy-mm-dd HH:MM
-            clean_date = datetime.datetime.strptime(dirty_date, '%Y-%m-%d %H:%M')
-        return clean_date
+
+        if isinstance(dirty_date, datetime.datetime):  # yyyy-mm-dd HH:MM:SS
+            return dirty_date
+
+        epoch_datetime = datetime.datetime.fromtimestamp(0)
+        if isinstance(dirty_date, datetime.date):  # yyyy-mm-dd
+            return datetime.datetime.combine(dirty_date, epoch_datetime.time())
+
+        if isinstance(dirty_date, str) and dirty_date.count(':') == 1:
+            # yyyy-mm-dd HH:MM
+            try:
+                return datetime.datetime.strptime(dirty_date, '%Y-%m-%d %H:%M')
+            except ValueError:
+                print(f'{dirty_date} is not valid date value in {self.id}')
+                return epoch_datetime
+
+        return epoch_datetime
 
     def _get_title(self):
         title = self.meta.get('title') or Page.clean_name(self.filename)
@@ -539,7 +549,7 @@ class Single(Page):
         template_file = self.lookup_template(config, themes)
         template = config.env.get_template(template_file)
 
-        if '{{' in self.content or '{#' in self.content or '{%' in self.content:
+        if any(x in self.content for x in ['{{', '{#', '{%']):
             # add "import short code" statement
             additional_statement = ''
             import_sc = '{% import "import/short-code.html" as sc %}'
