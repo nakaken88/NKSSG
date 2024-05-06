@@ -128,6 +128,7 @@ class Archives(Pages):
 
             if date_archive.get_child(year) is None:
                 year_archive = self.create_archive(date_archive, year)
+                year_archive.slug = year
                 year_archive.set_parent(date_archive, self.config)
             else:
                 year_archive = date_archive.get_child(year)
@@ -136,6 +137,7 @@ class Archives(Pages):
 
             if year_archive.get_child(year_month) is None:
                 month_archive = self.create_archive(year_archive, month)
+                month_archive.slug = month
                 month_archive.set_parent(year_archive, self.config)
             else:
                 month_archive = year_archive.get_child(year_month)
@@ -279,11 +281,9 @@ class Archive(Page):
 
         self.set_id(parent, name)
 
-        # self.archive_type = archive_type  # todo
         self.archive_type = ''
         self.name = str(name)
         self.title = self.name
-        # self.slug = to_slug(slug or self.name)  # todo
         self.slug = ''
 
         self.page_type = 'archive'
@@ -412,6 +412,7 @@ class Archive(Page):
                 child_archive.update_url()
 
     def get_archives(self, singles, archives: Archives, themes: Themes):
+
         if not self.shouldUpdateHtml:
             return []
 
