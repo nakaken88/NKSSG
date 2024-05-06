@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PurePath
 
 from nkssg.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
@@ -14,6 +14,11 @@ class Archives(Pages):
         self.archives = []
         self.root_archives = []
         self.pages = []
+
+        self.date_root_archive = Archive(None, '/date')
+        self.simple_root_archive = Archive(None, '/simple')
+        self.section_root_archive = Archive(None, '/sec')
+        self.taxonomy_root_archive = Archive(None, '/tax')
 
     def __iter__(self):
         return iter(self.archives)
@@ -39,13 +44,13 @@ class Archives(Pages):
 
         self.plugins.do_action('after_setup_archives', target=self)
 
-    def create_archive(self, archive_type, name, slug=''):
-        archive = Archive(archive_type, name, slug)
+    def create_archive(self, parent, name):
+        archive = Archive(parent, name)
         self.archives.append(archive)
         return archive
 
-    def create_root_archive(self, archive_type, name, slug=''):
-        root_archive = self.create_archive(archive_type, name, slug)
+    def create_root_archive(self, parent, name):
+        root_archive = self.create_archive(parent, name)
         root_archive.root_archive = root_archive
         root_archive.root_name = root_archive.name
         root_archive.is_root = True
@@ -75,8 +80,11 @@ class Archives(Pages):
                     post_type_name, base_path, with_front)
 
     def setup_simple_archive(self, post_type, singles, with_front):
-        slug = self.config.post_type[post_type].slug
-        root_archive = self.create_root_archive('simple', post_type, slug)
+        root_archive = self.create_root_archive(
+                            self.simple_root_archive, post_type)
+
+        slug = self.config.post_type[post_type].slug or post_type
+        root_archive.slug = to_slug(slug)
 
         if with_front:
             root_archive.dest_path = Path(root_archive.slug, 'index.html')
@@ -93,8 +101,11 @@ class Archives(Pages):
                 single.archive_list.append(root_archive)
 
     def setup_date_archives(self, post_type, singles, with_front):
-        slug = self.config.post_type[post_type].slug
-        date_archive = self.create_root_archive('date', post_type, slug)
+        date_archive = self.create_root_archive(
+                            self.date_root_archive, post_type)
+
+        slug = self.config.post_type[post_type].slug or post_type
+        date_archive.slug = to_slug(slug)
 
         if with_front:
             date_archive.dest_path = Path(date_archive.slug, 'index.html')
@@ -116,7 +127,7 @@ class Archives(Pages):
             year_month = year + month
 
             if date_archive.get_child(year) is None:
-                year_archive = self.create_archive('date', year)
+                year_archive = self.create_archive(date_archive, year)
                 year_archive.set_parent(date_archive, self.config)
             else:
                 year_archive = date_archive.get_child(year)
@@ -124,7 +135,7 @@ class Archives(Pages):
             year_archive.singles_all.append(single)
 
             if year_archive.get_child(year_month) is None:
-                month_archive = self.create_archive('date', year_month, month)
+                month_archive = self.create_archive(year_archive, month)
                 month_archive.set_parent(year_archive, self.config)
             else:
                 month_archive = year_archive.get_child(year_month)
@@ -134,8 +145,11 @@ class Archives(Pages):
             single.archive_list.append(month_archive)
 
     def setup_section_archive(self, post_type, basepath, with_front):
-        slug = self.config.post_type[post_type].slug
-        root_archive = self.create_root_archive('section', post_type, slug)
+        root_archive = self.create_root_archive(
+                            self.section_root_archive, post_type)
+
+        slug = self.config.post_type[post_type].slug or post_type
+        root_archive.slug = to_slug(slug)
 
         if with_front:
             root_archive.dest_path = Path(root_archive.slug, 'index.html')
@@ -151,20 +165,24 @@ class Archives(Pages):
 
         dirs = [d for d in basepath.glob('**/*') if d.is_dir()]
         for dir in sorted(dirs):
+            parent_archive = archive_dict[dir.parent]
+
             name = Page.clean_name(dir.parts[-1])
-            new_archive = self.create_archive('section', name)
+            new_archive = self.create_archive(parent_archive, name)
             new_archive.path = dir
 
-            parent_archive = archive_dict[dir.parent]
             new_archive.set_parent(parent_archive, self.config, flat_url)
             archive_dict[dir] = new_archive
 
     def setup_taxonomy_archives(self, singles):
         for tax_name, tax_config in self.config.taxonomy.items():
 
-            slug = tax_config.slug or tax_name
+            root_archive = self.create_root_archive(
+                                    self.taxonomy_root_archive, tax_name)
 
-            root_archive = self.create_root_archive('taxonomy', tax_name, slug)
+            slug = tax_config.slug or tax_name
+            root_archive.slug = to_slug(slug)
+
             root_archive.dest_path = Path(root_archive.slug, 'index.html')
             root_archive.rel_url = root_archive._get_url_from_dest()
             root_archive._url_setup(self.config)
@@ -189,7 +207,8 @@ class Archives(Pages):
             slug = term.slug or name
             parent_name = term.parent or tax_name
 
-            new_archive = self.create_archive('taxonomy', name, slug)
+            new_archive = self.create_archive(None, name)
+            new_archive.slug = to_slug(slug)
             archive_dict[name] = new_archive
             parent_names[name] = parent_name
             new_archive.meta = term
@@ -201,6 +220,7 @@ class Archives(Pages):
             if parent_name != '' and parent_name in archive_dict.keys():
                 parent = archive_dict[parent_name]
                 archive_item.set_parent(parent, self.config, flat_url)
+                archive_item.set_id(parent, archive_item.name)
 
     def setup_parents(self):
         for root_archive in self.root_archives:
@@ -254,15 +274,17 @@ class Archives(Pages):
 
 class Archive(Page):
 
-    def __init__(self, archive_type, name, slug=''):
+    def __init__(self, parent, name):
         super().__init__()
 
-        self.id = ''
+        self.set_id(parent, name)
 
-        self.archive_type = archive_type
+        # self.archive_type = archive_type  # todo
+        self.archive_type = ''
         self.name = str(name)
         self.title = self.name
-        self.slug = to_slug(slug or self.name)
+        # self.slug = to_slug(slug or self.name)  # todo
+        self.slug = ''
 
         self.page_type = 'archive'
 
@@ -279,7 +301,13 @@ class Archive(Page):
         self.single_index = None
 
     def __str__(self):
-        return "Archive(name='{}', root='{}', type='{}')".format(self.name, self.root_name, self.archive_type)
+        return f"Archive(id='{self.id}')"
+
+    def set_id(self, parent, name):
+        if parent is not None:
+            self.id = PurePath(parent.id, name)
+        else:
+            self.id = PurePath(name)
 
     def get_child(self, name):
         for child in self.children:
@@ -399,19 +427,20 @@ class Archive(Page):
         paginator = {}
         paginator['pages'] = []
 
+        self.archive_type = self.id.parents[-2].name
         if self.archive_type == 'date':
             target_singles = self.singles_all
 
             post_type_dict = config.post_type[self.root_name]
             paginator['limit'] = post_type_dict.get('limit') or 10
 
-        elif self.archive_type == 'section' or self.archive_type == 'simple':
+        elif self.archive_type == 'sec' or self.archive_type == 'simple':
             target_singles = self.singles
 
             post_type_dict = config.post_type[self.root_name]
             paginator['limit'] = post_type_dict.get('limit') or len(target_singles)
 
-        elif self.archive_type == 'taxonomy':
+        elif self.archive_type == 'tax':
             target_singles = self.singles_all
 
             post_type_dict = config.taxonomy[self.root_name]
@@ -430,7 +459,7 @@ class Archive(Page):
 
         while page_index == 1 or start < end:
 
-            archive = Archive(self.archive_type, self.name, self.slug)
+            archive = Archive(None, self.name)
             if page_index == 1:
                 archive.dest_path = dest_dir / 'index.html'
             else:

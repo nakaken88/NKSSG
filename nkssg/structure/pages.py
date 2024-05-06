@@ -26,7 +26,7 @@ class Pages:
 
 class Page:
     def __init__(self):
-        self._id = 0
+        self.id = ''
         self.file_id = ''
 
         self.src_path = ''
