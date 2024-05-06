@@ -29,10 +29,13 @@ class Archives(Pages):
         for archive in self.archives:
             archive.singles_all_count = len(archive.singles_all)
 
-        self._root_archives = {str(a.name): a for a in self.root_archives}
+        self._root_archives = {
+            str(archive.name): archive
+            for archive in self.root_archives}
 
         self._archives = {
-            (str(a.root_name), str(a.name)): a for a in self.archives}
+            (str(archive.root_name), str(archive.name)): archive
+            for archive in self.archives}
 
         self.plugins.do_action('after_setup_archives', target=self)
 
