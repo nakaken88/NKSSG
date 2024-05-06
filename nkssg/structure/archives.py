@@ -40,7 +40,7 @@ class Archives(Pages):
         self.plugins.do_action('after_setup_archives', target=self)
 
     def create_archive(self, archive_type, name, slug=''):
-        archive = Archive(len(self.archives) + 1, archive_type, name, slug)
+        archive = Archive(archive_type, name, slug)
         self.archives.append(archive)
         return archive
 
@@ -254,10 +254,10 @@ class Archives(Pages):
 
 class Archive(Page):
 
-    def __init__(self, id, archive_type, name, slug=''):
+    def __init__(self, archive_type, name, slug=''):
         super().__init__()
 
-        self._id = id
+        self.id = ''
 
         self.archive_type = archive_type
         self.name = str(name)
@@ -430,7 +430,7 @@ class Archive(Page):
 
         while page_index == 1 or start < end:
 
-            archive = Archive(0, self.archive_type, self.name, self.slug)
+            archive = Archive(self.archive_type, self.name, self.slug)
             if page_index == 1:
                 archive.dest_path = dest_dir / 'index.html'
             else:
