@@ -378,19 +378,19 @@ class Single(Page):
             return content
 
     def _get_summary(self):
-        summary = self.meta.get('summary')
-        if summary is None:
-            summary = self.content
-            summary = re.sub(r'<script.*?script>', '', summary, flags=re.DOTALL)
-            summary = re.sub(r'<style.*?style>', '', summary, flags=re.DOTALL)
-            summary = re.sub(r'<[^>]*?>', '', summary, flags=re.DOTALL)
-            summary = re.sub(r'{{[^}]*?}}', '', summary, flags=re.DOTALL)
-            summary = re.sub(r'{#[^}]*?#}', '', summary, flags=re.DOTALL)
-            summary = re.sub(r'{%[^}]*?%}', '', summary, flags=re.DOTALL)
-            summary = summary.replace('/', ' ').replace('\\', ' ')
-            summary = summary.replace('"', ' ').replace("'", ' ')
-            summary = summary.replace('\r\n', '').replace('\n', '')
-            summary = summary[:110]
+        summary = self.meta.get('summary', self.content)
+        remove_patterns = [
+            r'<script.*?script>', r'<style.*?style>',
+            r'<[^>]*?>', r'{{[^}]*?}}', r'{#[^}]*?#}', r'{%[^}]*?%}'
+        ]
+        for pattern in remove_patterns:
+            summary = re.sub(pattern, '', summary, flags=re.DOTALL)
+
+        for word in ['/', '\\', '"', "'"]:
+            summary = summary.replace(word, ' ')
+
+        summary = summary.replace('\r\n', '').replace('\n', '')
+        summary = summary[:110]
         return summary
 
     def _get_image(self, config: Config):
