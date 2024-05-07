@@ -367,8 +367,7 @@ class Single(Page):
         if self.content_updated:
             return content
 
-        ext = self.ext
-        if ext == 'md' or ext == 'markdown':
+        if self.ext in ['md', 'markdown']:
             md_config: dict = config.markdown
 
             return markdown.markdown(
