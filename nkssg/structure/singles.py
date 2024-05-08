@@ -12,7 +12,7 @@ from nkssg.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
-from nkssg.utils import to_slug, dup_check
+from nkssg.utils import to_slug
 
 
 class Singles(Pages):
@@ -21,6 +21,7 @@ class Singles(Pages):
         self.plugins = plugins
         self.pages = self.get_pages_from_docs_directory()
         self.file_ids = {}
+        self.dest_paths = {}
         self.plugins.do_action(
             'after_initialize_singles', target=self)
 
@@ -90,12 +91,18 @@ class Singles(Pages):
             page1.prev_page, page1.next_page = page0, page2
 
         self.src_paths = {str(page.src_path): page for page in self.pages}
-        self.file_id_dup_check()
-        self.file_ids = {str(page.file_id): page for page in self.pages}
+        self.setup_file_ids()
 
-    def file_id_dup_check(self):
-        file_id_list = [(str(page.file_id), page) for page in self.pages]
-        dup_check(file_id_list)
+    def setup_file_ids(self):
+        for page in self.pages:
+            page_id = str(page.file_id)
+            if page_id in self.file_ids:
+                error_message = f"Duplicate file ID detected: {page_id}.\n"
+                error_message += f"Page: {page} \n"
+                error_message += f"Page: {self.file_ids[page_id]}"
+                raise ValueError(error_message)
+            else:
+                self.file_ids[page_id] = page
 
     def update_urls(self):
         for page in self.pages:
@@ -104,8 +111,7 @@ class Singles(Pages):
         self.plugins.do_action(
             'after_update_singles_url', target=self)
 
-        self.dest_path_dup_check()
-        self.dest_paths = {str(page.dest_path): page for page in self.pages}
+        self.setup_dest_path()
 
     def update_htmls(self, archives, themes: Themes):
         self.plugins.do_action(
@@ -121,9 +127,16 @@ class Singles(Pages):
         self.plugins.do_action(
             'after_update_singles_html', target=self)
 
-    def dest_path_dup_check(self):
-        dest_path_list = [(str(page.dest_path), page) for page in self.pages]
-        dup_check(dest_path_list)
+    def setup_dest_path(self):
+        for page in self.pages:
+            dest_path = str(page.dest_path)
+            if dest_path in self.dest_paths:
+                error_message = f"Duplicate Dest Path: {dest_path}.\n"
+                error_message += f"Page: {page} \n"
+                error_message += f"Page: {self.dest_paths[dest_path]}"
+                raise ValueError(error_message)
+            else:
+                self.dest_paths[dest_path] = page
 
     def get_single_by_file_id(self, file_id):
         single = self.file_ids.get(file_id)
