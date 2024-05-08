@@ -1,8 +1,8 @@
-import datetime
 import logging
 from pathlib import Path
 import shutil
 
+from nkssg.config import Config
 from nkssg.structure.themes import Themes
 
 
@@ -113,7 +113,7 @@ def theme_copy(theme_from, theme_to):
             shutil.copyfile(str(f), str(to_path))
 
 
-def page(name, path, config):
+def page(name, path, config: Config):
 
     config['themes'] = Themes(config)
     template_file = None
@@ -134,7 +134,7 @@ def page(name, path, config):
         with open(template_file, 'r', encoding='UTF-8') as f:
             doc = f.read()
 
-        now = datetime.datetime.now()
+        now = config.now
         old_lines = doc.split('\n')
         new_lines = []
         to_path = ''
@@ -168,7 +168,8 @@ def page(name, path, config):
                 new_lines.append(line)
 
         if to_path == '':
-            to_path = config['docs_dir'] / name / now.strftime(r'%Y%m%d-%H%M%S.html')
+            filename = now.strftime(r'%Y%m%d-%H%M%S.html')
+            to_path = config['docs_dir'] / name / filename
 
         if str(to_path).startswith(str(to_path)):
             if not to_path.parent.exists():

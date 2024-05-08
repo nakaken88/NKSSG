@@ -178,6 +178,8 @@ class Config(BaseConfig):
 
     use_abs_url: bool = True
 
+    now = datetime.datetime.now()
+
     env: jinja2.Environment = jinja2.Environment()
 
     def __post_init__(self):
@@ -227,6 +229,5 @@ def load_config(mode):
     config.load_config('nkssg.yml')
 
     config['mode'] = mode
-    config['now'] = datetime.datetime.now(datetime.timezone.utc)
 
     return config

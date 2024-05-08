@@ -195,6 +195,7 @@ class Single(Page):
 
         self.status = self._get_status()
 
+        self.now = config.now
         self.date, self.modified = self._get_date()
         self.is_expired = self._is_expired()
         self.is_future = self._is_future()
@@ -279,16 +280,13 @@ class Single(Page):
         if expire is None:
             return False
 
-        now = datetime.datetime.now()
-
         if isinstance(expire, datetime):
             expire = datetime.datetime.combine(expire, datetime.time(0, 0, 0))
 
-        return expire <= now
+        return expire <= self.now
 
     def _is_future(self):
-        now = datetime.datetime.now()
-        return self.date > now
+        return self.date > self.now
 
     def _get_date(self):
         try:
