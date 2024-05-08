@@ -308,7 +308,7 @@ class Archive(Page):
     def set_id(self, parent, name):
         if parent is not None:
             self.id = PurePath(parent.id, name)
-            self.archive_type = self.id.parents[-2].name
+            self.archive_type = self.id.parts[1]
         else:
             self.id = PurePath(name)
 
@@ -431,7 +431,7 @@ class Archive(Page):
         paginator = {}
         paginator['pages'] = []
 
-        self.archive_type = self.id.parents[-2].name
+        self.archive_type = self.id.parts[1]
         if self.archive_type == 'date':
             target_singles = self.singles_all
 
