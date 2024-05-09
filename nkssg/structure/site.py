@@ -9,7 +9,6 @@ from nkssg.structure.archives import Archives
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.singles import Singles
 from nkssg.structure.themes import Themes
-from nkssg.utils import to_slug
 
 
 class Site:
@@ -77,9 +76,6 @@ class Site:
                     archive_type = 'section'
 
             post_type_config.archive_type = archive_type
-
-            slug = post_type_config.slug or post_type_name
-            post_type_config.slug = to_slug(slug)
 
         return config
 

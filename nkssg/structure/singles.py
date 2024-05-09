@@ -12,7 +12,6 @@ from nkssg.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
-from nkssg.utils import to_slug
 
 
 class Singles(Pages):
@@ -364,7 +363,7 @@ class Single(Page):
                 slug = self.post_type_slug
             else:
                 slug = self.name
-        return to_slug(slug)
+        return Page.to_slug(slug)
 
     def _get_content(self, config: Config, doc):
         if not doc:
@@ -479,7 +478,7 @@ class Single(Page):
                 parts = dest_path.parts
                 new_parts = []
                 for part in parts:
-                    new_parts.append(to_slug(Page.clean_name(part)))
+                    new_parts.append(Page.to_slug(Page.clean_name(part)))
                 dest_path = Path(*new_parts)
 
                 url = self._get_url_from_dest(dest_path)
@@ -510,7 +509,7 @@ class Single(Page):
                 else:
                     filename = Page.clean_name(part_list[-1])
 
-            filename = to_slug(filename)
+            filename = Page.to_slug(filename)
             url = url.replace('{filename}', filename)
 
         if '{' in url:
@@ -535,7 +534,7 @@ class Single(Page):
                         break
 
                 if target_archive is None:
-                    new_part.append('no-' + to_slug(part))
+                    new_part.append('no-' + Page.to_slug(part))
                 else:
                     target_archives = [p for p in target_archive.parents if not p.is_root]
                     target_archives = target_archives + [target_archive]

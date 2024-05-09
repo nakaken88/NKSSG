@@ -4,7 +4,6 @@ from nkssg.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
-from nkssg.utils import to_slug
 
 
 class Archives(Pages):
@@ -84,7 +83,7 @@ class Archives(Pages):
                             self.simple_root_archive, post_type)
 
         slug = self.config.post_type[post_type].slug or post_type
-        root_archive.slug = to_slug(slug)
+        root_archive.slug = Page.to_slug(slug)
 
         if with_front:
             root_archive.dest_path = Path(root_archive.slug, 'index.html')
@@ -105,7 +104,7 @@ class Archives(Pages):
                             self.date_root_archive, post_type)
 
         slug = self.config.post_type[post_type].slug or post_type
-        date_archive.slug = to_slug(slug)
+        date_archive.slug = Page.to_slug(slug)
 
         if with_front:
             date_archive.dest_path = Path(date_archive.slug, 'index.html')
@@ -151,7 +150,7 @@ class Archives(Pages):
                             self.section_root_archive, post_type)
 
         slug = self.config.post_type[post_type].slug or post_type
-        root_archive.slug = to_slug(slug)
+        root_archive.slug = Page.to_slug(slug)
         root_archive.archive_type = 'section'
 
         if with_front:
@@ -184,7 +183,7 @@ class Archives(Pages):
                                     self.taxonomy_root_archive, tax_name)
 
             slug = tax_config.slug or tax_name
-            root_archive.slug = to_slug(slug)
+            root_archive.slug = Page.to_slug(slug)
             root_archive.archive_type = 'taxonomy'
 
             root_archive.dest_path = Path(root_archive.slug, 'index.html')
@@ -212,7 +211,7 @@ class Archives(Pages):
             parent_name = term.parent or tax_name
 
             new_archive = self.create_archive(None, name)
-            new_archive.slug = to_slug(slug)
+            new_archive.slug = Page.to_slug(slug)
             archive_dict[name] = new_archive
             parent_names[name] = parent_name
             new_archive.meta = term

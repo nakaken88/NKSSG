@@ -57,6 +57,10 @@ class Page:
         self.shouldOutput = True
 
     @staticmethod
+    def to_slug(dirty_slug):
+        return dirty_slug.replace(' ', '-').lower()
+
+    @staticmethod
     def clean_name(dirty_name):
         if dirty_name[0] != '_':
             return dirty_name
