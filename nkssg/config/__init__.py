@@ -19,13 +19,13 @@ class BaseConfig:
         else:
             raise KeyError(f"{k} not found in {self.__class__.__name__}.")
 
-    def get(self, k):
+    def get(self, k, default=None):
         if k in self.__dict__:
             return self.__dict__[k]
         elif k in self.extras:
             return self.extras[k]
         else:
-            return None
+            return default
 
     def __setitem__(self, k, v):
         if k in self.__dict__:

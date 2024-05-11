@@ -163,7 +163,7 @@ class Archives(Pages):
 
         root_archive.path = basepath
         archive_dict = {basepath: root_archive}
-        flat_url = self.config.post_type[root_archive.name].get('flat-url') or False
+        flat_url = self.config.post_type[root_archive.name].get('flat-url', False)
 
         dirs = [d for d in basepath.glob('**/*') if d.is_dir()]
         for dir in sorted(dirs):
@@ -216,7 +216,7 @@ class Archives(Pages):
             parent_names[name] = parent_name
             new_archive.meta = term
 
-        flat_url = self.config.taxonomy[root_archive.name].get('flat-url') or False
+        flat_url = self.config.taxonomy[root_archive.name].get('flat-url', False)
 
         for archive_item in archive_dict.values():
             parent_name = parent_names[archive_item.name]
@@ -451,9 +451,9 @@ class Archive(Page):
 
         paginator['total_elements'] = len(target_singles)
 
-        paginator['first_limit'] = post_type_dict.get('first_limit') or paginator['limit']
+        paginator['first_limit'] = post_type_dict.get('first_limit', paginator['limit'])
 
-        paginator['path'] = post_type_dict.get('path') or 'path'
+        paginator['path'] = post_type_dict.get('path', 'path')
 
         # count archive page
         start = 0

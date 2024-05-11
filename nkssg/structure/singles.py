@@ -265,7 +265,7 @@ class Single(Page):
         return self.src_path.parts[0]
 
     def _get_status(self):
-        status = self.meta.get('status') or 'publish'
+        status = self.meta.get('status', 'publish')
         return status
 
     def _is_draft(self):
@@ -307,13 +307,13 @@ class Single(Page):
             cdate_unix = self._creation_date(self.abs_src_path)
             cdate = datetime.datetime.fromtimestamp(cdate_unix)
 
-        cdate = self.meta.get('date') or cdate
+        cdate = self.meta.get('date', cdate)
         cdate = self._get_clean_date(cdate)
 
         mtime_unix = self.abs_src_path.stat().st_mtime
         mdate = datetime.datetime.fromtimestamp(mtime_unix)
 
-        mdate = self.meta.get('modified') or mdate
+        mdate = self.meta.get('modified', mdate)
         mdate = self._get_clean_date(mdate)
 
         return cdate, mdate
@@ -404,9 +404,9 @@ class Single(Page):
         return summary
 
     def _get_image(self, config: Config):
-        image = self.meta.get('image') or {}
+        image = self.meta.get('image')
         if image:
-            src = image.get('src') or ''
+            src = image.get('src', '')
             if src:
                 if 'http' == src[:len('http')]:
                     return image
@@ -420,7 +420,7 @@ class Single(Page):
                 else:
                     image = {}
         if not image:
-            return image
+            return {}
 
         if '/static' == src[:len('/static')]:
             image['rel_url'] = src[len('/static'):]
