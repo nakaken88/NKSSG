@@ -107,7 +107,7 @@ class TaxonomyConfig(BaseConfig):
     desc: str = ''
     label: str = ''
     limit: int = 10
-    term: list[TermConfig] = field(default_factory=list)
+    terms: dict[str, TermConfig] = field(default_factory=dict)
 
     def update(self, d: dict):
         for k, v in d.items():
@@ -116,19 +116,30 @@ class TaxonomyConfig(BaseConfig):
             else:
                 super().update({k: v})
 
-    def update_terms(self, terms):
-        for term_config in terms:
-            term = TermConfig()
+    def update_terms(self, term_config_list, parent=''):
+        for term_config in term_config_list:
             if isinstance(term_config, dict):
-                term.update(term_config)
+                name = term_config.get('name', '')
             else:
                 try:
-                    term.update({'name': str(term_config)})
+                    name = str(term_config)
                 except ValueError as e:
                     raise ValueError(
-                        f"Invalid data for term: {term_config}"
-                        ) from e
-            self.term.append(term)
+                        f"Invalid data for term: {term_config}") from e
+
+            if not name:
+                raise ValueError('term config must have name')
+
+            term = self.terms.get(name, TermConfig(name=name, parent=parent))
+            self.terms[name] = term
+
+            if isinstance(term_config, dict):
+                for k, v in term_config.items():
+                    if k != 'term':
+                        term.update({k: v})
+
+                if 'term' in term_config:
+                    self.update_terms(term_config['term'], term.name)
 
 
 class TaxonomyConfigManager(dict[str, TaxonomyConfig]):
