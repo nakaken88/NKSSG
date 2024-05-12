@@ -3,6 +3,7 @@ from pathlib import Path, PurePath
 from nkssg.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
+from nkssg.structure.singles import Singles
 from nkssg.structure.themes import Themes
 
 
@@ -10,242 +11,218 @@ class Archives(Pages):
     def __init__(self, config: Config, plugins: Plugins):
         self.config = config
         self.plugins = plugins
-        self.archives = []
-        self.root_archives = []
+        self.archives: dict[PurePath, Archive] = {}
+        self.long_ids: dict[PurePath, PurePath] = {}  # for taxonomy
         self.pages = []
 
-        self.date_root_archive = Archive(None, '/date')
-        self.simple_root_archive = Archive(None, '/simple')
-        self.section_root_archive = Archive(None, '/section')
-        self.taxonomy_root_archive = Archive(None, '/taxonomy')
+        global_root_archive = Archive(None, '/')
+        self.archives[global_root_archive.id] = global_root_archive
 
     def __iter__(self):
-        return iter(self.archives)
+        return iter(self.archives.values())
 
     def setup(self, singles):
 
         self.setup_post_type_archives(singles)
         self.setup_taxonomy_archives(singles)
-
-        self.setup_parents()
-        self.add_singles(singles)
-
-        for archive in self.archives:
-            archive.singles_all_count = len(archive.singles_all)
-
-        self._root_archives = {
-            str(archive.name): archive
-            for archive in self.root_archives}
-
-        self._archives = {
-            (str(archive.root_name), str(archive.name)): archive
-            for archive in self.archives}
+        self.update_singles_all()
+        self.update_archive_attribute()
 
         self.plugins.do_action('after_setup_archives', target=self)
 
-    def create_archive(self, parent, name):
-        archive = Archive(parent, name)
-        self.archives.append(archive)
+    def create_archive(self, id: PurePath) -> 'Archive':
+        archive = self.archives.get(id)
+        if archive is not None:
+            return archive
+
+        parent = self.create_archive(id.parent)
+        archive = Archive(parent, id.name)
+
+        archive.slug = Page.to_slug(Page.clean_name(id.name))
+        parent.children[id.name] = archive
+        archive.parent = parent
+
+        self.archives[archive.id] = archive
         return archive
 
-    def create_root_archive(self, parent, name):
-        root_archive = self.create_archive(parent, name)
-        root_archive.root_archive = root_archive
-        root_archive.root_name = root_archive.name
-        root_archive.is_root = True
-        self.root_archives.append(root_archive)
+    @staticmethod
+    def get_modified_top_name(old_path: PurePath, new_top_name) -> PurePath:
+        sub_path = old_path.relative_to(old_path.parents[-2])
+        new_path = PurePath("/") / new_top_name / sub_path
+        return new_path
 
-        return root_archive
+    def setup_post_type_archives(self, singles: Singles):
+        for single in singles.pages:
+            post_type_name = single.id.parts[2]
+            post_type_config = self.config.post_type.get(post_type_name, {})
 
-    def setup_post_type_archives(self, singles):
-        for post_type_name, post_type_config in self.config.post_type.items():
+            archive_type = post_type_config.get('archive_type', '').lower()
 
-            with_front = post_type_config.with_front
-            archive_type = post_type_config.archive_type
-
-            archive_type = archive_type.lower()
-            if archive_type == 'none':
-                continue
+            if archive_type == 'section':
+                id = self.get_modified_top_name(single.id, 'section').parent
 
             elif archive_type == 'simple':
-                self.setup_simple_archive(post_type_name, singles, with_front)
+                id = PurePath('/simple', post_type_name)
 
-            elif archive_type != 'section':
-                self.setup_date_archives(post_type_name, singles, with_front)
+            elif archive_type == 'date':
+                id = PurePath('/date', post_type_name)
+                id = id / PurePath(str(single.date.year).zfill(4))
+                id = id / PurePath(str(single.date.month).zfill(2))
 
             else:
-                base_path = self.config.docs_dir / post_type_name
-                self.setup_section_archive(
-                    post_type_name, base_path, with_front)
-
-    def setup_simple_archive(self, post_type, singles, with_front):
-        root_archive = self.create_root_archive(
-                            self.simple_root_archive, post_type)
-
-        slug = self.config.post_type[post_type].slug or post_type
-        root_archive.slug = Page.to_slug(slug)
-
-        if with_front:
-            root_archive.dest_path = Path(root_archive.slug, 'index.html')
-        else:
-            root_archive.dest_path = Path('index.html')
-
-        root_archive.rel_url = root_archive._get_url_from_dest()
-        root_archive._url_setup(self.config)
-
-        for single in singles:
-            if single.post_type == post_type:
-                root_archive.singles.append(single)
-                root_archive.singles_all.append(single)
-                single.archive_list.append(root_archive)
-
-    def setup_date_archives(self, post_type, singles, with_front):
-        date_archive = self.create_root_archive(
-                            self.date_root_archive, post_type)
-
-        slug = self.config.post_type[post_type].slug or post_type
-        date_archive.slug = Page.to_slug(slug)
-
-        if with_front:
-            date_archive.dest_path = Path(date_archive.slug, 'index.html')
-        else:
-            date_archive.dest_path = Path('index.html')
-
-        date_archive.rel_url = date_archive._get_url_from_dest()
-        date_archive._url_setup(self.config)
-
-        for single in singles:
-            if single.post_type != post_type:
                 continue
 
-            date_archive.singles_all.append(single)
+            archive = self.create_archive(id)
 
-            cdate = single.date
-            year = str(cdate.year).zfill(4)
-            month = str(cdate.month).zfill(2)
-            year_month = year + month
-
-            if date_archive.get_child(year) is None:
-                year_archive = self.create_archive(date_archive, year)
-                year_archive.slug = year
-                year_archive.set_parent(date_archive, self.config)
-            else:
-                year_archive = date_archive.get_child(year)
-
-            year_archive.singles_all.append(single)
-
-            if year_archive.get_child(year_month) is None:
-                month_archive = self.create_archive(year_archive, month)
-                month_archive.slug = month
-                month_archive.set_parent(year_archive, self.config)
-            else:
-                month_archive = year_archive.get_child(year_month)
-
-            month_archive.singles.append(single)
-            month_archive.singles_all.append(single)
-            single.archive_list.append(month_archive)
-
-    def setup_section_archive(self, post_type, basepath, with_front):
-        root_archive = self.create_root_archive(
-                            self.section_root_archive, post_type)
-
-        slug = self.config.post_type[post_type].slug or post_type
-        root_archive.slug = Page.to_slug(slug)
-        root_archive.archive_type = 'section'
-
-        if with_front:
-            root_archive.dest_path = Path(root_archive.slug, 'index.html')
-        else:
-            root_archive.dest_path = Path('index.html')
-
-        root_archive.rel_url = root_archive._get_url_from_dest()
-        root_archive._url_setup(self.config)
-
-        root_archive.path = basepath
-        archive_dict = {basepath: root_archive}
-        flat_url = self.config.post_type[root_archive.name].get('flat-url', False)
-
-        dirs = [d for d in basepath.glob('**/*') if d.is_dir()]
-        for dir in sorted(dirs):
-            parent_archive = archive_dict[dir.parent]
-
-            name = Page.clean_name(dir.parts[-1])
-            new_archive = self.create_archive(parent_archive, name)
-            new_archive.path = dir
-
-            new_archive.set_parent(parent_archive, self.config, flat_url)
-            archive_dict[dir] = new_archive
+            archive.singles.append(single)
+            single.archive_list.append(archive)
 
     def setup_taxonomy_archives(self, singles):
+
         for tax_name, tax_config in self.config.taxonomy.items():
+            self.initialize_taxonomy_archives(tax_name, tax_config.terms)
 
-            root_archive = self.create_root_archive(
-                                    self.taxonomy_root_archive, tax_name)
+        for tax_name in self.config.taxonomy:
+            self.reassign_id(PurePath('/taxonomy', tax_name))
 
-            slug = tax_config.slug or tax_name
-            root_archive.slug = Page.to_slug(slug)
-            root_archive.archive_type = 'taxonomy'
+        for tax_name, tax_config in self.config.taxonomy.items():
+            self.delete_unnecessary_id(tax_name)
 
-            root_archive.dest_path = Path(root_archive.slug, 'index.html')
-            root_archive.rel_url = root_archive._get_url_from_dest()
-            root_archive._url_setup(self.config)
-            root_archive.meta = {}
+        self.add_singles_to_taxonomy_archives(singles)
 
-            self.setup_taxonomy_archive(
-                root_archive, tax_name, tax_config.term)
+    def initialize_taxonomy_archives(
+            self, tax_name, terms: dict[str, TermConfig]):
 
-    def setup_taxonomy_archive(
-            self,
-            root_archive,
-            tax_name,
-            term_list: list[TermConfig]
-            ):
+        root_id = PurePath('/taxonomy', tax_name)
 
-        archive_dict = {tax_name: root_archive}
-        parent_names = {tax_name: ''}
+        for term_name, term_config in terms.items():
 
-        for term in term_list:
+            id = root_id / term_name
+            archive = self.create_archive(id)
 
-            name = term.name
-            slug = term.slug or name
-            parent_name = term.parent or tax_name
+            parent_id = root_id / term_config.parent
+            parent = self.create_archive(parent_id)
 
-            new_archive = self.create_archive(None, name)
-            new_archive.slug = Page.to_slug(slug)
-            archive_dict[name] = new_archive
-            parent_names[name] = parent_name
-            new_archive.meta = term
+            parent.children[term_name] = archive
 
-        flat_url = self.config.taxonomy[root_archive.name].get('flat-url', False)
+            # archive.slug = Page.to_slug(term_config.slug)
 
-        for archive_item in archive_dict.values():
-            parent_name = parent_names[archive_item.name]
-            if parent_name != '' and parent_name in archive_dict.keys():
-                parent = archive_dict[parent_name]
-                archive_item.set_parent(parent, self.config, flat_url)
-                archive_item.set_id(parent, archive_item.name)
+    def reassign_id(self, base_id: PurePath):
 
-    def setup_parents(self):
-        for root_archive in self.root_archives:
-            for child_archve in root_archive.children:
-                self.update_parents(child_archve)
+        base_archive = self.create_archive(base_id)
+        for child_name, child_archive in base_archive.children.items():
+            new_id = base_archive.id / child_name
+            self.create_archive(new_id)
+            self.long_ids[child_archive.id] = new_id
+            self.reassign_id(child_archive.id)
 
-    def update_parents(self, target_archive):
-        parent_archive = target_archive.parent
-        target_archive.parents = [*parent_archive.parents, parent_archive]
-        target_archive.root_name = parent_archive.root_name
+    def delete_unnecessary_id(self, tax_name):
 
-        for child_archve in target_archive.children:
-            self.update_parents(child_archve)
+        root_id = PurePath('/taxonomy', tax_name)
+        root_archive = self.create_archive(root_id)
+        ids_to_remove = set()
 
-    def add_singles(self, singles):
-        for root_archive in self.root_archives:
-            if root_archive.archive_type != 'date':
-                root_archive.add_singles(singles, root_archive.root_name)
+        for child_archive in self.archives.values():
+            if len(child_archive.id.parts) <= 3:
+                continue
+            elif child_archive.id.parts[1] != 'taxonomy':
+                continue
+            elif child_archive.id.parts[2] != tax_name:
+                continue
+            elif child_archive.parent.name != tax_name:
+                id = root_id / child_archive.name
+                ids_to_remove.add(id)
+
+        for id in ids_to_remove:
+            del self.archives[id]
+            del root_archive.children[id.name]
+
+    def add_singles_to_taxonomy_archives(self, singles: Singles):
+        taxonomy_root_archive = self.create_archive(PurePath('/taxonomy'))
+        for root_name in taxonomy_root_archive.children:
+            for single in singles:
+                if single.meta.get(root_name) is None:
+                    continue
+                if not isinstance(single.meta[root_name], list):
+                    single.meta[root_name] = [single.meta[root_name]]
+
+                for term in single.meta[root_name]:
+                    short_id = PurePath('/taxonomy', root_name, term)
+                    id = self.long_ids[short_id]
+                    archive = self.create_archive(id)
+                    if single not in archive.singles:
+                        archive.singles.append(single)
+                        single.archive_list.append(archive)
+
+    def update_singles_all(self):
+        for archive in self.archives.values():
+            if len(archive.id.parts) <= 2:
+                continue
+            if archive.children:
+                continue
+
+            archive.singles_all = archive.singles
+            current_id = archive.id
+
+            for _ in range(len(archive.id.parts)):
+                if len(current_id.parts) <= 3:
+                    break
+
+                current = self.create_archive(current_id)
+                parent = self.create_archive(current_id.parent)
+
+                for single in parent.singles:
+                    if single not in parent.singles_all:
+                        parent.singles_all.append(single)
+
+                for single in current.singles_all:
+                    if single not in parent.singles_all:
+                        parent.singles_all.append(single)
+                current_id = current_id.parent
+
+    def update_archive_attribute(self):
+        for archive in self.archives.values():
+            if len(archive.id.parts) <= 2:
+                continue
+            if len(archive.id.parts) == 3:
+                archive.is_root = True
 
     def update_urls(self):
-        for root_archive in self.root_archives:
-            root_archive.update_url()
+        for id, archive in self.archives.items():
+            if len(id.parts) < 3:
+                continue
+
+            archive_type = id.parts[1]
+            parent = self.create_archive(id.parent)
+
+            root_name = id.parts[2]
+
+            if archive_type == 'taxonomy':
+                root_config = self.config.taxonomy[root_name]
+            else:
+                root_config = self.config.post_type[root_name]
+
+            with_front = root_config.get('with_front', True)
+            flat_url = root_config.get('flat-url', False)
+            slug = Page.to_slug(root_config.slug or root_name)
+
+            if with_front:
+                root_dest = Path(slug, 'index.html')
+            else:
+                root_dest = Path('index.html')
+
+            if len(id.parts) == 3:
+                archive.dest_path = root_dest
+            else:
+                if flat_url:
+                    base_path = root_dest.parent
+                else:
+                    base_path = parent.dest_path.parent
+
+                archive.dest_path = base_path / archive.slug / 'index.html'
+
+            archive.rel_url = archive._get_url_from_dest()
+            archive._url_setup(self.config)
 
         self.plugins.do_action(
             'after_update_archives_url', target=self)
@@ -254,25 +231,11 @@ class Archives(Pages):
         self.plugins.do_action(
             'before_update_archives_html', target=self)
 
-        for archive in self.archives:
+        for archive in self.archives.values():
             self.pages += archive.get_archives(singles, self, themes)
 
         self.plugins.do_action(
             'after_update_archives_html', target=self)
-
-    def get_root_archive_by_name(self, name):
-        name = str(name)
-        archive = self._root_archives.get(name)
-        if archive is None:
-            print('root archive:' + name + ' is not found.')
-        return archive
-
-    def get_archive_by_name(self, root_name, name):
-        root_name, name = str(root_name), str(name)
-        archive = self._archives.get((root_name, name))
-        if archive is None:
-            print('archive:(' + root_name + ', ' + name + ') is not found.')
-        return archive
 
 
 class Archive(Page):
@@ -280,6 +243,7 @@ class Archive(Page):
     def __init__(self, parent, name):
         super().__init__()
 
+        self.id: PurePath
         self.set_id(parent, name)
 
         self.archive_type = ''
@@ -295,7 +259,7 @@ class Archive(Page):
         self.is_root = False
         self.parent = None
         self.parents = []
-        self.children = []
+        self.children = {}
 
         self.singles = []
         self.singles_all = []
@@ -311,33 +275,8 @@ class Archive(Page):
         else:
             self.id = PurePath(name)
 
-    def get_child(self, name):
-        for child in self.children:
-            if child.name == str(name):
-                return child
-        return None
-
-    def set_parent(self, parent, config, flat_url=False):
-        self.parent = parent
-        parent.children.append(self)
-        self.root_archive = parent.root_archive
-
-        if flat_url:
-            base_path = self.root_archive.dest_path.parent
-        else:
-            base_path = parent.dest_path.parent
-
-        self.dest_path = base_path / self.slug / 'index.html'
-        self.rel_url = self._get_url_from_dest()
-        self._url_setup(config)
-
     def add_singles(self, singles, root_name):
-        if self.archive_type == 'section':
-            for single in singles:
-                if single.archive_type == 'section':
-                    self.add_single_to_section_archive(single)
-
-        elif self.archive_type == 'taxonomy':
+        if self.archive_type == 'taxonomy':
             for single in singles:
                 if single.meta.get(root_name) is None:
                     continue
@@ -376,11 +315,11 @@ class Archive(Page):
                     self.single_index = single
 
             else:
-                for archive in self.children:
+                for archive in self.children.values():
                     archive.add_single_to_section_archive(single)
 
     def add_single_to_taxonomy_archive(self, single, root_name):
-        for archive in self.children:
+        for archive in self.children.values():
             if archive.name in single.meta[root_name]:
                 target_archive = archive
                 for parent in target_archive.parents:
@@ -410,7 +349,7 @@ class Archive(Page):
             self.dest_dir = self.single_index.dest_dir
 
         if self.children is not None:
-            for child_archive in self.children:
+            for child_archive in self.children.values():
                 child_archive.update_url()
 
     def get_archives(self, singles, archives: Archives, themes: Themes):
@@ -427,6 +366,8 @@ class Archive(Page):
         config = archives.config
         dest_dir = self.dest_path.parent
 
+        root_name = self.id.parts[2]
+
         paginator = {}
         paginator['pages'] = []
 
@@ -434,19 +375,19 @@ class Archive(Page):
         if self.archive_type == 'date':
             target_singles = self.singles_all
 
-            post_type_dict = config.post_type[self.root_name]
+            post_type_dict = config.post_type[root_name]
             paginator['limit'] = post_type_dict.get('limit') or 10
 
         elif self.archive_type == 'section' or self.archive_type == 'simple':
             target_singles = self.singles
 
-            post_type_dict = config.post_type[self.root_name]
+            post_type_dict = config.post_type[root_name]
             paginator['limit'] = post_type_dict.get('limit') or len(target_singles)
 
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
 
-            post_type_dict = config.taxonomy[self.root_name]
+            post_type_dict = config.taxonomy[root_name]
             paginator['limit'] = post_type_dict.limit
 
         paginator['total_elements'] = len(target_singles)

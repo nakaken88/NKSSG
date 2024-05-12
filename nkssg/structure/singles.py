@@ -149,7 +149,7 @@ class Single(Page):
     def __init__(self, src_path, docs_dir, plugins: Plugins = None):
         super().__init__()
 
-        self.id = PurePath('/docs', src_path)
+        self.id: PurePath = PurePath('/docs', src_path)
 
         self.src_path = Path(src_path)
         self.abs_src_path = docs_dir / self.src_path
