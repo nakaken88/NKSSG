@@ -184,8 +184,13 @@ class Archives(Pages):
         for archive in self.archives.values():
             if len(archive.id.parts) <= 2:
                 continue
+
             if len(archive.id.parts) == 3:
                 archive.is_root = True
+                archive.archive_type = archive.id.parts[1]
+
+            archive.root_name = archive.id.parts[2]
+            archive.singles_all_count = len(archive.singles_all)
 
     def update_urls(self):
         for id, archive in self.archives.items():
@@ -263,6 +268,7 @@ class Archive(Page):
 
         self.singles = []
         self.singles_all = []
+        self.singles_all_count = 0
         self.single_index = None
 
     def __str__(self):
