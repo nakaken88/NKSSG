@@ -38,7 +38,6 @@ class Archives(Pages):
         parent = self.create_archive(id.parent)
         archive = Archive(parent, id.name)
 
-        archive.slug = Page.to_slug(Page.clean_name(id.name))
         parent.children[id.name] = archive
         archive.parent = parent
 
@@ -100,8 +99,6 @@ class Archives(Pages):
             parent = self.create_archive(parent_id)
 
             parent.children[term_name] = archive
-
-            # archive.slug = Page.to_slug(term_config.slug)
 
     def reassign_id(self, base_id: PurePath, terms: dict[str, TermConfig]):
 
@@ -176,6 +173,9 @@ class Archives(Pages):
 
             archive.root_name = archive.id.parts[2]
             archive.singles_all_count = len(archive.singles_all)
+
+            archive.name = Page.clean_name(archive.id.name)
+            archive.slug = Page.to_slug(archive.name)  # todo
 
     def update_urls(self):
         for id, archive in self.archives.items():
