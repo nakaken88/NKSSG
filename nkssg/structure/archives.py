@@ -80,14 +80,9 @@ class Archives(Pages):
     def setup_taxonomy_archives(self, singles):
 
         for tax_name, tax_config in self.config.taxonomy.items():
-            self.initialize_taxonomy_archives(tax_name, tax_config.terms)
-
-        for tax_name, tax_config in self.config.taxonomy.items():
             root_id = PurePath('/taxonomy', tax_name)
+            self.initialize_taxonomy_archives(tax_name, tax_config.terms)
             self.reassign_id(root_id, tax_config.terms)
-
-        for tax_name, tax_config in self.config.taxonomy.items():
-            self.delete_unnecessary_id(tax_name)
 
         self.add_singles_to_taxonomy_archives(singles)
 
@@ -110,7 +105,9 @@ class Archives(Pages):
 
     def reassign_id(self, base_id: PurePath, terms: dict[str, TermConfig]):
 
+        ids_to_remove = set()
         base_archive = self.create_archive(base_id)
+
         for child_name, child_archive in base_archive.children.items():
             term_config = terms[child_name]
             if term_config.parent == '' or term_config.parent == base_id.name:
@@ -118,27 +115,12 @@ class Archives(Pages):
                 self.create_archive(new_id)
                 self.long_ids[child_archive.id] = new_id
                 self.reassign_id(child_archive.id, terms)
-
-    def delete_unnecessary_id(self, tax_name):
-
-        root_id = PurePath('/taxonomy', tax_name)
-        root_archive = self.create_archive(root_id)
-        ids_to_remove = set()
-
-        for child_archive in self.archives.values():
-            if len(child_archive.id.parts) <= 3:
-                continue
-            elif child_archive.id.parts[1] != 'taxonomy':
-                continue
-            elif child_archive.id.parts[2] != tax_name:
-                continue
-            elif child_archive.parent.name != tax_name:
-                id = root_id / child_archive.name
-                ids_to_remove.add(id)
+            else:
+                ids_to_remove.add(child_archive.id)
 
         for id in ids_to_remove:
             del self.archives[id]
-            del root_archive.children[id.name]
+            del base_archive.children[id.name]
 
     def add_singles_to_taxonomy_archives(self, singles: Singles):
         taxonomy_root_archive = self.create_archive(PurePath('/taxonomy'))
