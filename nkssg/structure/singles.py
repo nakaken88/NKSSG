@@ -596,31 +596,31 @@ class Single(Page):
             )
 
     def lookup_template(self, config: Config, themes: Themes):
+
+        def template_exists(template_name):
+            for theme_dir in themes.dirs:
+                template_path = theme_dir / template_name
+                if template_path.exists():
+                    return True
+            return False
+
         template_file = self.meta.get('template')
-
-        for theme_dir in themes.dirs:
-            if template_file is not None:
-                template_file = template_file.replace('.html', '') + '.html'
-                template_path = theme_dir / template_file
-                if template_path.exists():
-                    return template_file
-
-        for theme_dir in themes.dirs:
-            if config['mode'] == 'draft':
-                template_file = 'draft.html'
-                template_path = theme_dir / template_file
-                if template_path.exists():
-                    return template_file
-
-        for theme_dir in themes.dirs:
-            template_file = 'single-' + self.post_type + '.html'
-            template_path = theme_dir / template_file
-            if template_path.exists():
+        if template_file:
+            template_file = template_file.replace('.html', '') + '.html'
+            if template_exists(template_file):
                 return template_file
 
-            template_file = 'single.html'
-            template_path = theme_dir / template_file
-            if template_path.exists():
+        if config['mode'] == 'draft':
+            template_file = 'draft.html'
+            if template_exists(template_file):
                 return template_file
+
+        template_file = 'single-' + self.post_type + '.html'
+        if template_exists(template_file):
+            return template_file
+
+        template_file = 'single.html'
+        if template_exists(template_file):
+            return template_file
 
         return 'main.html'
