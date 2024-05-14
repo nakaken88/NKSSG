@@ -57,49 +57,49 @@ class Singles(Pages):
         return False
 
     def setup(self):
-        config = self.config
-
-        if config['mode'] == 'draft':
-            page = self.pages[0]
-            new_page = page.setup(config)
-            new_page.url = '/'
-            new_page.dest_path = 'index.html'
-            new_page.dest_dir = ''
-            self.pages = [new_page]
-            self.plugins.do_action(
-                'after_setup_draft_singles', target=self)
+        if self.config['mode'] == 'draft':
+            self._setup_draft_mode()
+            self.plugins.do_action('after_setup_draft_singles', target=self)
             return
 
-        new_pages = []
-        for page in self.pages:
-            new_page = page.setup(config)
-
-            if new_page.is_draft and not config.get('serve_all'):
-                continue
-
-            new_pages.append(new_page)
-
+        self._setup_normal_mode()
         self.plugins.do_action('after_setup_singles', target=self)
 
-        self.pages = sorted(new_pages)
+        self.pages.sort()
         self.plugins.do_action('after_sort_singles', target=self)
 
+        self._setup_prev_next_page()
+        self._setup_file_ids()
+
+    def _setup_draft_mode(self):
+        page = self.pages[0]
+        new_page = page.setup(self.config)
+        new_page.url = '/'
+        new_page.dest_path = 'index.html'
+        new_page.dest_dir = ''
+        self.pages = [new_page]
+
+    def _setup_normal_mode(self):
+        new_pages = []
+        for page in self.pages:
+            new_page = page.setup(self.config)
+            if self.config.get('serve_all') or not new_page.is_draft:
+                new_pages.append(new_page)
+        self.pages = new_pages
+
+    def _setup_prev_next_page(self):
         bookended = [None] + self.pages + [None]
         zipped = zip(bookended[:-2], bookended[1:-1], bookended[2:])
         for page0, page1, page2 in zipped:
             page1.prev_page, page1.next_page = page0, page2
 
-        self.src_paths = {str(page.src_path): page for page in self.pages}
-        self.setup_file_ids()
-
-    def setup_file_ids(self):
+    def _setup_file_ids(self):
         for page in self.pages:
             page_id = str(page.file_id)
             if page_id in self.file_ids:
-                error_message = f"Duplicate file ID detected: {page_id}.\n"
-                error_message += f"Page: {page} \n"
-                error_message += f"Page: {self.file_ids[page_id]}"
-                raise ValueError(error_message)
+                raise ValueError(
+                    f"Duplicate file ID detected: '{page_id}' "
+                    f"for pages {page} and {self.file_ids[page_id]}")
             else:
                 self.file_ids[page_id] = page
 
