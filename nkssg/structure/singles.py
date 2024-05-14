@@ -25,30 +25,25 @@ class Singles(Pages):
             'after_initialize_singles', target=self)
 
     def get_pages_from_docs_directory(self):
-        config = self.config
-        docs_dir = config.docs_dir
+        docs_dir = self.config.docs_dir
 
-        if config['mode'] == 'draft':
-            src_path = config['draft_path'].relative_to(docs_dir)
+        if self.config['mode'] == 'draft':
+            src_path = self.config['draft_path'].relative_to(docs_dir)
             return [Single(src_path, docs_dir, self.plugins)]
 
-        pages = []
-        for post_type_name in config.post_type.keys():
-            target_dir = docs_dir / post_type_name
-            files = [f for f in target_dir.glob('**/*') if f.is_file()]
+        def is_valid_file(f):
+            ext = f.suffix[1:]
+            is_file = f.is_file()
+            has_valid_extension = ext in self.config.doc_ext
+            not_excluded = not self.is_exclude(f.relative_to(docs_dir))
+            return is_file and has_valid_extension and not_excluded
 
-            for f in sorted(files):
-                ext = f.suffix[1:]
-                if ext not in config['doc_ext']:
-                    continue
-
-                relative_path = f.relative_to(docs_dir)
-                if self.is_exclude(relative_path):
-                    continue
-
-                pages.append(Single(relative_path, docs_dir, self.plugins))
-
-        return pages
+        return [
+            Single(f.relative_to(docs_dir), docs_dir, self.plugins)
+            for post_type_name in self.config.post_type
+            for f in sorted((docs_dir / post_type_name).glob('**/*'))
+            if is_valid_file(f)
+        ]
 
     def is_exclude(self, target):
         return any(fnmatch(target, item) for item in self.config.exclude)
