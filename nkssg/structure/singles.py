@@ -1,5 +1,5 @@
 import datetime
-import fnmatch
+from fnmatch import fnmatch
 import markdown
 from pathlib import Path, PurePath
 import platform
@@ -51,10 +51,7 @@ class Singles(Pages):
         return pages
 
     def is_exclude(self, target):
-        for item in self.config['exclude']:
-            if fnmatch.fnmatch(target, item):
-                return True
-        return False
+        return any(fnmatch(target, item) for item in self.config.exclude)
 
     def setup(self):
         if self.config['mode'] == 'draft':
