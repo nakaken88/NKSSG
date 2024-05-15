@@ -25,25 +25,29 @@ class Singles(Pages):
             'after_initialize_singles', target=self)
 
     def get_pages_from_docs_directory(self):
-        docs_dir = self.config.docs_dir
-
         if self.config['mode'] == 'draft':
-            src_path = self.config['draft_path'].relative_to(docs_dir)
-            return [Single(src_path, docs_dir, self.plugins)]
+            return self._handle_draft_mode(self.config.docs_dir)
 
-        def is_valid_file(f):
-            ext = f.suffix[1:]
-            is_file = f.is_file()
-            has_valid_extension = ext in self.config.doc_ext
-            not_excluded = not self.is_exclude(f.relative_to(docs_dir))
-            return is_file and has_valid_extension and not_excluded
+        return self._handle_normal_mode(self.config.docs_dir)
 
+    def _handle_draft_mode(self, docs_dir: Path):
+        src_path = self.config['draft_path'].relative_to(docs_dir)
+        return [Single(src_path, docs_dir, self.plugins)]
+
+    def _handle_normal_mode(self, docs_dir: Path):
         return [
             Single(f.relative_to(docs_dir), docs_dir, self.plugins)
             for post_type_name in self.config.post_type
             for f in sorted((docs_dir / post_type_name).glob('**/*'))
-            if is_valid_file(f)
+            if self._is_valid_file(f, docs_dir)
         ]
+
+    def _is_valid_file(self, f: Path, docs_dir: Path):
+        ext = f.suffix[1:]
+        is_file = f.is_file()
+        has_valid_extension = ext in self.config.doc_ext
+        not_excluded = not self.is_exclude(f.relative_to(docs_dir))
+        return is_file and has_valid_extension and not_excluded
 
     def is_exclude(self, target):
         return any(fnmatch(target, item) for item in self.config.exclude)
