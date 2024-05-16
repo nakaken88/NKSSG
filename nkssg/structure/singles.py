@@ -159,7 +159,7 @@ class Single(Page):
 
         self.page_type = 'single'
 
-        self.post_type = ''
+        self.post_type = self.id.parts[2]
         self.status = ''
         self.is_draft = False
         self.is_expired = False
@@ -197,7 +197,6 @@ class Single(Page):
 
         self.meta, doc = self.parse_front_matter(self.abs_src_path)
 
-        self.post_type = self._get_post_type()
         self.post_type_slug = config.post_type[self.post_type].slug
         self.post_type_index = list(config.post_type).index(self.post_type)
 
@@ -256,9 +255,6 @@ class Single(Page):
         except Exception as e:
             raise Exception(
                 f"An error occurred while reading {path}: {str(e)}")
-
-    def _get_post_type(self):
-        return self.src_path.parts[0]
 
     def _get_status(self):
         status = self.meta.get('status', 'publish')

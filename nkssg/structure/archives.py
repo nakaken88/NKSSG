@@ -52,7 +52,7 @@ class Archives(Pages):
 
     def setup_post_type_archives(self, singles: Singles):
         for single in singles.pages:
-            post_type_name = single.id.parts[2]
+            post_type_name = single.post_type
             post_type_config = self.config.post_type.get(post_type_name, {})
 
             archive_type = post_type_config.get('archive_type', '').lower()
