@@ -98,7 +98,7 @@ taxonomy:
     yaml = YAML(typ='safe')
     config.update(yaml.load(yaml_text))
 
-    assert config.taxonomy['tag'].term[1].name == 'tag2'
-    assert config.taxonomy['tag'].term[2].name == 'tag3'
+    assert config.taxonomy['tag'].terms['tag2'].name == 'tag2'
+    assert config.taxonomy['tag'].terms['tag3'].name == 'tag3'
     assert config.taxonomy['tag'].label == 'Tag'
-    assert config.taxonomy['category'].term[1].parent == 'cat1'
+    assert config.taxonomy['category'].terms['cat11'].parent == 'cat1'
