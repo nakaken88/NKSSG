@@ -395,31 +395,44 @@ class Single(Page):
         return summary
 
     def _get_image(self, config: Config):
-        image = self.meta.get('image')
-        if image:
-            src = image.get('src', '')
-            if src:
-                if 'http' == src[:len('http')]:
-                    return image
-                elif '/' == src[:len('/')]:
-                    image_path = config.base_dir / src.strip('/')
-                else:
-                    image_path = self.abs_src_path.parent / src
+        image: dict = self.meta.get('image', {})
+        src: str = image.get('src', '')
 
-                if image_path.exists():
-                    image['old_path'] = image_path
-                else:
-                    image = {}
-        if not image:
+        if not image or not src:
             return {}
 
-        if '/static' == src[:len('/static')]:
-            image['rel_url'] = src[len('/static'):]
+        if src.startswith('http'):
+            return image
+
+        image = self._process_image_src(image, src, config)
+        image = self._set_image_url(image, src, config)
+
+        return image
+
+    def _process_image_src(self, image: dict, src: str, config: Config):
+
+        if src.startswith('/'):
+            image_path = config.base_dir / src.strip('/')
+        else:
+            image_path = self.abs_src_path.parent / src
+
+        if image_path.exists():
+            image['old_path'] = image_path
+        else:
+            image = {}
+            print(f"Warning: Image path '{image_path}'"
+                  f" for post '{self.id}' does not exist.")
+        return image
+
+    def _set_image_url(self, image: dict, src: str, config: Config):
+
+        if src.startswith('/' + config.static_dir):
+            image['rel_url'] = src[len('/' + config.static_dir):]
         else:
             year = str(self.date.year).zfill(4)
             month = str(self.date.month).zfill(2)
 
-            image_name = image_path.name
+            image_name = image['old_path'].name
             thumb_path_parts = ['thumb', year, month, image_name]
             new_path = Path(config.public_dir, *thumb_path_parts)
             image['new_path'] = new_path
@@ -427,7 +440,7 @@ class Single(Page):
             image['rel_url'] = '/' + '/'.join(thumb_path_parts)
 
         image['abs_url'] = config.site.site_url + image['rel_url']
-        if config['use_abs_url']:
+        if config.use_abs_url:
             image['url'] = image['abs_url']
         else:
             image['url'] = image['rel_url']
