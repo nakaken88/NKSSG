@@ -42,6 +42,11 @@ class Page:
         self.summary = ''
         self.image = {}
 
+        self.status = 'public'
+        self.is_draft = False
+        self.is_expired = False
+        self.is_future = False
+
         self.html = ''
         self.url = ''
         self.abs_url = ''

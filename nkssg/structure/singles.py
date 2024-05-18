@@ -166,10 +166,8 @@ class Single(Page):
         self.date = self._get_created_date()
         self.modified = self._get_modified_date()
 
-        self.status = 'public'
-        self.is_draft = False
-        self.is_expired = False
-        self.is_future = False
+        self.post_type_index = list(config.post_type).index(self.post_type)
+        self.archive_type = config.post_type[self.post_type]
 
     def __str__(self):
         return f"Single(src='{self.id}')"
@@ -201,8 +199,7 @@ class Single(Page):
 
         self.meta, doc = self.parse_front_matter(self.abs_src_path)
 
-        self.post_type_slug = config.post_type[self.post_type].slug
-        self.post_type_index = list(config.post_type).index(self.post_type)
+        post_type_config = config.post_type[self.post_type]
 
         self.date, self.modified = self._get_date()
         self.status = self._get_status()
@@ -212,14 +209,13 @@ class Single(Page):
 
         self.title = self._get_title()
         self.name = self._get_name()
-        self.slug = self._get_slug()
+        self.slug = self._get_slug(post_type_config.slug)
 
         self.content = self._get_content(doc, config, plugins)
         self.summary = self._get_summary()
         self.image = self._get_image(config)
 
         self.file_id = self._get_file_id()
-        self.archive_type = self._get_archive_type(config)
 
         return self
 
@@ -350,12 +346,12 @@ class Single(Page):
     def _get_name(self):
         return self.title
 
-    def _get_slug(self):
+    def _get_slug(self, post_type_slug):
         slug = self.meta.get('slug')
         if slug is None:
             # set top index slug to post type slug instead of dir name
             if self.filename == 'index' and len(self.id.parts) == 3:
-                slug = self.post_type_slug
+                slug = post_type_slug
             else:
                 slug = self.name
         return Page.to_slug(slug)
@@ -440,9 +436,6 @@ class Single(Page):
 
     def _get_file_id(self):
         return self.meta.get('file_id') or self.src_path
-
-    def _get_archive_type(self, config: Config):
-        return config.post_type[self.post_type].archive_type
 
     def update_url(self, config):
         self.rel_url, self.dest_path = self._get_url_and_dest_path(config)

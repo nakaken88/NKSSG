@@ -6,6 +6,7 @@ from nkssg.structure.singles import Single
 
 def test_get_url_from_permalink_no_change():
     config = Config()
+    config.update({'post_type': {'sample': {}}})
     dummy_path = config.docs_dir / 'sample' / 'sample.md'
     single = Single(dummy_path, config)
     ret = single.get_url_from_permalink('/sample/', None)
@@ -14,6 +15,7 @@ def test_get_url_from_permalink_no_change():
 
 def test_get_url_from_permalink_YMD():
     config = Config()
+    config.update({'post_type': {'sample': {}}})
     dummy_path = config.docs_dir / 'sample' / 'sample.md'
     single = Single(dummy_path, config)
     now = datetime.datetime.now()
@@ -24,6 +26,7 @@ def test_get_url_from_permalink_YMD():
 
 def test_get_url_from_permalink_YMD_HMS():
     config = Config()
+    config.update({'post_type': {'sample': {}}})
     dummy_path = config.docs_dir / 'sample' / 'sample.md'
     single = Single(dummy_path, config)
     now = datetime.datetime.now()
@@ -34,6 +37,7 @@ def test_get_url_from_permalink_YMD_HMS():
 
 def test_get_url_from_permalink_slug():
     config = Config()
+    config.update({'post_type': {'sample': {}}})
     dummy_path = config.docs_dir / 'sample' / 'sample.md'
     single = Single(dummy_path, config)
     single.slug = 'sample'
@@ -43,6 +47,7 @@ def test_get_url_from_permalink_slug():
 
 def test_get_url_from_permalink_filename():
     config = Config()
+    config.update({'post_type': {'sample': {}}})
     dummy_path = config.docs_dir / 'sample' / 'sample.md'
     single = Single(dummy_path, config)
     ret = single.get_url_from_permalink('/{filename}/', None)
@@ -51,6 +56,7 @@ def test_get_url_from_permalink_filename():
 
 def test_get_url_from_permalink_filename_dirty_name():
     config = Config()
+    config.update({'post_type': {'sample': {}}})
     dummy_path = config.docs_dir / 'sample' / 'A of C.md'
     single = Single(dummy_path, config)
     ret = single.get_url_from_permalink('/{filename}/', None)
@@ -59,6 +65,7 @@ def test_get_url_from_permalink_filename_dirty_name():
 
 def test_get_url_from_permalink_filename_index():
     config = Config()
+    config.update({'post_type': {'sample': {}}})
     dummy_path = config.docs_dir / 'sample' / 'dir1' / 'dir2' / 'index.md'
     single = Single(dummy_path, config)
     ret = single.get_url_from_permalink('/{filename}/', None)
@@ -67,8 +74,8 @@ def test_get_url_from_permalink_filename_index():
 
 def test_get_url_from_permalink_filename_top_index():
     config = Config()
+    config.update({'post_type': {'sample': {'slug': 'new_post_type'}}})
     dummy_path = config.docs_dir / 'sample' / 'index.md'
     single = Single(dummy_path, config)
-    config.update({'post_type': {'sample': {'slug': 'new_post_type'}}})
     ret = single.get_url_from_permalink('/{filename}/', config)
     assert ret == '/new_post_type/'
