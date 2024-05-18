@@ -2,7 +2,6 @@ import datetime
 from fnmatch import fnmatch
 import markdown
 from pathlib import Path, PurePath
-import platform
 import re
 from urllib.parse import quote
 
@@ -161,8 +160,8 @@ class Single(Page):
         self.filename = self.src_path.stem
         self.ext = self.src_path.suffix[1:]
 
-        self.date = ''
-        self.modified = ''
+        self.date = self._get_created_date()
+        self.modified = self._get_modified_date()
 
         self.page_type = 'single'
 
@@ -297,32 +296,38 @@ class Single(Page):
     def _is_future(self):
         return self.date > self.now
 
+    def _get_created_date(self):
+        try:
+            stat_info = self.abs_src_path.stat()
+            created_time = getattr(stat_info, 'st_birthtime', None)
+            if created_time is None:
+                created_time = getattr(stat_info, 'st_ctime', 0)
+        except Exception:
+            created_time = 0
+        return datetime.datetime.fromtimestamp(created_time)
+
+    def _get_modified_date(self):
+        try:
+            stat_info = self.abs_src_path.stat()
+            modified_time = getattr(stat_info, 'st_mtime', 0)
+        except Exception:
+            modified_time = 0
+        return datetime.datetime.fromtimestamp(modified_time)
+
     def _get_date(self):
         try:
             cdate = datetime.datetime.strptime(self.filename, '%Y%m%d')
         except ValueError:
-            cdate_unix = self._creation_date(self.abs_src_path)
-            cdate = datetime.datetime.fromtimestamp(cdate_unix)
+            cdate = self.date
 
         cdate = self.meta.get('date', cdate)
         cdate = self._get_clean_date(cdate)
 
-        mtime_unix = self.abs_src_path.stat().st_mtime
-        mdate = datetime.datetime.fromtimestamp(mtime_unix)
-
-        mdate = self.meta.get('modified', mdate)
+        mdate = self.meta.get('modified', self.modified)
         mdate = self._get_clean_date(mdate)
+        mdate = max(cdate, mdate)
 
         return cdate, mdate
-
-    def _creation_date(self, path_to_file):
-        if platform.system() == 'Windows':
-            return self.abs_src_path.stat().st_ctime
-        else:
-            try:
-                return self.abs_src_path.stat().st_birthtime
-            except AttributeError:
-                return 0
 
     def _get_clean_date(self, dirty_date):
 
