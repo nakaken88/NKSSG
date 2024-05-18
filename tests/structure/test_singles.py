@@ -1,19 +1,22 @@
 import datetime
-from pathlib import Path
 
 from nkssg.config import Config
 from nkssg.structure.singles import Single
 
 
 def test_get_url_from_permalink_no_change():
-    single = Single('', '')
+    config = Config()
+    dummy_path = config.docs_dir / 'sample' / 'sample.md'
+    single = Single(dummy_path, config)
     single.date = datetime.datetime.now()
     ret = single.get_url_from_permalink('/sample/', None)
     assert ret == '/sample/'
 
 
 def test_get_url_from_permalink_YMD():
-    single = Single('', '')
+    config = Config()
+    dummy_path = config.docs_dir / 'sample' / 'sample.md'
+    single = Single(dummy_path, config)
     now = datetime.datetime.now()
     single.date = datetime.datetime.now()
     ret = single.get_url_from_permalink('/%Y/%m/%d/', None)
@@ -21,7 +24,9 @@ def test_get_url_from_permalink_YMD():
 
 
 def test_get_url_from_permalink_YMD_HMS():
-    single = Single('', '')
+    config = Config()
+    dummy_path = config.docs_dir / 'sample' / 'sample.md'
+    single = Single(dummy_path, config)
     now = datetime.datetime.now()
     single.date = datetime.datetime.now()
     ret = single.get_url_from_permalink('/%Y/%m/%d/%H%M%S/', None)
@@ -29,7 +34,9 @@ def test_get_url_from_permalink_YMD_HMS():
 
 
 def test_get_url_from_permalink_slug():
-    single = Single('', '')
+    config = Config()
+    dummy_path = config.docs_dir / 'sample' / 'sample.md'
+    single = Single(dummy_path, config)
     single.date = datetime.datetime.now()
     single.slug = 'sample'
     ret = single.get_url_from_permalink('/{slug}/', None)
@@ -37,37 +44,37 @@ def test_get_url_from_permalink_slug():
 
 
 def test_get_url_from_permalink_filename():
-    single = Single('', '')
+    config = Config()
+    dummy_path = config.docs_dir / 'sample' / 'sample.md'
+    single = Single(dummy_path, config)
     single.date = datetime.datetime.now()
-    single.filename = 'sample'
     ret = single.get_url_from_permalink('/{filename}/', None)
     assert ret == '/sample/'
 
 
 def test_get_url_from_permalink_filename_dirty_name():
-    single = Single('', '')
+    config = Config()
+    dummy_path = config.docs_dir / 'sample' / 'A of C.md'
+    single = Single(dummy_path, config)
     single.date = datetime.datetime.now()
-    single.filename = 'A of C'
     ret = single.get_url_from_permalink('/{filename}/', None)
     assert ret == '/a-of-c/'
 
 
 def test_get_url_from_permalink_filename_index():
-    single = Single('', '')
+    config = Config()
+    dummy_path = config.docs_dir / 'sample' / 'dir1' / 'dir2' / 'index.md'
+    single = Single(dummy_path, config)
     single.date = datetime.datetime.now()
-    single.filename = 'index'
-    single.src_dir = Path('post_type', 'dir1', 'dir2')
     ret = single.get_url_from_permalink('/{filename}/', None)
     assert ret == '/dir2/'
 
 
 def test_get_url_from_permalink_filename_top_index():
-    single = Single('', '')
-    single.date = datetime.datetime.now()
-    single.filename = 'index'
-    single.post_type = 'sample_post_type'
-    single.src_dir = Path(single.post_type)
     config = Config()
-    config.update({'post_type': {'sample_post_type': {'slug': 'new_post_type'}}})
+    dummy_path = config.docs_dir / 'sample' / 'index.md'
+    single = Single(dummy_path, config)
+    single.date = datetime.datetime.now()
+    config.update({'post_type': {'sample': {'slug': 'new_post_type'}}})
     ret = single.get_url_from_permalink('/{filename}/', config)
     assert ret == '/new_post_type/'
