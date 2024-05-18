@@ -32,11 +32,11 @@ class Singles(Pages):
 
     def _handle_draft_mode(self, docs_dir: Path):
         src_path = self.config['draft_path'].relative_to(docs_dir)
-        return [Single(src_path, docs_dir, self.plugins)]
+        return [Single(src_path, docs_dir)]
 
     def _handle_normal_mode(self, docs_dir: Path):
         return [
-            Single(f.relative_to(docs_dir), docs_dir, self.plugins)
+            Single(f.relative_to(docs_dir), docs_dir)
             for post_type_name in self.config.post_type
             for f in sorted((docs_dir / post_type_name).glob('**/*'))
             if self._is_valid_file(f, docs_dir)
@@ -69,7 +69,7 @@ class Singles(Pages):
 
     def _setup_draft_mode(self):
         page = self.pages[0]
-        new_page = page.setup(self.config)
+        new_page = page.setup(self.config, self.plugins)
         new_page.url = '/'
         new_page.dest_path = 'index.html'
         new_page.dest_dir = ''
@@ -78,7 +78,7 @@ class Singles(Pages):
     def _setup_normal_mode(self):
         new_pages = []
         for page in self.pages:
-            new_page = page.setup(self.config)
+            new_page = page.setup(self.config, self.plugins)
             if self.config.get('serve_all') or not new_page.is_draft:
                 new_pages.append(new_page)
         self.pages = new_pages
@@ -142,7 +142,7 @@ class Singles(Pages):
 
 class Single(Page):
 
-    def __init__(self, src_path, docs_dir, plugins: Plugins = None):
+    def __init__(self, src_path, docs_dir):
         super().__init__()
 
         self.id: PurePath = PurePath('/docs', src_path)
@@ -164,8 +164,6 @@ class Single(Page):
         self.is_draft = False
         self.is_expired = False
         self.is_future = False
-
-        self.plugins = plugins
 
     def __str__(self):
         return f"Single(src='{self.id}')"
@@ -193,7 +191,7 @@ class Single(Page):
 
         return (s_order, self.src_path) < (o_order, other.src_path)
 
-    def setup(self, config: Config):
+    def setup(self, config: Config, plugins: Plugins):
 
         self.meta, doc = self.parse_front_matter(self.abs_src_path)
 
@@ -212,7 +210,7 @@ class Single(Page):
         self.name = self._get_name()
         self.slug = self._get_slug()
 
-        self.content = self._get_content(config, doc)
+        self.content = self._get_content(doc, config, plugins)
         self.summary = self._get_summary()
 
         self.image = self._get_image(config)
@@ -357,13 +355,13 @@ class Single(Page):
                 slug = self.name
         return Page.to_slug(slug)
 
-    def _get_content(self, config: Config, doc):
+    def _get_content(self, doc, config: Config, plugins: Plugins):
         if not doc:
             return ''
 
         content = doc
         self.content_updated = False
-        content = self.plugins.do_action(
+        content = plugins.do_action(
             'on_get_content', target=content, config=config, single=self)
 
         if self.content_updated:
@@ -544,6 +542,7 @@ class Single(Page):
 
     def update_html(self, singles: Singles, archives, themes: Themes):
         config = singles.config
+        plugins = singles.plugins
         if not self.shouldUpdateHtml:
             return
 
@@ -573,7 +572,7 @@ class Single(Page):
 
             self.content = content
 
-        self.content = self.plugins.do_action(
+        self.content = plugins.do_action(
             'before_render_html',
             target=self.content,
             config=config,
@@ -586,7 +585,7 @@ class Single(Page):
             'mypage': self,
             })
 
-        self.html = self.plugins.do_action(
+        self.html = plugins.do_action(
             'after_render_html',
             target=self.html,
             config=config,
