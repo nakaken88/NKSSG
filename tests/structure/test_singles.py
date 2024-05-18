@@ -8,7 +8,6 @@ def test_get_url_from_permalink_no_change():
     config = Config()
     dummy_path = config.docs_dir / 'sample' / 'sample.md'
     single = Single(dummy_path, config)
-    single.date = datetime.datetime.now()
     ret = single.get_url_from_permalink('/sample/', None)
     assert ret == '/sample/'
 
@@ -37,7 +36,6 @@ def test_get_url_from_permalink_slug():
     config = Config()
     dummy_path = config.docs_dir / 'sample' / 'sample.md'
     single = Single(dummy_path, config)
-    single.date = datetime.datetime.now()
     single.slug = 'sample'
     ret = single.get_url_from_permalink('/{slug}/', None)
     assert ret == '/sample/'
@@ -47,7 +45,6 @@ def test_get_url_from_permalink_filename():
     config = Config()
     dummy_path = config.docs_dir / 'sample' / 'sample.md'
     single = Single(dummy_path, config)
-    single.date = datetime.datetime.now()
     ret = single.get_url_from_permalink('/{filename}/', None)
     assert ret == '/sample/'
 
@@ -56,7 +53,6 @@ def test_get_url_from_permalink_filename_dirty_name():
     config = Config()
     dummy_path = config.docs_dir / 'sample' / 'A of C.md'
     single = Single(dummy_path, config)
-    single.date = datetime.datetime.now()
     ret = single.get_url_from_permalink('/{filename}/', None)
     assert ret == '/a-of-c/'
 
@@ -65,7 +61,6 @@ def test_get_url_from_permalink_filename_index():
     config = Config()
     dummy_path = config.docs_dir / 'sample' / 'dir1' / 'dir2' / 'index.md'
     single = Single(dummy_path, config)
-    single.date = datetime.datetime.now()
     ret = single.get_url_from_permalink('/{filename}/', None)
     assert ret == '/dir2/'
 
@@ -74,7 +69,6 @@ def test_get_url_from_permalink_filename_top_index():
     config = Config()
     dummy_path = config.docs_dir / 'sample' / 'index.md'
     single = Single(dummy_path, config)
-    single.date = datetime.datetime.now()
     config.update({'post_type': {'sample': {'slug': 'new_post_type'}}})
     ret = single.get_url_from_permalink('/{filename}/', config)
     assert ret == '/new_post_type/'
