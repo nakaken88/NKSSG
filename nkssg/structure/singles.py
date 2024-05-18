@@ -155,7 +155,10 @@ class Single(Page):
         self.abs_src_path = abs_src_path
         self.src_path = abs_src_path.relative_to(docs_dir)
         self.src_dir = self.src_path.parent
+
         self.id: PurePath = PurePath('/docs', self.src_path)
+        self.post_type = self.id.parts[2]
+        self.page_type = 'single'
 
         self.filename = self.src_path.stem
         self.ext = self.src_path.suffix[1:]
@@ -163,10 +166,7 @@ class Single(Page):
         self.date = self._get_created_date()
         self.modified = self._get_modified_date()
 
-        self.page_type = 'single'
-
-        self.post_type = self.id.parts[2]
-        self.status = ''
+        self.status = 'public'
         self.is_draft = False
         self.is_expired = False
         self.is_future = False
@@ -204,12 +204,10 @@ class Single(Page):
         self.post_type_slug = config.post_type[self.post_type].slug
         self.post_type_index = list(config.post_type).index(self.post_type)
 
-        self.status = self._get_status()
-
-        self.now = config.now
         self.date, self.modified = self._get_date()
-        self.is_expired = self._is_expired()
-        self.is_future = self._is_future()
+        self.status = self._get_status()
+        self.is_expired = self._is_expired(config.now)
+        self.is_future = self._is_future(config.now)
         self.is_draft = self._is_draft()
 
         self.title = self._get_title()
@@ -218,7 +216,6 @@ class Single(Page):
 
         self.content = self._get_content(doc, config, plugins)
         self.summary = self._get_summary()
-
         self.image = self._get_image(config)
 
         self.file_id = self._get_file_id()
@@ -230,7 +227,6 @@ class Single(Page):
     def parse_front_matter(path):
         try:
             doc = Single.read_document(path)
-
             parts = doc.split('---')
             if len(parts) < 3 or parts[0].strip() != '':
                 return {}, doc
@@ -259,42 +255,6 @@ class Single(Page):
         except Exception as e:
             raise Exception(
                 f"An error occurred while reading {path}: {str(e)}")
-
-    def _get_status(self):
-        status = self.meta.get('status', 'publish')
-        return status
-
-    def _is_draft(self):
-        draft = self.meta.get('draft')
-        if draft is not None:
-            return draft
-
-        status_list = ['auto-draft', 'draft', 'future', 'inherit',
-                       'pending', 'private', 'trash']
-
-        if self.post_type in status_list:
-            return True
-
-        if self.status in status_list:
-            return True
-
-        if self.is_expired or self.is_future:
-            return True
-
-        return False
-
-    def _is_expired(self):
-        expire = self.meta.get('expire')
-        if expire is None:
-            return False
-
-        if isinstance(expire, datetime):
-            expire = datetime.datetime.combine(expire, datetime.time(0, 0, 0))
-
-        return expire <= self.now
-
-    def _is_future(self):
-        return self.date > self.now
 
     def _get_created_date(self):
         try:
@@ -348,6 +308,39 @@ class Single(Page):
 
         return epoch_datetime
 
+    def _get_status(self):
+        return self.meta.get('status', 'publish')
+
+    def _is_expired(self, now):
+        expire = self.meta.get('expire')
+        if expire is None:
+            return False
+
+        expire = self._get_clean_date(expire)
+        return expire <= now
+
+    def _is_future(self, now):
+        return self.date > now
+
+    def _is_draft(self):
+        draft = self.meta.get('draft')
+        if draft is not None:
+            return draft
+
+        status_list = ['auto-draft', 'draft', 'future', 'inherit',
+                       'pending', 'private', 'trash']
+
+        if self.post_type in status_list:
+            return True
+
+        if self.status in status_list:
+            return True
+
+        if self.is_expired or self.is_future:
+            return True
+
+        return False
+
     def _get_title(self):
         title = self.meta.get('title') or Page.clean_name(self.filename)
         if self.filename == 'index' and title == 'index':
@@ -355,13 +348,13 @@ class Single(Page):
         return title
 
     def _get_name(self):
-        return self.title[:80]
+        return self.title
 
     def _get_slug(self):
         slug = self.meta.get('slug')
         if slug is None:
             # set top index slug to post type slug instead of dir name
-            if self.filename == 'index' and str(self.src_dir) == self.post_type:
+            if self.filename == 'index' and len(self.id.parts) == 3:
                 slug = self.post_type_slug
             else:
                 slug = self.name
@@ -427,15 +420,15 @@ class Single(Page):
         if '/static' == src[:len('/static')]:
             image['rel_url'] = src[len('/static'):]
         else:
-            cdate = self.date
-            year = str(cdate.year).zfill(4)
-            month = str(cdate.month).zfill(2)
+            year = str(self.date.year).zfill(4)
+            month = str(self.date.month).zfill(2)
 
             image_name = image_path.name
-            new_path = Path(config.public_dir, 'thumb', year, month, image_name)
+            thumb_path_parts = ['thumb', year, month, image_name]
+            new_path = Path(config.public_dir, *thumb_path_parts)
             image['new_path'] = new_path
 
-            image['rel_url'] = '/' + '/'.join(['thumb', year, month, image_name])
+            image['rel_url'] = '/' + '/'.join(thumb_path_parts)
 
         image['abs_url'] = config.site.site_url + image['rel_url']
         if config['use_abs_url']:
