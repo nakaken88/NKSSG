@@ -26,23 +26,24 @@ class Singles(Pages):
 
     def get_pages_from_docs_directory(self):
         if self.config['mode'] == 'draft':
-            return self._handle_draft_mode(self.config.docs_dir)
+            return self._handle_draft_mode()
 
-        return self._handle_normal_mode(self.config.docs_dir)
+        return self._handle_normal_mode()
 
-    def _handle_draft_mode(self, docs_dir: Path):
-        src_path = self.config['draft_path'].relative_to(docs_dir)
-        return [Single(src_path, docs_dir)]
+    def _handle_draft_mode(self):
+        draft_path = self.config['draft_path']
+        return [Single(draft_path, self.config)]
 
-    def _handle_normal_mode(self, docs_dir: Path):
+    def _handle_normal_mode(self):
         return [
-            Single(f.relative_to(docs_dir), docs_dir)
-            for post_type_name in self.config.post_type
-            for f in sorted((docs_dir / post_type_name).glob('**/*'))
-            if self._is_valid_file(f, docs_dir)
+            Single(f, self.config)
+            for post_type in self.config.post_type
+            for f in sorted((self.config.docs_dir / post_type).glob('**/*'))
+            if self._is_valid_file(f)
         ]
 
-    def _is_valid_file(self, f: Path, docs_dir: Path):
+    def _is_valid_file(self, f: Path):
+        docs_dir = self.config.docs_dir
         ext = f.suffix[1:]
         is_file = f.is_file()
         has_valid_extension = ext in self.config.doc_ext
@@ -142,14 +143,20 @@ class Singles(Pages):
 
 class Single(Page):
 
-    def __init__(self, src_path, docs_dir):
+    def __init__(self, abs_src_path: Path, config: Config):
         super().__init__()
 
-        self.id: PurePath = PurePath('/docs', src_path)
+        docs_dir = config.docs_dir
 
-        self.src_path = Path(src_path)
-        self.abs_src_path = docs_dir / self.src_path
+        if docs_dir not in abs_src_path.parents:
+            raise ValueError(
+                f"The path '{abs_src_path}' must be a descendant "
+                "of the docs dir '{docs_dir}'.")
+
+        self.abs_src_path = abs_src_path
+        self.src_path = abs_src_path.relative_to(docs_dir)
         self.src_dir = self.src_path.parent
+        self.id: PurePath = PurePath('/docs', self.src_path)
 
         self.filename = self.src_path.stem
         self.ext = self.src_path.suffix[1:]
