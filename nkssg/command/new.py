@@ -120,70 +120,57 @@ def theme_copy(theme_from: Path, theme_to: Path):
 
 def page(name, path, config: Config):
 
-    config['themes'] = Themes(config)
+    themes = Themes(config)
     template_file = None
 
-    for d in config['themes'].dirs:
-        if template_file is not None:
-            break
+    for d in themes.dirs:
         for f in d.glob('**/*'):
-            if template_file is not None:
-                break
             if f.is_file() and f.stem == 'new_' + name:
                 template_file = f
+                break
+        if template_file is not None:
+            break
 
     if template_file is None:
         log.warning(name + ' is not found')
         return
-    else:
-        with open(template_file, 'r', encoding='UTF-8') as f:
-            doc = f.read()
 
-        now = config.now
-        old_lines = doc.split('\n')
-        new_lines = []
-        to_path = ''
+    with open(template_file, 'r', encoding='UTF-8') as f:
+        doc = f.read()
 
-        dash_count = 0
-        for i, line in enumerate(old_lines):
-            if i == 0 and line != '---':
-                new_lines = old_lines
-                break
+    old_lines = doc.split('\n')
+    new_lines = []
+    filename = config.now.strftime(r'%Y%m%d-%H%M%S.html')
+    to_path = config.docs_dir / name / filename
 
-            if line == '---':
-                dash_count = dash_count + 1
+    dash_count = 0
+    for i, line in enumerate(old_lines):
+        if i == 0 and line.strip() != '---':
+            new_lines = old_lines
+            break
 
-            if dash_count == 1 and line[0] != '#':
-                parts = r'%Y %m %d %H %M %S'.split(' ')
-                for part in parts:
-                    if part in line:
-                        line = line.replace(part, now.strftime(part))
+        if line.strip() == '---':
+            dash_count = dash_count + 1
 
-                if r'{path}' in line:
-                    line = line.replace(r'{path}', path)
+        if dash_count == 1 and line.strip() and line.strip()[0] != '#':
+            line = line.replace(r'{path}', path)
+            parts = r'%Y %m %d %H %M %S'.split(' ')
+            for part in parts:
+                line = line.replace(part, config.now.strftime(part))
 
-                if line[:5] == 'file:':
-                    value = line[5:].strip()
-                    value = value.strip('/').strip('\\')
-                    value = value.strip('"').strip("'")
-                    to_path = Path(config['docs_dir'], value)
-                else:
-                    new_lines.append(line)
+            if line.startswith('file:'):
+                file_path = line[len('file:'):].strip()
+                file_path = file_path.strip('/').strip('\\')
+                file_path = file_path.strip('"').strip("'")
+                to_path = config.docs_dir / file_path
             else:
                 new_lines.append(line)
-
-        if to_path == '':
-            filename = now.strftime(r'%Y%m%d-%H%M%S.html')
-            to_path = config['docs_dir'] / name / filename
-
-        if str(to_path).startswith(str(to_path)):
-            if not to_path.parent.exists():
-                to_path.parent.mkdir(parents=True)
-
-            with open(to_path, mode='w', encoding='utf-8') as f:
-                f.write('\n'.join(new_lines))
-
-            print(str(to_path) + ' is created!')
-
         else:
-            log.warning('There is something wrong with the file setting.')
+            new_lines.append(line)
+
+    to_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(to_path, mode='w', encoding='utf-8') as f:
+        f.write('\n'.join(new_lines))
+
+    print(f'{to_path} is created!')
