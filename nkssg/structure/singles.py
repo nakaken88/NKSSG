@@ -501,54 +501,65 @@ class Single(Page):
         url = url.replace('{slug}', self.slug)
 
         if '{filename}' in url:
-            filename = Page.clean_name(self.filename)
-            if filename == 'index':
-                part_list = list(self.src_dir.parts)
-                if len(part_list) == 1:
-                    filename = config.post_type[self.post_type].slug
-                else:
-                    filename = Page.clean_name(part_list[-1])
-
-            filename = Page.to_slug(filename)
+            filename = self._get_filename_slug(config)
             url = url.replace('{filename}', filename)
 
-        if '{' in url:
-            parts = re.findall(r'\{.*?\}', url)
-            for part in parts:
-                original_part = part
-                part = part[1:-1]
-
-                part_type = 'all'
-                if '_top' in part:
-                    part_type = 'top'
-                    part = part[:-(len('_top'))]
-                elif '_last' in part:
-                    part_type = 'last'
-                    part = part[:-(len('_last'))]
-
-                new_part = []
-                target_archive = None
-                for archive in self.archive_list:
-                    if archive.root_name == part and not archive.is_root:
-                        target_archive = archive
-                        break
-
-                if target_archive is None:
-                    new_part.append('no-' + Page.to_slug(part))
-                else:
-                    target_archives = [p for p in target_archive.parents if not p.is_root]
-                    target_archives = target_archives + [target_archive]
-
-                    if part_type == 'all':
-                        new_part = [p.slug for p in target_archives]
-                    elif part_type == 'top':
-                        new_part = [target_archives[0].slug]
-                    elif part_type == 'last':
-                        new_part = [target_archives[-1].slug]
-
-                url = url.replace(original_part, '/'.join(new_part))
-
+        url = self._replace_dynamic_parts_in_url(url)
         return quote(url).lower()
+
+    def _get_filename_slug(self, config: Config):
+        filename_slug = self.filename
+        if filename_slug.lower() == 'index':
+            if len(self.src_dir.parts) == 1:
+                filename_slug = config.post_type[self.post_type].slug
+            else:
+                filename_slug = self.src_dir.parts[-1]
+        return Page.to_slug(Page.clean_name(filename_slug))
+
+    def _replace_dynamic_parts_in_url(self, url: str):
+        dynamic_parts = re.findall(r'\{.*?\}', url)
+        for original_part in dynamic_parts:
+            part = original_part[1:-1]
+
+            part_type, part = self._extract_part_type(part)
+
+            new_part = self._get_dynamic_part_replacement(part, part_type)
+            url = url.replace(original_part, '/'.join(new_part))
+        return url
+
+    def _extract_part_type(self, part):
+        if '_top' in part:
+            return 'top', part[:-len('_top')]
+        elif '_last' in part:
+            return 'last', part[:-len('_last')]
+        return 'all', part
+
+    def _get_target_archives_for_permalink(self, part):
+        target_archives = []
+        archive_list = self.archive_list
+
+        for archive in archive_list:
+            if archive.root_name == part:
+                target_archives.append(archive)
+                for p in archive.parent:
+                    if p.is_root:
+                        break
+                    target_archives.append(p)
+                return target_archives[::-1]
+        return target_archives
+
+    def _get_dynamic_part_replacement(self, part, part_type):
+        target_archives = self._get_target_archives_for_permalink(part)
+
+        if not target_archives:
+            return ['no-' + Page.to_slug(part)]
+
+        if part_type == 'all':
+            return [p.slug for p in target_archives]
+        elif part_type == 'top':
+            return [target_archives[0].slug]
+        elif part_type == 'last':
+            return [target_archives[-1].slug]
 
     def update_html(self, singles: Singles, archives, themes: Themes):
         config = singles.config
