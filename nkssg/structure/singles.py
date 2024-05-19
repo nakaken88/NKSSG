@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 from ruamel.yaml import YAML, YAMLError
 
-from nkssg.config import Config
+from nkssg.config import Config, PostTypeConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
@@ -426,8 +426,11 @@ class Single(Page):
 
     def _set_image_url(self, image: dict, src: str, config: Config):
 
-        if src.startswith('/' + config.static_dir):
-            image['rel_url'] = src[len('/' + config.static_dir):]
+        if not image or not src:
+            return {}
+
+        if src.startswith('/' + str(config.static_dir)):
+            image['rel_url'] = src[len('/' + str(config.static_dir)):]
         else:
             year = str(self.date.year).zfill(4)
             month = str(self.date.month).zfill(2)
@@ -461,33 +464,15 @@ class Single(Page):
 
         if url is None:
             post_type = self.post_type
-            permalink = config.post_type[post_type].permalink
+            post_type_config = config.post_type[post_type]
+            permalink = post_type_config.permalink
 
             if permalink is None:
-                dest_path = self.src_dir / self.filename / 'index.html'
-                if self.filename == 'index':
-                    dest_path = self.src_dir / 'index.html'
-
-                with_front = config.post_type[post_type].with_front
-
-                if with_front:
-                    slug = config.post_type[post_type].slug
-                    dest_path = Path(str(dest_path).replace(post_type, slug, 1))
-                else:
-                    dest_path = dest_path.relative_to(Path(post_type))
-
-                parts = dest_path.parts
-                new_parts = []
-                for part in parts:
-                    new_parts.append(Page.to_slug(Page.clean_name(part)))
-                dest_path = Path(*new_parts)
-
+                dest_path = self._generate_default_dest_path(post_type_config)
                 url = self._get_url_from_dest(dest_path)
-
             else:
                 url = self.get_url_from_permalink(permalink, config)
                 dest_path = self._get_dest_from_url(url)
-
         else:
             dest_path = self._get_dest_from_url(url)
 
@@ -495,6 +480,20 @@ class Single(Page):
         url = url.replace('//', '/')
 
         return url.lower(), dest_path
+
+    def _generate_default_dest_path(self, post_type_config: PostTypeConfig):
+        dest_path = self.src_dir / self.filename / 'index.html'
+        if self.filename == 'index':
+            dest_path = self.src_dir / 'index.html'
+
+        dest_path = dest_path.relative_to(Path(self.post_type))
+        if post_type_config.with_front:
+            slug = post_type_config.slug
+            dest_path = Path(slug, dest_path)
+
+        parts = dest_path.parts
+        new_parts = [Page.to_slug(Page.clean_name(part)) for part in parts]
+        return Path(*new_parts)
 
     def get_url_from_permalink(self, permalink, config: Config):
         permalink = '/' + permalink.strip('/') + '/'
