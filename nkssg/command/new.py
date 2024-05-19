@@ -11,35 +11,36 @@ log = logging.getLogger(__name__)
 
 def site(project_dir, package_dir):
 
+    project_dir = Path(project_dir)
+
+    if project_dir.is_absolute():
+        log.error('Please provide a relative path for the project directory.')
+        return
+
     base_dir = Path.cwd()
-    project_dir = Path(base_dir, project_dir)
+    project_dir = base_dir / project_dir
     config_path = project_dir / 'nkssg.yml'
 
     if config_path.exists():
-        log.warn('Project already exists.')
+        log.warning('Project already exists.')
         return
 
-    if not project_dir.parent.exists():
-        log.warn('Parent directory does not exist.')
-        return
+    directories_to_create = [
+        project_dir / 'docs' / 'post',
+        project_dir / 'docs' / 'page',
+        project_dir / 'public',
+        project_dir / 'static',
+        project_dir / 'themes' / 'default',
+        project_dir / 'themes' / 'child'
+    ]
 
-    Path(project_dir).mkdir(exist_ok=True)
-    Path(project_dir, 'docs').mkdir(exist_ok=True)
-    Path(project_dir, 'docs', 'post').mkdir(exist_ok=True)
-    Path(project_dir, 'docs', 'page').mkdir(exist_ok=True)
-    Path(project_dir, 'public').mkdir(exist_ok=True)
-    Path(project_dir, 'static').mkdir(exist_ok=True)
-    Path(project_dir, 'themes').mkdir(exist_ok=True)
-    Path(project_dir, 'themes', 'default').mkdir(exist_ok=True)
-    Path(project_dir, 'themes', 'child').mkdir(exist_ok=True)
+    for directory in directories_to_create:
+        directory.mkdir(parents=True, exist_ok=True)
 
-    default_theme_from = package_dir / 'themes' / 'default'
-    default_theme_to = project_dir / 'themes' / 'default'
-    theme_copy(default_theme_from, default_theme_to)
-
-    child_theme_from = package_dir / 'themes' / 'child'
-    child_theme_to = project_dir / 'themes' / 'child'
-    theme_copy(child_theme_from, child_theme_to)
+    for directory in ['default', 'child']:
+        theme_from = package_dir / 'themes' / directory
+        theme_to = project_dir / 'themes' / directory
+        theme_copy(theme_from, theme_to)
 
     Path(project_dir, 'nkssg.yml').write_text('''\
 site:
@@ -77,19 +78,25 @@ theme:
   child: child
 
 taxonomy:
-  - tag:
-    - tag1
-    - tag 2:
+  tag:
+    term:
+      - tag1
+      - name: tag 2
         slug: tag2
-    - tag3
+      - tag3
 
-  - category:
-    - cat1
-    - cat11:
+  category:
+    term:
+      - cat1
+      - name: cat11
         parent: cat1
-    - cat12:
+      - name: cat12
         parent: cat1
-    - cat2
+      - name: cat2
+        term:
+          - name: cat21
+          - name: cat22
+          - cat23
 ''')
 
     Path(project_dir, 'docs', 'post', 'sample.md').write_text('''\
@@ -102,14 +109,12 @@ This is a sample post.
 ''')
 
 
-def theme_copy(theme_from, theme_to):
+def theme_copy(theme_from: Path, theme_to: Path):
     for f in theme_from.glob('**/*'):
         if f.is_file():
             rel_path = f.relative_to(theme_from)
             to_path = theme_to / rel_path
-
-            if not to_path.parent.exists():
-                to_path.parent.mkdir(parents=True)
+            to_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(str(f), str(to_path))
 
 
@@ -128,7 +133,7 @@ def page(name, path, config: Config):
                 template_file = f
 
     if template_file is None:
-        log.warn(name + ' is not found')
+        log.warning(name + ' is not found')
         return
     else:
         with open(template_file, 'r', encoding='UTF-8') as f:
@@ -181,4 +186,4 @@ def page(name, path, config: Config):
             print(str(to_path) + ' is created!')
 
         else:
-            log.warn('There is something wrong with the file setting.')
+            log.warning('There is something wrong with the file setting.')
