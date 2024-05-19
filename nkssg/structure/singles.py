@@ -462,19 +462,19 @@ class Single(Page):
 
         url = self.meta.get('url')
 
-        if url is None:
+        if url:
+            dest_path = self._get_dest_from_url(url)
+        else:
             post_type = self.post_type
             post_type_config = config.post_type[post_type]
             permalink = post_type_config.permalink
 
-            if permalink is None:
-                dest_path = self._generate_default_dest_path(post_type_config)
-                url = self._get_url_from_dest(dest_path)
-            else:
+            if permalink:
                 url = self.get_url_from_permalink(permalink, config)
                 dest_path = self._get_dest_from_url(url)
-        else:
-            dest_path = self._get_dest_from_url(url)
+            else:
+                dest_path = self._generate_default_dest_path(post_type_config)
+                url = self._get_url_from_dest(dest_path)
 
         url = '/' + url.strip('/') + '/'
         url = url.replace('//', '/')
