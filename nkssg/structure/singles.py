@@ -562,58 +562,49 @@ class Single(Page):
             return [target_archives[-1].slug]
 
     def update_html(self, singles: Singles, archives, themes: Themes):
-        config = singles.config
-        plugins = singles.plugins
+
         if not self.shouldUpdateHtml:
             return
 
+        config = singles.config
+        plugins = singles.plugins
         template_file = self.lookup_template(config, themes)
         template = config.env.get_template(template_file)
 
         if any(x in self.content for x in ['{{', '{#', '{%']):
-            # add "import short code" statement
-            additional_statement = ''
-            import_sc = '{% import "import/short-code.html" as sc %}'
-            import_scc = '{% import "import/short-code-child.html" as scc %}'
+            additional_statement = self._get_shortcode_import_statement(themes)
 
-            for theme_dir in themes.dirs:
-                template_path = theme_dir / 'import' / 'short-code.html'
-                if template_path.exists():
-                    additional_statement = additional_statement + import_sc
+            self.content = additional_statement + self.content
+            self.content = config.env.from_string(self.content).render({
+                'mypage': self, 'meta': self.meta})
 
-                template_path = theme_dir / 'import' / 'short-code-child.html'
-                if template_path.exists():
-                    additional_statement = additional_statement + import_scc
-
-            content = additional_statement + self.content
-            content = config.env.from_string(content).render({
-                'mypage': self,
-                'meta': self.meta,
-                })
-
-            self.content = content
+        context = {
+            'config': config,
+            'single': self,
+            'singles': singles,
+            'archives': archives
+        }
 
         self.content = plugins.do_action(
-            'before_render_html',
-            target=self.content,
-            config=config,
-            single=self,
-            singles=singles,
-            archives=archives
-            )
+            'before_render_html', target=self.content, **context)
 
-        self.html = template.render({
-            'mypage': self,
-            })
+        self.html = template.render({'mypage': self})
 
         self.html = plugins.do_action(
-            'after_render_html',
-            target=self.html,
-            config=config,
-            single=self,
-            singles=singles,
-            archives=archives
-            )
+            'after_render_html', target=self.html, **context)
+
+    def _get_shortcode_import_statement(self, themes: Themes):
+        import_sc = '{% import "import/short-code.html" as sc %}'
+        import_scc = '{% import "import/short-code-child.html" as scc %}'
+        additional_statement = ''
+
+        for theme_dir in themes.dirs:
+            if (theme_dir / 'import' / 'short-code.html').exists():
+                additional_statement += import_sc
+            if (theme_dir / 'import' / 'short-code-child.html').exists():
+                additional_statement += import_scc
+
+        return additional_statement
 
     def lookup_template(self, config: Config, themes: Themes):
 
