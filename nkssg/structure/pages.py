@@ -8,7 +8,7 @@ from nkssg.config import Config
 class Pages:
     def __init__(self):
         self.config: Config = None
-        self.pages = []
+        self.pages: list[Page] = []
 
     def __iter__(self):
         return iter(self.pages)
@@ -29,8 +29,8 @@ class Page:
         self.id = ''
         self.file_id = ''
 
-        self.src_path = ''
         self.abs_src_path = ''
+        self.src_path = ''
         self.src_dir = ''
 
         self.archive_type = ''
@@ -48,10 +48,10 @@ class Page:
         self.is_future = False
 
         self.html = ''
-        self.url = ''
+        self.url = '/'
         self.abs_url = ''
         self.rel_url = ''
-        self.dest_path = ''
+        self.dest_path = 'index.html'
         self.dest_dir = ''
         self.aliases = []
 
@@ -62,32 +62,29 @@ class Page:
         self.shouldOutput = True
 
     @staticmethod
-    def to_slug(dirty_slug):
+    def to_slug(dirty_slug: str):
         return dirty_slug.replace(' ', '-').lower()
 
     @staticmethod
-    def clean_name(dirty_name):
-        if dirty_name[0] != '_':
+    def clean_name(dirty_name: str):
+        if not dirty_name.startswith('_'):
             return dirty_name
-        if dirty_name[1] == '_':
+        if dirty_name.startswith('__'):
             return dirty_name[1:]
 
         parts = dirty_name.split('_')
-        if len(parts) == 2:
+        if len(parts) <= 2:
             return dirty_name
 
-        prefix = '_' + parts[1] + '_'
-
-        if len(prefix) == len(dirty_name):
-            return dirty_name
-        else:
-            return dirty_name[len(prefix):]
+        prefix = f'_{parts[1]}_'
+        suffix = dirty_name[len(prefix):]
+        return suffix if suffix else dirty_name
 
     def output(self, config: Config):
         if not self.shouldOutput:
             return
 
-        output_path = config['public_dir'] / self.dest_path
+        output_path = config.public_dir / self.dest_path
         output_dir = output_path.parent
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -95,10 +92,10 @@ class Page:
             f.write(self.html)
 
         if self.image:
-            old_path = self.image.get('old_path')
-            new_path = self.image.get('new_path')
+            old_path: Path = self.image.get('old_path')
+            new_path: Path = self.image.get('new_path')
 
-            if old_path is not None and new_path is not None:
+            if old_path and new_path:
                 new_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(str(old_path), str(new_path))
 
@@ -106,15 +103,12 @@ class Page:
             self.output_aliases(config)
 
     def _get_url_from_dest(self, dest_path=''):
-        if dest_path == '':
-            dest_path = self.dest_path
-        if dest_path == '':
-            try:
-                raise Exception
-            except Exception:
-                print('Error: dest path error on ' + self.src_path)
 
-        parts = list(Path(dest_path).parts)
+        dest_path = dest_path or self.dest_path
+        if not dest_path:
+            raise ValueError(f'Destination path error on {self.src_path}')
+
+        parts = Path(dest_path).parts
 
         if parts[-1] == 'index.html':
             if len(parts) == 1:
@@ -125,7 +119,7 @@ class Page:
             url = '/' + '/'.join(parts[:-1])
         return quote(url).lower()
 
-    def _get_dest_from_url(self, url):
+    def _get_dest_from_url(self, url: str):
         url = url.strip('/')
         if '.htm' not in url:
             url = url + '/index.html'
@@ -133,7 +127,7 @@ class Page:
         return Path(*parts)
 
     def _url_setup(self, config: Config):
-        if self.rel_url == '':
+        if not self.rel_url:
             return
 
         site_url = config.site.site_url or '/'
@@ -141,40 +135,36 @@ class Page:
         _rel_url = self.rel_url.lstrip('/')
         self.abs_url = urljoin(_site_url, _rel_url)
 
-        if config.use_abs_url:
-            self.url = self.abs_url
-        else:
-            self.url = self.rel_url
+        self.url = self.abs_url if config.use_abs_url else self.rel_url
 
     def output_aliases(self, config: Config):
         for url in self.meta['aliases']:
             url = '/' + url.strip('/')
             if '.htm' not in url:
-                url = url + '/'
+                url += '/'
 
             output_path = self._get_dest_from_url(url)
-            output_path = config['public_dir'] / output_path
-            output_dir = output_path.parent
-            output_dir.mkdir(parents=True, exist_ok=True)
+            output_path = config.public_dir / output_path
+            output_path.parent.mkdir(parents=True, exist_ok=True)
             print(output_path)
 
             with open(output_path, 'w', encoding='UTF-8') as f:
-                content = '''
+                content = f'''
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="uft-8">
-<link rel="canonical" href="{url}"/>
-<meta http-equiv="refresh" content="0;url={url}">
+<link rel="canonical" href="{self.url}"/>
+<meta http-equiv="refresh" content="0;url={self.url}">
 </head>
 <body>
 <p>
 This page has moved.
-Click <a href="{url}">here</a> to go to the new page.
+Click <a href="{self.url}">here</a> to go to the new page.
 </p>
 /body>
 </html>
-'''.format(url=self.url)
+'''
                 f.write(content)
 
     def lookup_template(self, config: Config):
