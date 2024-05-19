@@ -20,8 +20,7 @@ class Singles(Pages):
         self.pages = self.get_pages_from_docs_directory()
         self.file_ids = {}
         self.dest_paths = {}
-        self.plugins.do_action(
-            'after_initialize_singles', target=self)
+        self.plugins.do_action('after_initialize_singles', target=self)
 
     def get_pages_from_docs_directory(self):
         if self.config['mode'] == 'draft':
@@ -103,14 +102,12 @@ class Singles(Pages):
         for page in self.pages:
             page.update_url(self.config)
 
-        self.plugins.do_action(
-            'after_update_singles_url', target=self)
+        self.plugins.do_action('after_update_singles_url', target=self)
 
         self.setup_dest_path()
 
     def update_htmls(self, archives, themes: Themes):
-        self.plugins.do_action(
-            'before_update_singles_html', target=self)
+        self.plugins.do_action('before_update_singles_html', target=self)
 
         for page in self.pages:
             try:
@@ -119,8 +116,7 @@ class Singles(Pages):
                 print(page)
                 raise
 
-        self.plugins.do_action(
-            'after_update_singles_html', target=self)
+        self.plugins.do_action('after_update_singles_html', target=self)
 
     def setup_dest_path(self):
         for page in self.pages:
