@@ -22,7 +22,7 @@ def build(config: Config, clean=False):
     site.output()
 
 
-def start_server(config: Config, watch_path_list, port=5500):
+def start_server(config: Config, watch_paths, port=5500):
     def reload():
         build(config)
 
@@ -30,26 +30,29 @@ def start_server(config: Config, watch_path_list, port=5500):
 
     try:
         server = Server()
-        for watch_path in watch_path_list:
+        for watch_path in watch_paths:
             server.watch(str(watch_path), reload)
         server.serve(port=port, root=config.public_dir, open_url_delay=None)
     finally:
         shutil.rmtree(config.public_dir)
 
 
+def prepare_temp_dir(config: Config):
+    temp_dir = Path(tempfile.mkdtemp(prefix='nkssg_'))
+    config.public_dir = temp_dir
+    print(f'{temp_dir} is created.')
+
+
 def serve(config: Config, static=False, port=5500):
 
     config.site.site_url = f'http://127.0.0.1:{port}'
-    config.public_dir = Path(tempfile.mkdtemp(prefix='nkssg_'))
-    print(f'{config.public_dir} is created.')
+    prepare_temp_dir(config)
 
-    watch_path_list = []
-    if not static:
-        watch_path_list.append(config.docs_dir)
-        if config.themes_dir.exists():
-            watch_path_list.append(config.themes_dir)
+    watch_paths = [config.docs_dir] if not static else []
+    if config.themes_dir.exists():
+        watch_paths.append(config.themes_dir)
 
-    start_server(config, watch_path_list, port)
+    start_server(config, watch_paths, port)
 
 
 def draft(config: Config, path, port=5500):
@@ -60,6 +63,6 @@ def draft(config: Config, path, port=5500):
 
     config['draft_path'] = draft_path
     config.site.site_url = f'http://127.0.0.1:{port}'
-    config.public_dir = Path(tempfile.mkdtemp(prefix='nkssg_'))
+    prepare_temp_dir(config)
 
     start_server(config, [config['draft_path']], port)
