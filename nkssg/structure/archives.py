@@ -31,9 +31,8 @@ class Archives(Pages):
         self.plugins.do_action('after_setup_archives', target=self)
 
     def create_archive(self, id: PurePath) -> 'Archive':
-        archive = self.archives.get(id)
-        if archive is not None:
-            return archive
+        if id in self.archives:
+            return self.archives[id]
 
         parent = self.create_archive(id.parent)
         archive = Archive(parent, id.name)
@@ -107,7 +106,7 @@ class Archives(Pages):
 
         for child_name, child_archive in base_archive.children.items():
             term_config = terms[child_name]
-            if term_config.parent == '' or term_config.parent == base_id.name:
+            if term_config.parent in ('', base_id.name):
                 new_id = base_archive.id / child_name
                 self.create_archive(new_id)
                 self.long_ids[child_archive.id] = new_id
@@ -138,18 +137,12 @@ class Archives(Pages):
 
     def update_singles_all(self):
         for archive in self.archives.values():
-            if len(archive.id.parts) <= 2:
-                continue
-            if archive.children:
+            if len(archive.id.parts) <= 2 or archive.children:
                 continue
 
-            archive.singles_all = archive.singles
+            archive.singles_all = archive.singles[:]
             current_id = archive.id
-
-            for _ in range(len(archive.id.parts)):
-                if len(current_id.parts) <= 3:
-                    break
-
+            while len(current_id.parts) > 3:
                 current = self.create_archive(current_id)
                 parent = self.create_archive(current_id.parent)
 
@@ -218,14 +211,12 @@ class Archives(Pages):
             'after_update_archives_url', target=self)
 
     def update_htmls(self, singles, themes: Themes):
-        self.plugins.do_action(
-            'before_update_archives_html', target=self)
+        self.plugins.do_action('before_update_archives_html', target=self)
 
         for archive in self.archives.values():
             self.pages += archive.get_archives(singles, self, themes)
 
-        self.plugins.do_action(
-            'after_update_archives_html', target=self)
+        self.plugins.do_action('after_update_archives_html', target=self)
 
 
 class Archive(Page):
