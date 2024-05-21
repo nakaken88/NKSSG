@@ -32,21 +32,8 @@ class Site:
 
     def setup_post_types(self):
         config: Config = self.config
-
-        config = self.remove_invalid_post_types(config)
         config = self.add_missing_post_types(config)
         config = self.update_post_type_properties(config)
-
-        return config
-
-    def remove_invalid_post_types(self, config: Config):
-        keys_to_remove = []
-        for post_type in config.post_type.keys():
-            if not Path(config.docs_dir, post_type).exists():
-                keys_to_remove.append(post_type)
-
-        for post_type in keys_to_remove:
-            config.post_type.pop(post_type)
         return config
 
     def add_missing_post_types(self, config: Config):
