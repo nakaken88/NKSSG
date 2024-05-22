@@ -428,9 +428,7 @@ class Single(Page):
 
             image_name = image['old_path'].name
             thumb_path_parts = ['thumb', year, month, image_name]
-            new_path = Path(config.public_dir, *thumb_path_parts)
-            image['new_path'] = new_path
-
+            image['new_path'] = Path(config.public_dir, *thumb_path_parts)
             image['rel_url'] = '/' + '/'.join(thumb_path_parts)
 
         image['abs_url'] = config.site.site_url + image['rel_url']
