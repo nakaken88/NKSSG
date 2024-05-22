@@ -318,7 +318,7 @@ class Single(Page):
     def _is_draft(self):
         draft = self.meta.get('draft')
         if draft is not None:
-            return draft
+            return False if draft.lower() == 'false' else bool(draft)
 
         status_list = ['auto-draft', 'draft', 'future', 'inherit',
                        'pending', 'private', 'trash']
