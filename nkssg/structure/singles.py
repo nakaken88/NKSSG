@@ -69,9 +69,6 @@ class Singles(Pages):
     def _setup_draft_mode(self):
         page = self.pages[0]
         new_page = page.setup(self.config, self.plugins)
-        new_page.url = '/'
-        new_page.dest_path = 'index.html'
-        new_page.dest_dir = ''
         self.pages = [new_page]
 
     def _setup_normal_mode(self):
