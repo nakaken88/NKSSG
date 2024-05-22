@@ -143,7 +143,7 @@ class Single(Page):
         if docs_dir not in abs_src_path.parents:
             raise ValueError(
                 f"The path '{abs_src_path}' must be a descendant "
-                "of the docs dir '{docs_dir}'.")
+                f"of the docs dir '{docs_dir}'.")
 
         self.abs_src_path = abs_src_path
         self.src_path = abs_src_path.relative_to(docs_dir)
