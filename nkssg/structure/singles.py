@@ -268,7 +268,8 @@ class Single(Page):
 
     def _get_date(self):
         try:
-            cdate = datetime.datetime.strptime(self.filename, '%Y%m%d')
+            temp_filename = self.filename.replace('-', '')
+            cdate = datetime.datetime.strptime(temp_filename, '%Y%m%d')
         except ValueError:
             cdate = self.date
 
