@@ -195,8 +195,6 @@ class Single(Page):
 
         self.meta, doc = self.parse_front_matter(self.abs_src_path)
 
-        post_type_config = config.post_type[self.post_type]
-
         self.date, self.modified = self._get_date()
         self.status = self._get_status()
         self.is_expired = self._is_expired(config.now)
@@ -205,7 +203,9 @@ class Single(Page):
 
         self.title = self._get_title()
         self.name = self._get_name()
-        self.slug = self._get_slug(post_type_config.slug)
+
+        post_type_slug = config.post_type[self.post_type].slug
+        self.slug = self._get_slug(post_type_slug)
 
         self.content = self._get_content(doc, config, plugins)
         self.summary = self._get_summary()
