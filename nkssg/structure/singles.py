@@ -323,16 +323,10 @@ class Single(Page):
         status_list = ['auto-draft', 'draft', 'future', 'inherit',
                        'pending', 'private', 'trash']
 
-        if self.post_type in status_list:
-            return True
-
-        if self.status in status_list:
-            return True
-
-        if self.is_expired or self.is_future:
-            return True
-
-        return False
+        res = self.is_expired or self.is_future
+        res = res or (self.post_type in status_list)
+        res = res or (self.status in status_list)
+        return res
 
     def _get_title(self):
         title = self.meta.get('title') or Page.clean_name(self.filename)
