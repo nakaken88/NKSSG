@@ -163,7 +163,7 @@ class Single(Page):
         self.modified = self._get_modified_date()
 
         self.post_type_index = list(config.post_type).index(self.post_type)
-        self.archive_type = config.post_type[self.post_type]
+        self.archive_type = config.post_type[self.post_type].archive_type
 
     def __str__(self):
         return f"Single(src='{self.id}')"
