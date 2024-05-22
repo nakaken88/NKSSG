@@ -162,7 +162,7 @@ class Page:
 This page has moved.
 Click <a href="{self.url}">here</a> to go to the new page.
 </p>
-/body>
+</body>
 </html>
 '''
                 f.write(content)
