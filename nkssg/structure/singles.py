@@ -109,9 +109,9 @@ class Singles(Pages):
         for page in self.pages:
             try:
                 page.update_html(self, archives, themes)
-            except Exception:
-                print(page)
-                raise
+            except Exception as e:
+                raise RuntimeError(f"Error updating HTML for page: "
+                                   f"{page}\nException: {e}")
 
         self.plugins.do_action('after_update_singles_html', target=self)
 
