@@ -9,7 +9,7 @@ from nkssg.structure.themes import Themes
 log = logging.getLogger(__name__)
 
 
-def site(project_dir, package_dir):
+def site(project_dir, package_dir: Path):
 
     project_dir = Path(project_dir)
 
@@ -30,74 +30,17 @@ def site(project_dir, package_dir):
         project_dir / 'docs' / 'page',
         project_dir / 'public',
         project_dir / 'static',
-        project_dir / 'themes' / 'default',
-        project_dir / 'themes' / 'child'
     ]
 
     for directory in directories_to_create:
         directory.mkdir(parents=True, exist_ok=True)
 
-    for directory in ['default', 'child']:
-        theme_from = package_dir / 'themes' / directory
-        theme_to = project_dir / 'themes' / directory
-        theme_copy(theme_from, theme_to)
+    theme_from = package_dir / 'themes'
+    theme_to = project_dir / 'themes'
+    theme_copy(theme_from, theme_to)
 
-    Path(project_dir, 'nkssg.yml').write_text('''\
-site:
-  site_name: "site name"
-  site_url: ""
-  site_desc: ""
-  site_image: ""
-  language: "en"
-
-post_type:
-  post:
-    permalink: /%Y/%m/%d/%H%M%S/
-    archive_type: "date"
-  page:
-    permalink: /{slug}/
-    archive_type: "section"
-
-markdown:
-  fenced_code: {}
-  toc:
-    marker: "[toc]"
-
-plugins:
-  autop: {}
-  awesome-img-link {}
-  awesome-page-link:
-    strip_paths:
-      - /docs
-  select-pages:
-    start: 0
-    step: 1
-
-theme:
-  name: default
-  child: child
-
-taxonomy:
-  tag:
-    term:
-      - tag1
-      - name: tag 2
-        slug: tag2
-      - tag3
-
-  category:
-    term:
-      - cat1
-      - name: cat11
-        parent: cat1
-      - name: cat12
-        parent: cat1
-      - name: cat2
-        term:
-          - name: cat21
-          - name: cat22
-          - cat23
-''')
+    original_config_path = package_dir.parent / 'nkssg.yml'
+    shutil.copyfile(original_config_path, config_path)
 
     Path(project_dir, 'docs', 'post', 'sample.md').write_text('''\
 ---
@@ -111,11 +54,11 @@ This is a sample post.
 
 def theme_copy(theme_from: Path, theme_to: Path):
     for f in theme_from.glob('**/*'):
-        if f.is_file():
+        if f.is_file() and f.suffix != '.py':
             rel_path = f.relative_to(theme_from)
             to_path = theme_to / rel_path
             to_path.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(str(f), str(to_path))
+            shutil.copyfile(f, to_path)
 
 
 def page(name, path, config: Config):
