@@ -25,7 +25,6 @@ def cli():
 def build_command(clean):
 
     config = load_config_with_pkg_dir('build')
-    config['build_clean'] = clean
     build.build(config, clean)
 
 
