@@ -2,8 +2,7 @@ from pathlib import Path
 
 import click
 
-from nkssg.command import build
-from nkssg.command import new
+from nkssg.command import build, new
 from nkssg.config import load_config
 
 
@@ -50,13 +49,8 @@ def build_draft(path, port):
 
 @cli.command(name="new")
 @click.argument('name')
-@click.argument('path', nargs=-1)
+@click.argument('path', default='.', required=False)
 def new_project(name, path):
-
-    if len(path) == 0:
-        path = '.'
-    else:
-        path = path[0]
 
     if name == 'site':
         new.site(path, PKG_DIR)
