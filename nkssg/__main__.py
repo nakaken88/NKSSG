@@ -9,6 +9,12 @@ from nkssg.config import load_config
 PKG_DIR = Path(__file__).resolve().parent
 
 
+def load_config_with_pkg_dir(mode):
+    config = load_config(mode=mode)
+    config['PKG_DIR'] = PKG_DIR
+    return config
+
+
 @click.group()
 def cli():
     pass
@@ -18,8 +24,7 @@ def cli():
 @click.option('--clean', '-c', is_flag=True)
 def build_command(clean):
 
-    config = load_config(mode='build')
-    config['PKG_DIR'] = PKG_DIR
+    config = load_config_with_pkg_dir('build')
     config['build_clean'] = clean
     build.build(config, clean)
 
@@ -30,10 +35,8 @@ def build_command(clean):
 @click.option('--port', '-p', default=5500)
 def build_serve(static, all, port):
 
-    config = load_config(mode='serve')
-    config['PKG_DIR'] = PKG_DIR
+    config = load_config_with_pkg_dir('serve')
     config['serve_all'] = all
-
     build.serve(config, static, port)
 
 
@@ -42,8 +45,7 @@ def build_serve(static, all, port):
 @click.option('--port', '-p', default=5500)
 def build_draft(path, port):
 
-    config = load_config(mode='draft')
-    config['PKG_DIR'] = PKG_DIR
+    config = load_config_with_pkg_dir('draft')
     build.draft(config, path, port)
 
 
@@ -55,8 +57,7 @@ def new_project(name, path):
     if name == 'site':
         new.site(path, PKG_DIR)
     else:
-        config = load_config(mode='new')
-        config['PKG_DIR'] = PKG_DIR
+        config = load_config_with_pkg_dir('new')
         new.page(name, path, config)
 
 
