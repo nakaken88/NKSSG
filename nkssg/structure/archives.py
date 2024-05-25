@@ -129,6 +129,10 @@ class Archives(Pages):
 
                 for term in single.meta[root_name]:
                     short_id = PurePath('/taxonomy', root_name, term)
+                    if short_id not in self.long_ids:
+                        print(f'{root_name}: {term} is not found ({single})')
+                        continue
+
                     id = self.long_ids[short_id]
                     archive = self.create_archive(id)
                     if single not in archive.singles:
