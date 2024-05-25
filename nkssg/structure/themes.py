@@ -24,7 +24,7 @@ class Themes:
         if theme:
             theme_dir = config.themes_dir / Path(theme)
             if theme_dir.exists():
-                self.dirs.append(theme_dir)
+                self.dirs.insert(0, theme_dir)
                 self.load_theme_config(theme_dir, theme)
 
             elif not config.theme.get('updated'):
@@ -48,8 +48,9 @@ class Themes:
     def lookup_template(self, search_list: list[str]):
         for search in search_list:
             search = search.replace('.html', '')
-            for d in self.dirs[::-1]:
+            for d in self.dirs:
                 for f in d.glob('**/*'):
                     if f.is_file() and f.stem == search:
-                        return f
+                        rel_path = f.relative_to(d)
+                        return str(rel_path).replace('\\', '/')
         return ''

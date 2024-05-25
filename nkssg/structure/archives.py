@@ -428,7 +428,7 @@ class Archive(Page):
             else:
                 paginator['next'] = None
 
-            template_file = self.lookup_template(config, themes)
+            template_file = self.lookup_template(themes)
             template = config.env.get_template(template_file)
 
             paginator['pages'][i].html = template.render({
@@ -439,34 +439,16 @@ class Archive(Page):
 
         return paginator['pages']
 
-    def lookup_template(self, config, themes: Themes):
-        prefix = 'archive-' + self.archive_type
+    def lookup_template(self, themes: Themes):
+        prefix = f'archive-{self.archive_type}'
 
-        for theme_dir in themes.dirs:
+        search_list = [
+            f'{prefix}-{self.slug}.html',
+            f'{prefix}-{self.name}.html',
+            f'{prefix}-{self.root_name}.html',
+            f'{prefix}.html',
+            'archive.html',
+            'main.html'
+        ]
 
-            template_file = prefix + '-' + self.slug + '.html'
-            template_path = theme_dir / template_file
-            if template_path.exists():
-                return template_file
-
-            template_file = prefix + '-' + self.name + '.html'
-            template_path = theme_dir / template_file
-            if template_path.exists():
-                return template_file
-
-            template_file = prefix + '-' + self.root_name + '.html'
-            template_path = theme_dir / template_file
-            if template_path.exists():
-                return template_file
-
-            template_file = prefix + '.html'
-            template_path = theme_dir / template_file
-            if template_path.exists():
-                return template_file
-
-            template_file = 'archive.html'
-            template_path = theme_dir / template_file
-            if template_path.exists():
-                return template_file
-
-        return 'main.html'
+        return themes.lookup_template(search_list)

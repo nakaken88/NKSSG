@@ -555,7 +555,7 @@ class Single(Page):
         config = singles.config
         plugins = singles.plugins
         template_file = self.lookup_template(config, themes)
-        template = config.env.get_template(template_file)
+        template = config.env.get_template(str(template_file))
 
         if any(x in self.content for x in ['{{', '{#', '{%']):
             additional_statement = self._get_shortcode_import_statement(themes)
@@ -594,30 +594,19 @@ class Single(Page):
 
     def lookup_template(self, config: Config, themes: Themes):
 
-        def template_exists(template_name):
-            for theme_dir in themes.dirs:
-                template_path = theme_dir / template_name
-                if template_path.exists():
-                    return True
-            return False
+        search_list = []
+
+        if config['mode'] == 'draft':
+            search_list.append('draft.html')
 
         template_file = self.meta.get('template')
         if template_file:
-            template_file = template_file.replace('.html', '') + '.html'
-            if template_exists(template_file):
-                return template_file
+            search_list.append(template_file)
 
-        if config['mode'] == 'draft':
-            template_file = 'draft.html'
-            if template_exists(template_file):
-                return template_file
+        search_list.extend([
+            f'single-{self.post_type}.html',
+            'single.html',
+            'main.html',
+        ])
 
-        template_file = 'single-' + self.post_type + '.html'
-        if template_exists(template_file):
-            return template_file
-
-        template_file = 'single.html'
-        if template_exists(template_file):
-            return template_file
-
-        return 'main.html'
+        return themes.lookup_template(search_list)

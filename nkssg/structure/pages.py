@@ -166,6 +166,3 @@ Click <a href="{self.url}">here</a> to go to the new page.
 </html>
 '''
                 f.write(content)
-
-    def lookup_template(self, config: Config):
-        return 'main.html'
