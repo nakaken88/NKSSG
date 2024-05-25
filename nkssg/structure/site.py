@@ -20,8 +20,8 @@ class Site:
             'after_load_config', target=self.config)
 
         self.themes = Themes(self.config)
-        self.config = self.plugins.do_action(
-            'after_load_theme', target=self.config)
+        self.themes = self.plugins.do_action(
+            'after_load_theme', target=self.themes)
 
         self.config = self.setup_post_types()
         self.config = self.plugins.do_action(
