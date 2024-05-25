@@ -68,13 +68,6 @@ class PostTypeConfig(BaseConfig):
 
 class PostTypeConfigManager(dict[str, PostTypeConfig]):
 
-    def __init__(self):
-        super().__init__()
-        self['post'] = PostTypeConfig(
-            permalink=r'/%Y/%m/%d/%H%M%S/', archive_type='date')
-        self['page'] = PostTypeConfig(
-            permalink=r'/{slug}/', archive_type='section')
-
     def update(self, d: dict):
         for k, v in d.items():
             if k in self:
