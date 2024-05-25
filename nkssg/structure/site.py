@@ -76,13 +76,10 @@ class Site:
             self.archives.setup(self.singles)
             self.singles.update_urls()
             self.archives.update_urls()
-
-        self.plugins.do_action('after_update_urls', target=self)
+            self.plugins.do_action('after_update_urls', target=self)
 
         self.singles.update_htmls(self.archives, self.themes)
-        if self.config['mode'] != 'draft':
-            self.archives.update_htmls(self.singles, self.themes)
-
+        self.archives.update_htmls(self.singles, self.themes)
         self.plugins.do_action('after_update_site', target=self)
 
     def output(self):
