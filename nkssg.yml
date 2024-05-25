@@ -38,4 +38,8 @@ taxonomy:
         parent: cat1
       - name: cat12
         parent: cat1
-      - cat2
+      - name: cat2
+        term:
+          - name: cat21
+          - cat22
+          - cat23
