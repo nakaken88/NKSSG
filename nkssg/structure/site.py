@@ -50,7 +50,7 @@ class Site:
         if not home_template:
             _, post_type_config = next(iter(config.post_type.items()))
 
-            post_type_config.with_front = False
+            post_type_config.add_prefix_to_url = False
             if post_type_config.archive_type == 'none':
                 post_type_config.archive_type = 'section'
 

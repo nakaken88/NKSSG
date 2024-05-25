@@ -185,11 +185,11 @@ class Archives(Pages):
             else:
                 root_config = self.config.post_type[root_name]
 
-            with_front = root_config.get('with_front', True)
+            add_prefix_to_url = root_config.get('add_prefix_to_url', True)
             flat_url = root_config.get('flat-url', False)
             slug = Page.to_slug(root_config.slug or root_name)
 
-            if with_front:
+            if add_prefix_to_url:
                 root_dest = Path(slug, 'index.html')
             else:
                 root_dest = Path('index.html')

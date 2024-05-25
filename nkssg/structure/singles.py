@@ -473,7 +473,7 @@ class Single(Page):
             dest_path = self.src_dir / 'index.html'
 
         dest_path = dest_path.relative_to(Path(self.post_type))
-        if post_type_config.with_front:
+        if post_type_config.add_prefix_to_url:
             slug = post_type_config.slug
             dest_path = Path(slug, dest_path)
 

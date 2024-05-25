@@ -63,7 +63,7 @@ class PostTypeConfig(BaseConfig):
     permalink: str = r'/{slug}/'
     archive_type: str = 'section'
     slug: str = ''
-    with_front: bool = True
+    add_prefix_to_url: bool = True
 
 
 class PostTypeConfigManager(dict[str, PostTypeConfig]):
