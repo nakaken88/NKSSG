@@ -70,10 +70,10 @@ class PostTypeConfigManager(dict[str, PostTypeConfig]):
 
     def update(self, d: dict):
         for k, v in d.items():
-            if k in self:
-                self[k].update(v)
-            else:
-                self[k] = PostTypeConfig(**v)
+            if k not in self:
+                self[k] = PostTypeConfig()
+
+            self[k].update(v)
 
             archive_type = self[k].archive_type
             archive_type = archive_type.lower()
@@ -139,7 +139,9 @@ class TaxonomyConfigManager(dict[str, TaxonomyConfig]):
 
     def update(self, d: dict):
         for k, v in d.items():
-            self[k] = TaxonomyConfig()
+            if k not in self:
+                self[k] = TaxonomyConfig()
+
             self[k].update(v)
 
 
