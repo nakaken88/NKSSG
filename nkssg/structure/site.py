@@ -46,18 +46,13 @@ class Site:
 
     def update_post_type_properties(self, config: Config):
         home_template = self.themes.lookup_template(['home.html'])
-        if home_template:
-            return config
 
-        for post_type_name, post_type_config in config.post_type.items():
+        if not home_template:
+            _, post_type_config = next(iter(config.post_type.items()))
 
-            index = list(config.post_type).index(post_type_name)
-            archive_type = post_type_config.archive_type
-
-            if index == 0:
-                post_type_config.with_front = False
-                if archive_type == 'none':
-                    post_type_config.archive_type = 'section'
+            post_type_config.with_front = False
+            if post_type_config.archive_type == 'none':
+                post_type_config.archive_type = 'section'
 
         return config
 
