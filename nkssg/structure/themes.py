@@ -44,3 +44,12 @@ class Themes:
         config.theme['name'] = default_theme_name
         self.dirs.append(default_theme_dir)
         self.load_theme_config(default_theme_dir, default_theme_name)
+
+    def lookup_template(self, search_list: list[str]):
+        for search in search_list:
+            search = search.replace('.html', '')
+            for d in self.dirs[::-1]:
+                for f in d.glob('**/*'):
+                    if f.is_file() and f.stem == search:
+                        return f
+        return ''

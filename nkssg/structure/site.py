@@ -45,24 +45,19 @@ class Site:
         return config
 
     def update_post_type_properties(self, config: Config):
-        has_home_template = False
-        for theme_dir in self.themes.dirs:
-            target_file = Path(theme_dir) / 'home.html'
-            if target_file.exists():
-                has_home_template = True
-                break
+        home_template = self.themes.lookup_template(['home.html'])
+        if home_template:
+            return config
 
         for post_type_name, post_type_config in config.post_type.items():
 
             index = list(config.post_type).index(post_type_name)
             archive_type = post_type_config.archive_type
 
-            if not has_home_template and index == 0:
+            if index == 0:
                 post_type_config.with_front = False
                 if archive_type == 'none':
-                    archive_type = 'section'
-
-            post_type_config.archive_type = archive_type
+                    post_type_config.archive_type = 'section'
 
         return config
 
