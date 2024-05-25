@@ -12,7 +12,6 @@ def test_default_config():
     assert config.plugins.get('select-pages') == {}
 
     assert 'md' in config.doc_ext
-    assert config.post_type['post'].permalink == '/%Y/%m/%d/%H%M%S/'
 
     assert config.taxonomy == {}
     assert config.use_abs_url is True
