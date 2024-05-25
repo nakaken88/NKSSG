@@ -39,17 +39,12 @@ def site(project_dir, package_dir: Path):
     theme_to = project_dir / 'themes'
     theme_copy(theme_from, theme_to)
 
+    sample_post_from = Path(package_dir.parent, 'docs', 'post', 'sample.md')
+    sample_post_to = Path(project_dir, 'docs', 'post', 'sample.md')
+    shutil.copyfile(sample_post_from, sample_post_to)
+
     original_config_path = package_dir.parent / 'nkssg.yml'
     shutil.copyfile(original_config_path, config_path)
-
-    Path(project_dir, 'docs', 'post', 'sample.md').write_text('''\
----
-title: sample post
-tag: ["tag1", "tag 2"]
-category: ["cat11"]
----
-This is a sample post.
-''')
 
 
 def theme_copy(theme_from: Path, theme_to: Path):
