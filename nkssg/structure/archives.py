@@ -27,6 +27,7 @@ class Archives(Pages):
         self.setup_taxonomy_archives(singles)
         self.update_singles_all()
         self.update_archive_attribute()
+        self.link_section_archive_to_single(singles)
 
         self.plugins.do_action('after_setup_archives', target=self)
 
@@ -173,6 +174,17 @@ class Archives(Pages):
             archive.name = Page.clean_name(archive.id.name)
             archive.slug = Page.to_slug(archive.name)  # todo
 
+    def link_section_archive_to_single(self, singles):
+        for single in singles:
+            single: Single
+            archive_type = single.archive_type
+            if single.filename == 'index' and archive_type == 'section':
+                temp_id = self.get_modified_top_name(single.id, 'section')
+                temp_id = temp_id.parent
+                if temp_id in self.archives:
+                    archive = self.archives[temp_id]
+                    archive.single = single
+
     def update_urls(self):
         for id, archive in self.archives.items():
             if len(id.parts) < 3:
@@ -248,7 +260,7 @@ class Archive(Page):
         self.singles = []
         self.singles_all = []
         self.singles_all_count = 0
-        self.single_index = None
+        self.single = None
 
     def __str__(self):
         return f"Archive(id='{self.id}')"
@@ -287,7 +299,7 @@ class Archive(Page):
                     self.archive_list = single.archive_list
                     self.shouldUpdateHtml = single.shouldUpdateHtml
                     self.shouldOutput = single.shouldOutput
-                    self.single_index = single
+                    self.single = single
 
             else:
                 for archive in self.children.values():
@@ -301,12 +313,12 @@ class Archive(Page):
             return
 
         # get data from single index file
-        if self.single_index is not None:
-            self.url = self.single_index.url
-            self.abs_url = self.single_index.abs_url
-            self.rel_url = self.single_index.rel_url
-            self.dest_path = self.single_index.dest_path
-            self.dest_dir = self.single_index.dest_dir
+        if self.single is not None:
+            self.url = self.single.url
+            self.abs_url = self.single.abs_url
+            self.rel_url = self.single.rel_url
+            self.dest_path = self.single.dest_path
+            self.dest_dir = self.single.dest_dir
 
         if self.children is not None:
             for child_archive in self.children.values():
@@ -320,8 +332,8 @@ class Archive(Page):
         if self.singles_all is None or len(self.singles_all) == 0:
             return []
 
-        if self.single_index is not None:
-            self.content = self.single_index.content
+        if self.single is not None:
+            self.content = self.single.content
 
         config = archives.config
         dest_dir = self.dest_path.parent
