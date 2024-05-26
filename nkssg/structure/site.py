@@ -142,27 +142,19 @@ class Site:
         return False
 
     def output_extra_pages(self):
-        config = self.themes.cnf
-        extra_pages = config.get('extra_pages', [])
-        config_extra_pages = extra_pages[:]
-
-        default_extra_pages = [
+        extra_pages = [
             'home.html', '404.html', 'sitemap.html', 'sitemap.xml'
             ]
 
-        for default_extra_page in default_extra_pages:
-            if default_extra_page not in extra_pages:
-                extra_pages.append(default_extra_page)
+        theme_config = self.themes.cnf
+        extra_pages += theme_config.get('extra_pages', [])
+        extra_pages = list(set(extra_pages))
 
         for extra_page in extra_pages:
-            exist_check = False
-            for theme_dir in self.themes.dirs:
-                if Path(theme_dir, extra_page).exists():
-                    self.output_extra_page(extra_page)
-                    exist_check = True
-                    continue
-
-            if extra_page in config_extra_pages and not exist_check:
+            template = self.themes.lookup_template(extra_page)
+            if template:
+                self.output_extra_page(template)
+            else:
                 print(extra_page + ' is not found on extra pages')
 
     def output_extra_page(self, extra_page):
