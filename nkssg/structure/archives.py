@@ -260,16 +260,6 @@ class Archive(Page):
         else:
             self.id = PurePath(name)
 
-    def add_singles(self, singles, root_name):
-        if self.archive_type == 'taxonomy':
-            for single in singles:
-                if single.meta.get(root_name) is None:
-                    continue
-                if not isinstance(single.meta[root_name], list):
-                    single.meta[root_name] = [single.meta[root_name]]
-
-                self.add_single_to_taxonomy_archive(single, root_name)
-
     def add_single_to_section_archive(self, single):
         if str(self.path) in str(single.abs_src_path.parent):
             if self.path == single.abs_src_path.parent:
@@ -302,21 +292,6 @@ class Archive(Page):
             else:
                 for archive in self.children.values():
                     archive.add_single_to_section_archive(single)
-
-    def add_single_to_taxonomy_archive(self, single, root_name):
-        for archive in self.children.values():
-            if archive.name in single.meta[root_name]:
-                target_archive = archive
-                for parent in target_archive.parents:
-                    if single not in parent.singles_all:
-                        parent.singles_all.append(single)
-
-                if single not in target_archive.singles:
-                    target_archive.singles.append(single)
-                    target_archive.singles_all.append(single)
-                    single.archive_list.append(target_archive)
-
-            archive.add_single_to_taxonomy_archive(single, root_name)
 
     def update_url(self):
         if self.singles_all is None or len(self.singles_all) == 0:
