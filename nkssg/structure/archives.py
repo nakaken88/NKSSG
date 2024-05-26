@@ -3,7 +3,7 @@ from pathlib import Path, PurePath
 from nkssg.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
-from nkssg.structure.singles import Singles
+from nkssg.structure.singles import Singles, Single
 from nkssg.structure.themes import Themes
 
 
@@ -51,6 +51,7 @@ class Archives(Pages):
 
     def setup_post_type_archives(self, singles: Singles):
         for single in singles.pages:
+            single: Single
             post_type_name = single.post_type
             post_type_config = self.config.post_type.get(post_type_name, {})
 
@@ -63,9 +64,9 @@ class Archives(Pages):
                 id = PurePath('/simple', post_type_name)
 
             elif archive_type == 'date':
-                id = PurePath('/date', post_type_name)
-                id = id / PurePath(str(single.date.year).zfill(4))
-                id = id / PurePath(str(single.date.month).zfill(2))
+                yyyy = str(single.date.year).zfill(4)
+                mm = str(single.date.month).zfill(2)
+                id = PurePath('/date', post_type_name, yyyy, mm)
 
             else:
                 continue
