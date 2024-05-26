@@ -62,12 +62,12 @@ class Site:
         self.config.env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(self.themes.dirs)
             )
-
-        self.config.env.globals['config'] = self.config
-        self.config.env.globals['singles'] = self.singles
-        self.config.env.globals['archives'] = self.archives
-        self.config.env.globals['theme'] = self.themes.cnf
-
+        self.config.env.globals.update({
+            'config': self.config,
+            'singles': self.singles,
+            'archives': self.archives,
+            'theme': self.themes.cnf
+        })
         self.config = self.plugins.do_action(
             'after_setup_env', target=self.config)
 
@@ -128,15 +128,13 @@ class Site:
                 shutil.copyfile(str(f), str(to_path))
 
     def is_target(self, rel_path):
-        config = self.themes.cnf
-        exclude = config.get('static_exclude', [])
-        for item in exclude:
-            if fnmatch.fnmatch(rel_path, item):
+        theme_config = self.themes.cnf
+        for pattern in theme_config.get('static_exclude', []):
+            if fnmatch.fnmatch(rel_path, pattern):
                 return False
 
-        include = config.get('static_include', [])
-        for item in include:
-            if fnmatch.fnmatch(rel_path, item):
+        for pattern in theme_config.get('static_include', []):
+            if fnmatch.fnmatch(rel_path, pattern):
                 return True
         return False
 
