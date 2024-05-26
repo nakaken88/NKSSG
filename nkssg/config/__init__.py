@@ -169,6 +169,9 @@ class Config(BaseConfig):
     doc_ext: list[str] = field(default_factory=lambda: [
         'md', 'markdown', 'html', 'htm', 'txt'
     ])
+    extra_pages: list[str] = field(default_factory=lambda: [
+        'home.html', '404.html', 'sitemap.html', 'sitemap.xml'
+    ])
 
     markdown: dict = field(default_factory=dict)
 

@@ -1,5 +1,4 @@
 import fnmatch
-from pathlib import Path
 import shutil
 
 import jinja2
@@ -142,30 +141,27 @@ class Site:
         return False
 
     def output_extra_pages(self):
-        extra_pages = [
-            'home.html', '404.html', 'sitemap.html', 'sitemap.xml'
-            ]
-
         theme_config = self.themes.cnf
-        extra_pages += theme_config.get('extra_pages', [])
-        extra_pages = list(set(extra_pages))
+        extra_pages = theme_config.get('extra_pages', [])
+        extra_pages = set(extra_pages + self.config.extra_pages)
 
         for extra_page in extra_pages:
-            template = self.themes.lookup_template(extra_page)
-            if template:
-                self.output_extra_page(template)
-            else:
-                print(extra_page + ' is not found on extra pages')
+            template_path = self.themes.lookup_template(extra_page)
+            if template_path:
+                self.output_extra_page(extra_page, template_path)
+            elif extra_page not in self.config.extra_pages:
+                print(f'{extra_page} is not found on extra pages')
 
-    def output_extra_page(self, extra_page):
-        template = self.config.env.get_template(extra_page)
-
+    def output_extra_page(self, extra_page, template_path):
+        template = self.config.env.get_template(template_path)
         html = template.render()
 
         if extra_page == 'home.html':
             output_path = self.config.public_dir / 'index.html'
+        elif extra_page in self.config.extra_pages:
+            output_path = self.config.public_dir / extra_page
         else:
-            output_path = Path(self.config.public_dir, extra_page)
+            output_path = self.config.public_dir / template_path
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
