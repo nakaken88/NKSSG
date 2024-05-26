@@ -1,5 +1,5 @@
 {% if mypage.children %}
-  {%- for child in mypage.children if child.singles_all | length > 0 %}
+  {%- for child in mypage.children.values() if child.singles_all | length > 0 %}
     {%- if loop.first  %}
 <div class="subsection-list">
   <h2>Sub section</h2>
