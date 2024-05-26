@@ -185,6 +185,20 @@ class Archives(Pages):
                     archive = self.archives[temp_id]
                     archive.single = single
 
+                    archive.file_id = single.file_id
+                    archive.meta = single.meta
+                    archive.title = single.title
+                    archive.name = single.name
+                    archive.slug = single.slug
+                    archive.content = single.content
+                    archive.summary = single.summary
+                    archive.image = single.image
+
+                    archive.html = single.html
+                    archive.archive_list = single.archive_list
+                    archive.shouldUpdateHtml = single.shouldUpdateHtml
+                    archive.shouldOutput = single.shouldOutput
+
     def update_urls(self):
         for id, archive in self.archives.items():
             if len(id.parts) < 3:
@@ -218,6 +232,10 @@ class Archives(Pages):
                     base_path = parent.dest_path.parent
 
                 archive.dest_path = base_path / archive.slug / 'index.html'
+
+            if archive.single:
+                archive.dest_path = archive.single.dest_path
+                archive.dest_dir = archive.single.dest_dir
 
             archive.rel_url = archive._get_url_from_dest()
             archive._url_setup(self.config)
@@ -271,58 +289,6 @@ class Archive(Page):
             self.archive_type = self.id.parts[1]
         else:
             self.id = PurePath(name)
-
-    def add_single_to_section_archive(self, single):
-        if str(self.path) in str(single.abs_src_path.parent):
-            if self.path == single.abs_src_path.parent:
-                target_archive = self
-
-                for parent in target_archive.parents:
-                    parent.singles_all.append(single)
-
-                target_archive.singles.append(single)
-                target_archive.singles_all.append(single)
-                single.archive_list.append(target_archive)
-
-                # get data from single index file
-                if single.filename == 'index':
-                    self.file_id = single.file_id
-                    self.meta = single.meta
-                    self.title = single.title
-                    self.name = single.name
-                    self.slug = single.slug
-                    self.content = single.content
-                    self.summary = single.summary
-                    self.image = single.image
-
-                    self.html = single.html
-                    self.archive_list = single.archive_list
-                    self.shouldUpdateHtml = single.shouldUpdateHtml
-                    self.shouldOutput = single.shouldOutput
-                    self.single = single
-
-            else:
-                for archive in self.children.values():
-                    archive.add_single_to_section_archive(single)
-
-    def update_url(self):
-        if self.singles_all is None or len(self.singles_all) == 0:
-            return
-
-        if self.archive_type != 'section':
-            return
-
-        # get data from single index file
-        if self.single is not None:
-            self.url = self.single.url
-            self.abs_url = self.single.abs_url
-            self.rel_url = self.single.rel_url
-            self.dest_path = self.single.dest_path
-            self.dest_dir = self.single.dest_dir
-
-        if self.children is not None:
-            for child_archive in self.children.values():
-                child_archive.update_url()
 
     def get_archives(self, singles, archives: Archives, themes: Themes):
 
