@@ -17,7 +17,7 @@ class Site:
 
         self.plugins: Plugins = Plugins(config)
         self.config = self.plugins.do_action(
-            'after_load_config', target=self.config)
+            'after_load_plugins', target=self.config)
 
         self.themes = Themes(self.config)
         self.themes = self.plugins.do_action(
@@ -33,7 +33,7 @@ class Site:
     def setup_post_types(self):
         config: Config = self.config
         config = self.add_missing_post_types(config)
-        config = self.update_post_type_properties(config)
+        config = self.handle_missing_home_template(config)
         return config
 
     def add_missing_post_types(self, config: Config):
@@ -44,7 +44,7 @@ class Site:
                     config.post_type.update({post_type: {}})
         return config
 
-    def update_post_type_properties(self, config: Config):
+    def handle_missing_home_template(self, config: Config):
         home_template = self.themes.lookup_template(['home.html'])
 
         if not home_template:
@@ -62,7 +62,7 @@ class Site:
     def update(self):
         self.config.env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(self.themes.dirs)
-            )
+        )
         self.config.env.globals.update({
             'config': self.config,
             'singles': self.singles,
@@ -89,13 +89,10 @@ class Site:
 
         if self.config['mode'] != 'draft':
             self.archives.output()
-            self.plugins.do_action(
-                'after_output_archives', target=self)
-
+            self.plugins.do_action('after_output_archives', target=self)
             self.output_extra_pages()
 
         self.plugins.do_action('after_output_site', target=self)
-
         self.plugins.do_action('on_end', target=self)
 
     def copy_static_files(self):
@@ -112,7 +109,9 @@ class Site:
                 copy_file_if_newer(f, to_path)
 
         for d in self.themes.dirs:
+            d: Path
             for f in d.glob('**/*'):
+                f: Path
                 if f.is_file() and self.is_target(f.relative_to(d.parent)):
                     rel_path = f.relative_to(d.parent)
                     to_path = self.config.public_dir / 'themes' / rel_path
@@ -145,12 +144,13 @@ class Site:
         html = template.render()
 
         if extra_page == 'home.html':
-            output_path = self.config.public_dir / 'index.html'
+            output_path = 'index.html'
         elif extra_page in self.config.extra_pages:
-            output_path = self.config.public_dir / extra_page
+            output_path = extra_page
         else:
-            output_path = self.config.public_dir / template_path
+            output_path = template_path
 
+        output_path = self.config.public_dir / output_path
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, 'w', encoding='UTF-8') as f:
