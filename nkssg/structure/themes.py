@@ -47,10 +47,10 @@ class Themes:
 
     def lookup_template(self, search_list: list[str]):
         for search in search_list:
-            search = search.replace('.html', '')
             for d in self.dirs:
                 for f in d.glob('**/*'):
-                    if f.is_file() and f.stem == search:
+                    if f.is_file() and f.name == search:
                         rel_path = f.relative_to(d)
-                        return str(rel_path).replace('\\', '/')
+                        rel_path = str(rel_path).replace('\\', '/')
+                        return rel_path
         return ''
