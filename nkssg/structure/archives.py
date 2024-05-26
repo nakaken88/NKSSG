@@ -88,14 +88,12 @@ class Archives(Pages):
     def initialize_taxonomy_archives(
             self, tax_name, terms: dict[str, TermConfig]):
 
-        root_id = PurePath('/taxonomy', tax_name)
-
         for term_name, term_config in terms.items():
 
-            id = root_id / term_name
+            id = PurePath('/taxonomy', tax_name, term_name)
             archive = self.create_archive(id)
 
-            parent_id = root_id / term_config.parent
+            parent_id = PurePath('/taxonomy', tax_name, term_config.parent)
             parent = self.create_archive(parent_id)
 
             parent.children[term_name] = archive
