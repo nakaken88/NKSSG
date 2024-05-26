@@ -1,4 +1,5 @@
 import fnmatch
+from pathlib import Path
 import shutil
 
 import jinja2
@@ -98,42 +99,31 @@ class Site:
         self.plugins.do_action('on_end', target=self)
 
     def copy_static_files(self):
+        def copy_file_if_newer(src: Path, dest: Path):
+            if dest.exists() and src.stat().st_mtime <= dest.stat().st_mtime:
+                return
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(src, dest)
 
         for f in self.config.static_dir.glob('**/*'):
             if f.is_file():
                 rel_path = f.relative_to(self.config.static_dir)
                 to_path = self.config.public_dir / rel_path
-                if to_path.exists():
-                    if f.stat().st_mtime < to_path.stat().st_mtime:
-                        continue
-
-                to_path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(str(f), str(to_path))
+                copy_file_if_newer(f, to_path)
 
         for d in self.themes.dirs:
             for f in d.glob('**/*'):
-                if not f.is_file():
-                    continue
-
-                rel_path = f.relative_to(d.parent)
-                if not self.is_target(rel_path):
-                    continue
-
-                to_path = self.config.public_dir / 'themes' / rel_path
-                if to_path.exists():
-                    if f.stat().st_mtime < to_path.stat().st_mtime:
-                        continue
-
-                to_path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(str(f), str(to_path))
+                if f.is_file() and self.is_target(f.relative_to(d.parent)):
+                    rel_path = f.relative_to(d.parent)
+                    to_path = self.config.public_dir / 'themes' / rel_path
+                    copy_file_if_newer(f, to_path)
 
     def is_target(self, rel_path):
-        theme_config = self.themes.cnf
-        for pattern in theme_config.get('static_exclude', []):
+        for pattern in self.themes.cnf.get('static_exclude', []):
             if fnmatch.fnmatch(rel_path, pattern):
                 return False
 
-        for pattern in theme_config.get('static_include', []):
+        for pattern in self.themes.cnf.get('static_include', []):
             if fnmatch.fnmatch(rel_path, pattern):
                 return True
         return False
