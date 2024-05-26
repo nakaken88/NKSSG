@@ -9,7 +9,7 @@
     </a>
   </summary>
   {% if menu_item.children %}
-    {% for menu_item in menu_item.children if menu_item.singles_all | length > 0 %}
+    {% for menu_item in menu_item.children.values() if menu_item.singles_all | length > 0 %}
       {% include "partials/menu_item.html" %}
     {% endfor %}
   {% endif %}
