@@ -172,6 +172,7 @@ class Archives(Pages):
             archive.singles_all_count = len(archive.singles_all)
 
             archive.name = Page.clean_name(archive.id.name)
+            archive.title = archive.name
             archive.slug = Page.to_slug(archive.name)  # todo
 
     def link_section_archive_to_single(self, singles):
