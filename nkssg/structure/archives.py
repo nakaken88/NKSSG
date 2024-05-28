@@ -45,10 +45,10 @@ class Archives(Pages):
         return archive
 
     @staticmethod
-    def get_modified_top_name(old_path: PurePath, new_top_name) -> PurePath:
-        sub_path = old_path.relative_to(old_path.parents[-2])
-        new_path = PurePath("/") / new_top_name / sub_path
-        return new_path
+    def modified_id(old_id: PurePath, index: int, new_part_name) -> PurePath:
+        parts = list(old_id.parts)
+        parts[index] = new_part_name
+        return PurePath(*parts)
 
     def setup_post_type_archives(self, singles: Singles):
         for single in singles.pages:
@@ -59,7 +59,7 @@ class Archives(Pages):
             archive_type = post_type_config.get('archive_type', '').lower()
 
             if archive_type == 'section':
-                id = self.get_modified_top_name(single.id, 'section').parent
+                id = self.modified_id(single.id, 1, 'section').parent
 
             elif archive_type == 'simple':
                 id = PurePath('/simple', post_type_name)
@@ -180,7 +180,7 @@ class Archives(Pages):
             single: Single
             archive_type = single.archive_type
             if single.filename == 'index' and archive_type == 'section':
-                temp_id = self.get_modified_top_name(single.id, 'section')
+                temp_id = self.modified_id(single.id, 1, 'section')
                 temp_id = temp_id.parent
                 if temp_id in self.archives:
                     archive = self.archives[temp_id]
