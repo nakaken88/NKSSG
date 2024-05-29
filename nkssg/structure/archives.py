@@ -165,7 +165,6 @@ class Archives(Pages):
                 continue
 
             if len(archive.id.parts) == 3:
-                archive.is_root = True
                 archive.archive_type = archive.id.parts[1]
 
             archive.root_name = archive.id.parts[2]
@@ -271,7 +270,6 @@ class Archive(Page):
         self.path = ''
         self.root_archive = ''
         self.root_name = ''
-        self.is_root = False
         self.parent = None
         self.parents = []
         self.children = {}
@@ -283,6 +281,10 @@ class Archive(Page):
 
     def __str__(self):
         return f"Archive(id='{self.id}')"
+
+    @property
+    def is_root(self):
+        return len(self.id.parts) == 3
 
     def set_id(self, parent, name):
         if parent is not None:
