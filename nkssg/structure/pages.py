@@ -29,10 +29,6 @@ class Page:
         self.id = ''
         self.file_id = ''
 
-        self.abs_src_path = ''
-        self.src_path = ''
-        self.src_dir = ''
-
         self.archive_type = ''
         self.meta = {}
         self.title = ''
