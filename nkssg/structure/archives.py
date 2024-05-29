@@ -167,7 +167,6 @@ class Archives(Pages):
             if len(archive.id.parts) == 3:
                 archive.archive_type = archive.id.parts[1]
 
-            archive.root_name = archive.id.parts[2]
             archive.singles_all_count = len(archive.singles_all)
 
             archive.name = Page.clean_name(archive.id.name)
@@ -207,16 +206,14 @@ class Archives(Pages):
             archive_type = id.parts[1]
             parent = self.create_archive(id.parent)
 
-            root_name = id.parts[2]
-
             if archive_type == 'taxonomy':
-                root_config = self.config.taxonomy[root_name]
+                root_config = self.config.taxonomy[archive.root_name]
             else:
-                root_config = self.config.post_type[root_name]
+                root_config = self.config.post_type[archive.root_name]
 
             add_prefix_to_url = root_config.get('add_prefix_to_url', True)
             flat_url = root_config.get('flat-url', False)
-            slug = Page.to_slug(root_config.slug or root_name)
+            slug = Page.to_slug(root_config.slug or archive.root_name)
 
             if add_prefix_to_url:
                 root_dest = Path(slug, 'index.html')
@@ -269,7 +266,6 @@ class Archive(Page):
 
         self.path = ''
         self.root_archive = ''
-        self.root_name = ''
         self.parent = None
         self.parents = []
         self.children = {}
@@ -285,6 +281,10 @@ class Archive(Page):
     @property
     def is_root(self):
         return len(self.id.parts) == 3
+
+    @property
+    def root_name(self):
+        return self.id.parts[2] if len(self.id.parts) >= 3 else ''
 
     def set_id(self, parent, name):
         if parent is not None:
@@ -307,8 +307,6 @@ class Archive(Page):
         config = archives.config
         dest_dir = self.dest_path.parent
 
-        root_name = self.id.parts[2]
-
         paginator = {}
         paginator['pages'] = []
 
@@ -316,19 +314,19 @@ class Archive(Page):
         if self.archive_type == 'date':
             target_singles = self.singles_all
 
-            post_type_dict = config.post_type[root_name]
+            post_type_dict = config.post_type[self.root_name]
             paginator['limit'] = post_type_dict.get('limit') or 10
 
         elif self.archive_type == 'section' or self.archive_type == 'simple':
             target_singles = self.singles
 
-            post_type_dict = config.post_type[root_name]
+            post_type_dict = config.post_type[self.root_name]
             paginator['limit'] = post_type_dict.get('limit') or len(target_singles)
 
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
 
-            post_type_dict = config.taxonomy[root_name]
+            post_type_dict = config.taxonomy[self.root_name]
             paginator['limit'] = post_type_dict.limit
 
         paginator['total_elements'] = len(target_singles)
