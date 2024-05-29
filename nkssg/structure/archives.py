@@ -59,7 +59,7 @@ class Archives(Pages):
             archive_type = post_type_config.get('archive_type', '').lower()
 
             if archive_type == 'section':
-                id = self.modified_id(single.id, 1, 'section').parent
+                id = self.modified_id(single.id.parent, 1, 'section')
 
             elif archive_type == 'simple':
                 id = PurePath('/simple', post_type_name)
