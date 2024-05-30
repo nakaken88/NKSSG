@@ -167,8 +167,6 @@ class Archives(Pages):
             if len(archive.id.parts) == 3:
                 archive.archive_type = archive.id.parts[1]
 
-            archive.singles_all_count = len(archive.singles_all)
-
             archive.name = Page.clean_name(archive.id.name)
             archive.title = archive.name
             archive.slug = Page.to_slug(archive.name)  # todo
@@ -272,7 +270,6 @@ class Archive(Page):
 
         self.singles = []
         self.singles_all = []
-        self.singles_all_count = 0
         self.single = None
 
     def __str__(self):
@@ -285,6 +282,10 @@ class Archive(Page):
     @property
     def root_name(self):
         return self.id.parts[2] if len(self.id.parts) >= 3 else ''
+
+    @property
+    def singles_all_count(self):
+        return len(self.singles_all)
 
     def set_id(self, parent, name):
         if parent is not None:
