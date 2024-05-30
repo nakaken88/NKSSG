@@ -101,7 +101,7 @@ class Archives(Pages):
 
     def reassign_id(self, base_id: PurePath, terms: dict[str, TermConfig]):
 
-        ids_to_remove = set()
+        ids_to_remove: set[PurePath] = set()
         base_archive = self.create_archive(base_id)
 
         for child_name, child_archive in base_archive.children.items():
@@ -264,7 +264,7 @@ class Archive(Page):
 
         self.parent = None
         self.parents = []
-        self.children = {}
+        self.children: dict[str, 'Archive'] = {}
 
         self.singles = []
         self.singles_all = []
