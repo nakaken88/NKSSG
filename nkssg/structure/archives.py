@@ -263,7 +263,6 @@ class Archive(Page):
         self.page_type = 'archive'
 
         self.path = ''
-        self.root_archive = ''
         self.parent = None
         self.parents = []
         self.children = {}
