@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 from ruamel.yaml import YAML, YAMLError
 
-from nkssg.config import Config, PostTypeConfig
+from nkssg.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
@@ -462,11 +462,18 @@ class Single(Page):
             post_type_config = config.post_type[post_type]
             permalink = post_type_config.permalink
 
+            post_type_slug = post_type_config.slug or post_type
+            post_type_slug = Page.to_slug(post_type_slug)
+
+            prefix_to_url = ''
+            if post_type_config.add_prefix_to_url:
+                prefix_to_url = post_type_slug
+
             if permalink:
-                url = self.get_url_from_permalink(permalink, config)
+                url = self.get_url_from_permalink(permalink, prefix_to_url)
                 dest_path = self._get_dest_from_url(url)
             else:
-                dest_path = self._generate_default_dest_path(post_type_config)
+                dest_path = self._generate_default_dest_path(prefix_to_url)
                 url = self._get_url_from_dest(dest_path)
 
         url = '/' + url.strip('/')
@@ -476,40 +483,43 @@ class Single(Page):
 
         return url.lower(), dest_path
 
-    def _generate_default_dest_path(self, post_type_config: PostTypeConfig):
+    def _generate_default_dest_path(self, prefix_to_url):
         dest_path = self.src_dir / self.filename / 'index.html'
         if self.filename == 'index':
             dest_path = self.src_dir / 'index.html'
 
         dest_path = dest_path.relative_to(Path(self.post_type))
-        if post_type_config.add_prefix_to_url:
-            slug = post_type_config.slug
-            dest_path = Path(slug, dest_path)
 
         parts = dest_path.parts
-        new_parts = [Page.to_slug(Page.clean_name(part)) for part in parts]
-        return Path(*new_parts)
+        new_parts = [Page.clean_name(part) for part in parts]
 
-    def get_url_from_permalink(self, permalink, config: Config):
+        return Path(prefix_to_url, *new_parts)
+
+    def get_url_from_permalink(self, permalink, prefix_to_url):
         permalink = '/' + permalink.strip('/') + '/'
+
+        if prefix_to_url:
+            permalink = '/' + prefix_to_url + permalink
+
         url = self.date.strftime(permalink)
         url = url.replace('{slug}', self.slug)
 
         if '{filename}' in url:
-            filename = self._get_filename_slug(config)
+            filename = self._get_filename_slug(prefix_to_url)
             url = url.replace('{filename}', filename)
 
         url = self._replace_dynamic_parts_in_url(url)
         return quote(url).lower()
 
-    def _get_filename_slug(self, config: Config):
+    def _get_filename_slug(self, prefix_to_url):
         filename_slug = self.filename
         if filename_slug.lower() == 'index':
             if len(self.src_dir.parts) == 1:
-                filename_slug = config.post_type[self.post_type].slug
+                filename_slug = prefix_to_url
             else:
                 filename_slug = self.src_dir.parts[-1]
-        return Page.to_slug(Page.clean_name(filename_slug))
+                filename_slug = Page.to_slug(Page.clean_name(filename_slug))
+        return filename_slug
 
     def _replace_dynamic_parts_in_url(self, url: str):
         dynamic_parts = re.findall(r'\{.*?\}', url)
@@ -520,6 +530,7 @@ class Single(Page):
 
             new_part = self._get_dynamic_part_replacement(part, part_type)
             url = url.replace(original_part, '/'.join(new_part))
+            url = url.replace('//', '/')
         return url
 
     def _extract_part_type(self, part):
@@ -535,6 +546,8 @@ class Single(Page):
 
         for archive in archive_list:
             if archive.root_name == part:
+                if archive.is_root:
+                    return []
                 target_archives.append(archive)
                 current = archive
                 for _ in range(len(archive.id.parts)):
@@ -550,7 +563,7 @@ class Single(Page):
         target_archives = self._get_target_archives_for_permalink(part)
 
         if not target_archives:
-            return ['no-' + Page.to_slug(part)]
+            return []
 
         if part_type == 'all':
             return [p.slug for p in target_archives]
