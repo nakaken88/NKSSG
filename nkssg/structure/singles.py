@@ -165,7 +165,7 @@ class Single(Page):
     def __str__(self):
         return f"Single(src='{self.id}')"
 
-    def __lt__(self, other):
+    def __lt__(self, other: 'Single'):
         if self.post_type != other.post_type:
             return self.post_type_index < other.post_type_index
 
