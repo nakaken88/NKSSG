@@ -449,7 +449,11 @@ class Single(Page):
 
     def _get_url_and_dest_path(self, config: Config):
 
-        url = self.meta.get('url')
+        url: str = self.meta.get('url', '')
+
+        # convert to relative url
+        url = url.replace(config.site.site_url, '')
+        url = url.replace(config.site.site_url_original, '')
 
         if url:
             dest_path = self._get_dest_from_url(url)
@@ -465,8 +469,10 @@ class Single(Page):
                 dest_path = self._generate_default_dest_path(post_type_config)
                 url = self._get_url_from_dest(dest_path)
 
-        url = '/' + url.strip('/') + '/'
-        url = url.replace('//', '/')
+        url = '/' + url.strip('/')
+        parts = url.split('/')
+        if parts[-1] != '' and '.htm' not in parts[-1]:
+            url = url + '/'
 
         return url.lower(), dest_path
 
