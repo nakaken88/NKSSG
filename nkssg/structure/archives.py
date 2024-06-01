@@ -252,7 +252,6 @@ class Archive(Page):
     def __init__(self, parent, name):
         super().__init__()
 
-        self.id: PurePath
         self.set_id(parent, name)
 
         self.archive_type = ''
@@ -275,6 +274,7 @@ class Archive(Page):
 
     @property
     def is_root(self):
+        # /{archive_type}/{root_name}/
         return len(self.id.parts) == 3
 
     @property

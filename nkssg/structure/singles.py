@@ -149,7 +149,7 @@ class Single(Page):
         self.src_path = abs_src_path.relative_to(docs_dir)
         self.src_dir = self.src_path.parent
 
-        self.id: PurePath = PurePath('/docs', self.src_path)
+        self.id = PurePath('/docs', self.src_path)
         self.post_type = self.id.parts[2]
         self.page_type = 'single'
 
@@ -211,6 +211,11 @@ class Single(Page):
         self.file_id = self._get_file_id()
 
         return self
+
+    @property
+    def is_root(self):
+        # /docs/{post_type}/index.md
+        return len(self.id.parts) == 4
 
     @staticmethod
     def parse_front_matter(path):
@@ -338,7 +343,7 @@ class Single(Page):
         slug = self.meta.get('slug')
         if slug is None:
             # set top index slug to post type slug instead of dir name
-            if self.filename == 'index' and len(self.id.parts) == 3:
+            if self.filename == 'index' and self.is_root:
                 slug = post_type_slug
             else:
                 slug = self.name

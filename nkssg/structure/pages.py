@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path, PurePath
 import shutil
 from urllib.parse import quote, unquote, urljoin
 
@@ -26,7 +26,7 @@ class Pages:
 
 class Page:
     def __init__(self):
-        self.id = ''
+        self.id: PurePath
         self.file_id = ''
 
         self.archive_type = ''
