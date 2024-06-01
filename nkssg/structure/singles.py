@@ -521,7 +521,7 @@ class Single(Page):
             return 'top', part[:-len('_top')]
         elif '_last' in part:
             return 'last', part[:-len('_last')]
-        return 'all', part
+        return 'all', part[:-len('_all')]
 
     def _get_target_archives_for_permalink(self, part):
         target_archives = []
@@ -530,10 +530,13 @@ class Single(Page):
         for archive in archive_list:
             if archive.root_name == part:
                 target_archives.append(archive)
-                for p in archive.parent:
-                    if p.is_root:
+                current = archive
+                for _ in range(len(archive.id.parts)):
+                    parent = current.parent
+                    if parent.is_root:
                         break
-                    target_archives.append(p)
+                    target_archives.append(parent)
+                    current = parent
                 return target_archives[::-1]
         return target_archives
 
