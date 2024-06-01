@@ -60,7 +60,7 @@ def test_get_url_from_permalink_filename_dirty_name():
     dummy_path = config.docs_dir / 'sample' / 'A of C.md'
     single = Single(dummy_path, config)
     ret = single.get_url_from_permalink('/{filename}/', None)
-    assert ret == '/a-of-c/'
+    assert ret == r'/a%20of%20c/'
 
 
 def test_get_url_from_permalink_filename_index():
@@ -77,5 +77,5 @@ def test_get_url_from_permalink_filename_top_index():
     config.update({'post_type': {'sample': {'slug': 'new_post_type'}}})
     dummy_path = config.docs_dir / 'sample' / 'index.md'
     single = Single(dummy_path, config)
-    ret = single.get_url_from_permalink('/{filename}/', config)
+    ret = single.get_url_from_permalink('/{filename}/', 'new_post_type')
     assert ret == '/new_post_type/'

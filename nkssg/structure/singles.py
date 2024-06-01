@@ -470,7 +470,9 @@ class Single(Page):
                 prefix_to_url = post_type_slug
 
             if permalink:
-                url = self.get_url_from_permalink(permalink, prefix_to_url)
+                url = self.get_url_from_permalink(
+                                permalink, post_type_slug, prefix_to_url)
+
                 dest_path = self._get_dest_from_url(url)
             else:
                 dest_path = self._generate_default_dest_path(prefix_to_url)
@@ -495,7 +497,8 @@ class Single(Page):
 
         return Path(prefix_to_url, *new_parts)
 
-    def get_url_from_permalink(self, permalink, prefix_to_url):
+    def get_url_from_permalink(
+            self, permalink, post_type_slug, prefix_to_url=''):
         permalink = '/' + permalink.strip('/') + '/'
 
         if prefix_to_url:
@@ -505,17 +508,17 @@ class Single(Page):
         url = url.replace('{slug}', self.slug)
 
         if '{filename}' in url:
-            filename = self._get_filename_slug(prefix_to_url)
+            filename = self._get_filename_slug(post_type_slug)
             url = url.replace('{filename}', filename)
 
         url = self._replace_dynamic_parts_in_url(url)
         return quote(url).lower()
 
-    def _get_filename_slug(self, prefix_to_url):
+    def _get_filename_slug(self, post_type_slug):
         filename_slug = self.filename
         if filename_slug.lower() == 'index':
             if len(self.src_dir.parts) == 1:
-                filename_slug = prefix_to_url
+                filename_slug = post_type_slug
             else:
                 filename_slug = self.src_dir.parts[-1]
                 filename_slug = Page.to_slug(Page.clean_name(filename_slug))
