@@ -433,11 +433,9 @@ class Single(Page):
             image['new_path'] = Path(config.public_dir, *thumb_path_parts)
             image['rel_url'] = '/' + '/'.join(thumb_path_parts)
 
+        use_abs_url = config.use_abs_url
         image['abs_url'] = config.site.site_url + image['rel_url']
-        if config.use_abs_url:
-            image['url'] = image['abs_url']
-        else:
-            image['url'] = image['rel_url']
+        image['url'] = image['abs_url'] if use_abs_url else image['rel_url']
         image['src'] = image['url']
         return image
 
