@@ -26,7 +26,7 @@ class Pages:
 
 class Page:
     def __init__(self):
-        self.id: PurePath
+        self.id: PurePath = PurePath('')
         self.file_id = ''
 
         self.archive_type = ''
@@ -102,17 +102,18 @@ class Page:
 
         dest_path = dest_path or self.dest_path
         if not dest_path:
-            raise ValueError(f'Destination path error on {self.src_path}')
+            raise ValueError(f'Destination path error on {self.id}')
 
         parts = Path(dest_path).parts
 
-        if parts[-1] == 'index.html':
-            if len(parts) == 1:
-                url = '/'
-            else:
-                url = '/' + '/'.join(parts[:-1]) + '/'
+        if len(parts) == 1 and parts[-1] == 'index.html':
+            url = '/'
+        elif parts[-1] == 'index.html':
+            url = '/' + '/'.join(parts[:-1]) + '/'
+        elif '.' in parts[-1]:
+            url = '/' + '/'.join(parts)
         else:
-            url = '/' + '/'.join(parts[:-1])
+            url = '/' + '/'.join(parts) + '/'
         return quote(url).lower()
 
     def _get_dest_from_url(self, url: str):
