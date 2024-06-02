@@ -1,6 +1,6 @@
 from pathlib import Path, PurePath
 import shutil
-from urllib.parse import quote, unquote, urljoin
+from urllib.parse import quote, unquote
 
 from nkssg.config import Config
 
@@ -127,10 +127,9 @@ class Page:
         if not self.rel_url:
             return
 
-        site_url = config.site.site_url or '/'
-        _site_url = site_url.rstrip('/') + '/'
-        _rel_url = self.rel_url.lstrip('/')
-        self.abs_url = urljoin(_site_url, _rel_url)
+        site_url = (config.site.site_url or '/').rstrip('/')
+        rel_url = self.rel_url.lstrip('/')
+        self.abs_url = f'{site_url}/{rel_url}'
 
         self.url = self.abs_url if config.use_abs_url else self.rel_url
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 import pytest
 
+from nkssg.config import Config
 from nkssg.structure.pages import Page
 
 
@@ -74,3 +75,31 @@ def test_get_url_from_dest_error(dest_path):
 def test_get_dest_from_url(url, expected):
     page = Page()
     assert page._get_dest_from_url(url) == Path(expected)
+
+
+@pytest.mark.parametrize(
+    "site_url, use_abs_url, rel_url, expected_abs_url, expected_url",
+    [
+        # site_url is not empty
+        ('http://example.com', False, '/path/to/page',
+         'http://example.com/path/to/page', '/path/to/page'),
+        ('http://example.com', True, '/path/to/page',
+         'http://example.com/path/to/page', 'http://example.com/path/to/page'),
+        # site_url is empty
+        ('', False, '/path/to/page', '/path/to/page', '/path/to/page'),
+        ('', True, '/path/to/page', '/path/to/page', '/path/to/page'),
+    ]
+)
+def test_url_setup(
+        site_url, use_abs_url, rel_url, expected_abs_url, expected_url):
+
+    config = Config()
+    config.site.site_url = site_url
+    config.use_abs_url = use_abs_url
+
+    page = Page()
+    page.rel_url = rel_url
+    page._url_setup(config)
+
+    assert page.abs_url == expected_abs_url
+    assert page.url == expected_url
