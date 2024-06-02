@@ -118,9 +118,9 @@ class Page:
 
     def _get_dest_from_url(self, url: str):
         url = url.strip('/')
-        if '.htm' not in url:
-            url = url + '/index.html'
         parts = unquote(url).split('/')
+        if '.' not in parts[-1]:
+            parts.append('index.html')
         return Path(*parts)
 
     def _url_setup(self, config: Config):

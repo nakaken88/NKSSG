@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 
 from nkssg.structure.pages import Page
@@ -57,3 +58,19 @@ def test_get_url_from_dest_error(dest_path):
     page.dest_path = ''
     with pytest.raises(ValueError):
         page._get_url_from_dest(dest_path)
+
+
+@pytest.mark.parametrize("url, expected", [
+    ('/', 'index.html'),                           # site top
+    ('/a/b/c/', 'a/b/c/index.html'),               # normal page
+    ('/sample.html', 'sample.html'),               # x.html in top
+    ('/a/b/c.html', 'a/b/c.html'),                 # x.html in sub folder
+    ('/A/B/C/', 'A/B/C/index.html'),               # upper case
+    ('/a%20b/', 'a b/index.html'),                 # path with space
+    ('/a//b///c/', 'a/b/c/index.html'),            # multiple slashes
+    ('/folder/', 'folder/index.html'),             # folder in root
+    ('/a/subfolder/', 'a/subfolder/index.html'),   # nested folder in root
+])
+def test_get_dest_from_url(url, expected):
+    page = Page()
+    assert page._get_dest_from_url(url) == Path(expected)
