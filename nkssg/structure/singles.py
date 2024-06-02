@@ -453,7 +453,7 @@ class Single(Page):
         return image
 
     def _get_file_id(self):
-        return self.meta.get('file_id') or self.src_path
+        return self.meta.get('file_id', str(self.src_path))
 
     def update_url(self, config):
         self.rel_url, self.dest_path = self._get_url_and_dest_path(config)
