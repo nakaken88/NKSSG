@@ -15,13 +15,7 @@ from nkssg.structure.singles import Single
 ])
 def test_get_url_from_permalink_simple(permalink, expected):
     config = Config()
-    config.update({
-        'post_type': {
-            'sample': {
-                'add_prefix_to_url': False
-            }
-        }
-    })
+    config.update({'post_type': {'sample': {}}})
     dummy_path = config.docs_dir / 'sample' / 'sample post.md'
     single = Single(dummy_path, config)
 
