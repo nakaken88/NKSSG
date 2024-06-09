@@ -491,12 +491,7 @@ class Single(Page):
                 dest_path = self._generate_default_dest_path(prefix_to_url)
                 url = self._get_url_from_dest(dest_path)
 
-        url = '/' + url.strip('/')
-        parts = url.split('/')
-        if parts[-1] != '' and '.htm' not in parts[-1]:
-            url = url + '/'
-
-        return url.lower(), dest_path
+        return self._format_url(url), dest_path
 
     def _generate_default_dest_path(self, prefix_to_url):
         dest_path = self.src_dir / self.filename / 'index.html'
@@ -587,6 +582,11 @@ class Single(Page):
             return [target_archives[0].slug]
         elif part_type == 'last':
             return [target_archives[-1].slug]
+
+    def _format_url(self, url: str):
+        if not url.endswith('/') and '.htm' not in url.split('/')[-1]:
+            url += '/'
+        return url.lower()
 
     def update_html(self, singles: Singles, archives, themes: Themes):
 
