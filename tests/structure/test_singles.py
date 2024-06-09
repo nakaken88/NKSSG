@@ -26,6 +26,28 @@ def test_get_url_from_permalink_simple(permalink, expected):
     assert result == expected
 
 
+@pytest.mark.parametrize("permalink, expected", [
+    ("/fix/", "/s/fix/"),                           # fix
+    ("/%Y/%m/%d/", "/s/2001/02/03/"),               # date
+    ("/pre/%Y/%m/%d/", "/s/pre/2001/02/03/"),       # date with prefix
+    ("/%Y%m%d/%H%M%S/", "/s/20010203/040506/"),     # datetime
+    ("/{slug}/", "/s/sample-slug/"),                # slug
+    ("/{filename}/", "/s/sample%20post/"),          # filename
+])
+def test_get_url_from_permalink_prefix(permalink, expected):
+    config = Config()
+    config.update({'post_type': {'sample': {}}})
+    dummy_path = config.docs_dir / 'sample' / 'sample post.md'
+    single = Single(dummy_path, config)
+
+    single.date = datetime.datetime(2001, 2, 3, 4, 5, 6)
+    single.slug = 'sample-slug'
+
+    result = single.get_url_from_permalink(
+        permalink, post_type_slug='sample', prefix_to_url='s')
+    assert result == expected
+
+
 def test_get_url_from_permalink_filename_index():
     config = Config()
     config.update({'post_type': {'sample': {}}})
