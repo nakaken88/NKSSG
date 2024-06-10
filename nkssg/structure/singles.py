@@ -551,37 +551,40 @@ class Single(Page):
             return 'last', part[:-len('_last')]
         return 'all', part[:-len('_all')]
 
-    def _get_target_archives_for_permalink(self, part):
-        target_archives = []
+    def _get_target_archive_slugs(self, part):
+        slugs = []
         archive_list = self.archive_list
 
         for archive in archive_list:
             if archive.root_name == part:
+                if self.filename.lower() == 'index':
+                    archive = archive.parent
                 if archive.is_root:
                     return []
-                target_archives.append(archive)
+
+                slugs.append(archive.slug)
                 current = archive
                 for _ in range(len(archive.id.parts)):
                     parent = current.parent
                     if parent.is_root:
                         break
-                    target_archives.append(parent)
+                    slugs.append(parent.slug)
                     current = parent
-                return target_archives[::-1]
-        return target_archives
+                return slugs[::-1]
+        return slugs
 
     def _get_dynamic_part_replacement(self, part, part_type):
-        target_archives = self._get_target_archives_for_permalink(part)
+        target_archive_slugs = self._get_target_archive_slugs(part)
 
-        if not target_archives:
+        if not target_archive_slugs:
             return []
 
         if part_type == 'all':
-            return [p.slug for p in target_archives]
+            return target_archive_slugs
         elif part_type == 'top':
-            return [target_archives[0].slug]
+            return [target_archive_slugs[0]]
         elif part_type == 'last':
-            return [target_archives[-1].slug]
+            return [target_archive_slugs[-1]]
 
     def _format_url(self, url: str):
         if not url.endswith('/') and '.htm' not in url.split('/')[-1]:
