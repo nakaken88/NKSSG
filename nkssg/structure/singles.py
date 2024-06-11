@@ -538,8 +538,9 @@ class Single(Page):
             part = original_part[1:-1]
 
             part_type, part = self._extract_part_type(part)
+            slugs = self._get_target_archive_slugs(part)
 
-            new_part = self._get_dynamic_part_replacement(part, part_type)
+            new_part = self._get_dynamic_part_replacement(slugs, part_type)
             url = url.replace(original_part, '/'.join(new_part))
             url = url.replace('//', '/')
         return url
@@ -573,18 +574,17 @@ class Single(Page):
                 return slugs[::-1]
         return slugs
 
-    def _get_dynamic_part_replacement(self, part, part_type):
-        target_archive_slugs = self._get_target_archive_slugs(part)
-
-        if not target_archive_slugs:
+    def _get_dynamic_part_replacement(self, slugs, part_type):
+        if not slugs:
             return []
 
         if part_type == 'all':
-            return target_archive_slugs
+            return slugs
         elif part_type == 'top':
-            return [target_archive_slugs[0]]
+            return [slugs[0]]
         elif part_type == 'last':
-            return [target_archive_slugs[-1]]
+            return [slugs[-1]]
+        return []
 
     def _format_url(self, url: str):
         if not url.endswith('/') and '.htm' not in url.split('/')[-1]:
