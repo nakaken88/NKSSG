@@ -476,36 +476,20 @@ class Single(Page):
             post_type_config = config.post_type[post_type]
             permalink = post_type_config.permalink
 
+            if not permalink:
+                raise ValueError(f"Permalink of '{post_type}' is not set.")
+
             post_type_slug = post_type_config.slug or post_type
             post_type_slug = Page.to_slug(post_type_slug)
 
-            prefix_to_url = ''
             add_prefix_to_url = post_type_config.add_prefix_to_url
-            if add_prefix_to_url:
-                prefix_to_url = post_type_slug
 
-            if permalink:
-                url = self.get_url_from_permalink(
-                                permalink, post_type_slug, add_prefix_to_url)
+            url = self.get_url_from_permalink(
+                            permalink, post_type_slug, add_prefix_to_url)
 
-                dest_path = self._get_dest_from_url(url)
-            else:
-                dest_path = self._generate_default_dest_path(prefix_to_url)
-                url = self._get_url_from_dest(dest_path)
+            dest_path = self._get_dest_from_url(url)
 
         return self._format_url(url), dest_path
-
-    def _generate_default_dest_path(self, prefix_to_url):
-        dest_path = self.src_dir / self.filename / 'index.html'
-        if self.filename == 'index':
-            dest_path = self.src_dir / 'index.html'
-
-        dest_path = dest_path.relative_to(Path(self.post_type))
-
-        parts = dest_path.parts
-        new_parts = [Page.clean_name(part) for part in parts]
-
-        return Path(prefix_to_url, *new_parts)
 
     def get_url_from_permalink(
             self, permalink, post_type_slug, add_prefix_to_url):
