@@ -457,21 +457,19 @@ class Single(Page):
         return self.meta.get('file_id', str(self.src_path))
 
     def update_url(self, config):
-        self.rel_url, self.dest_path = self._get_url_and_dest_path(config)
+        self.rel_url = self._get_rel_url(config)
+        self.dest_path = self._get_dest_from_url(self.rel_url)
         self.dest_dir = self.dest_path.parent
         self._url_setup(config)
 
-    def _get_url_and_dest_path(self, config: Config):
-
-        url: str = self.meta.get('url', '')
+    def _get_rel_url(self, config: Config):
 
         # convert to relative url
+        url: str = self.meta.get('url', '')
         url = url.replace(config.site.site_url, '')
         url = url.replace(config.site.site_url_original, '')
 
-        if url:
-            dest_path = self._get_dest_from_url(url)
-        else:
+        if not url:
             post_type = self.post_type
             post_type_config = config.post_type[post_type]
             permalink = post_type_config.permalink
@@ -487,9 +485,7 @@ class Single(Page):
             url = self.get_url_from_permalink(
                             permalink, post_type_slug, add_prefix_to_url)
 
-            dest_path = self._get_dest_from_url(url)
-
-        return self._format_url(url), dest_path
+        return self._format_url(url)
 
     def get_url_from_permalink(
             self, permalink, post_type_slug, add_prefix_to_url):
