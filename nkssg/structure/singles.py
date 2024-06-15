@@ -480,12 +480,13 @@ class Single(Page):
             post_type_slug = Page.to_slug(post_type_slug)
 
             prefix_to_url = ''
-            if post_type_config.add_prefix_to_url:
+            add_prefix_to_url = post_type_config.add_prefix_to_url
+            if add_prefix_to_url:
                 prefix_to_url = post_type_slug
 
             if permalink:
                 url = self.get_url_from_permalink(
-                                permalink, post_type_slug, prefix_to_url)
+                                permalink, post_type_slug, add_prefix_to_url)
 
                 dest_path = self._get_dest_from_url(url)
             else:
@@ -507,11 +508,11 @@ class Single(Page):
         return Path(prefix_to_url, *new_parts)
 
     def get_url_from_permalink(
-            self, permalink, post_type_slug, prefix_to_url=''):
+            self, permalink, post_type_slug, add_prefix_to_url):
         permalink = '/' + permalink.strip('/') + '/'
 
-        if prefix_to_url:
-            permalink = '/' + prefix_to_url + permalink
+        if add_prefix_to_url:
+            permalink = '/' + post_type_slug + permalink
 
         url = self.date.strftime(permalink)
 

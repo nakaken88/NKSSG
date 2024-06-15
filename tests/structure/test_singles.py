@@ -25,17 +25,13 @@ def test_get_url_from_permalink_simple(permalink, expected):
     single.date = datetime.datetime(2001, 2, 3, 4, 5, 6)
     single.slug = 'sample-slug'
 
-    result = single.get_url_from_permalink(permalink, None)
+    result = single.get_url_from_permalink(permalink, None, False)
     assert result == expected
 
 
 @pytest.mark.parametrize("permalink, expected", [
-    ("/fix/", "/s/fix/"),                           # fix
-    ("/%Y/%m/%d/", "/s/2001/02/03/"),               # date
-    ("/pre/%Y/%m/%d/", "/s/pre/2001/02/03/"),       # date with prefix
-    ("/%Y%m%d/%H%M%S/", "/s/20010203/040506/"),     # datetime
-    ("/{slug}/", "/s/sample-slug/"),                # slug
-    ("/{filename}/", "/s/sample%20post/"),          # filename
+    ("/%Y/%m/%d/", "/sample/2001/02/03/"),  # date
+    ("/{slug}/", "/sample/sample-slug/"),   # slug
 ])
 def test_get_url_from_permalink_prefix(permalink, expected):
     config = Config()
@@ -46,8 +42,7 @@ def test_get_url_from_permalink_prefix(permalink, expected):
     single.date = datetime.datetime(2001, 2, 3, 4, 5, 6)
     single.slug = 'sample-slug'
 
-    result = single.get_url_from_permalink(
-        permalink, post_type_slug='sample', prefix_to_url='s')
+    result = single.get_url_from_permalink(permalink, 'sample', True)
     assert result == expected
 
 
@@ -79,7 +74,7 @@ def test_get_url_from_permalink_section_normal(permalink, expected):
         p = c
     single.archive_list = [c]
 
-    result = single.get_url_from_permalink(permalink, None)
+    result = single.get_url_from_permalink(permalink, None, False)
     assert result == expected
 
 
@@ -108,16 +103,16 @@ def test_get_url_from_permalink_section_index(permalink, expected):
         p = c
     single.archive_list = [c]
 
-    result = single.get_url_from_permalink(permalink, None)
+    result = single.get_url_from_permalink(permalink, None, False)
     assert result == expected
 
 
 @pytest.mark.parametrize("permalink, expected", [
-    ("/{sample_all}/{slug}/", "/new_post_type/"),
+    ("/{sample_all}/{slug}/", "/new_sample/"),
 ])
 def test_get_url_from_permalink_section_top(permalink, expected):
     config = Config()
-    config.update({'post_type': {'sample': {'slug': 'new_post_type'}}})
+    config.update({'post_type': {'sample': {'slug': 'new_sample'}}})
     dummy_path = Path(config.docs_dir, 'sample', 'index.md')
 
     single = Single(dummy_path, config)
@@ -136,5 +131,5 @@ def test_get_url_from_permalink_section_top(permalink, expected):
         p = c
     single.archive_list = [c]
 
-    result = single.get_url_from_permalink(permalink, 'new_post_type', 'new_post_type')
+    result = single.get_url_from_permalink(permalink, 'new_sample', True)
     assert result == expected
