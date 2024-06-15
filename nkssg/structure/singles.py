@@ -215,6 +215,7 @@ class Single(Page):
         self.name = self._get_name()
 
         post_type_slug = config.post_type[self.post_type].slug
+        post_type_slug = post_type_slug or self.post_type
         self.slug = self._get_slug(post_type_slug)
 
         self.content = self._get_content(doc, config, plugins)
@@ -513,9 +514,12 @@ class Single(Page):
             permalink = '/' + prefix_to_url + permalink
 
         url = self.date.strftime(permalink)
-        url = url.replace('{slug}', self.slug)
 
-        if '{filename}' in url:
+        if self.filename == 'index':
+            url = url.replace('/{slug}/', '/')
+            url = url.replace('/{filename}/', '/')
+        else:
+            url = url.replace('{slug}', self.slug)
             filename = self._get_filename_slug(post_type_slug)
             url = url.replace('{filename}', filename)
 
