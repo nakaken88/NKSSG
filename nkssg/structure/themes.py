@@ -8,7 +8,7 @@ from nkssg.config import Config
 class Themes:
     def __init__(self, config: Config):
 
-        self.dirs = []
+        self.dirs: list[Path] = []
         self.cnf = {}
 
         self.load_theme(config, 'name')

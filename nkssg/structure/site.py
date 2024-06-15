@@ -109,9 +109,7 @@ class Site:
                 copy_file_if_newer(f, to_path)
 
         for d in self.themes.dirs:
-            d: Path
             for f in d.glob('**/*'):
-                f: Path
                 if f.is_file() and self.is_target(f.relative_to(d.parent)):
                     rel_path = f.relative_to(d.parent)
                     to_path = self.config.public_dir / 'themes' / rel_path
