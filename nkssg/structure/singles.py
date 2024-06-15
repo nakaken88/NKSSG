@@ -562,8 +562,6 @@ class Single(Page):
 
         for archive in archive_list:
             if archive.root_name == part:
-                if self.filename.lower() == 'index':
-                    archive = archive.parent
                 if archive.is_root:
                     return []
 
