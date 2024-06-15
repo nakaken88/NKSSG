@@ -171,30 +171,21 @@ class Archives(Pages):
             archive.title = archive.name
             archive.slug = Page.to_slug(archive.name)  # todo
 
-    def link_section_archive_to_single(self, singles):
+    def link_section_archive_to_single(self, singles: Singles):
+        attrs = [
+            'file_id', 'meta', 'title', 'name', 'slug', 'content',
+            'summary', 'image', 'archive_list',
+            'shouldUpdateHtml', 'shouldOutput'
+        ]
         for single in singles:
-            single: Single
             archive_type = single.archive_type
             if single.filename == 'index' and archive_type == 'section':
-                temp_id = self.modified_id(single.id, 1, 'section')
-                temp_id = temp_id.parent
+                temp_id = self.modified_id(single.id.parent, 1, 'section')
                 if temp_id in self.archives:
                     archive = self.archives[temp_id]
                     archive.single = single
-
-                    archive.file_id = single.file_id
-                    archive.meta = single.meta
-                    archive.title = single.title
-                    archive.name = single.name
-                    archive.slug = single.slug
-                    archive.content = single.content
-                    archive.summary = single.summary
-                    archive.image = single.image
-
-                    archive.html = single.html
-                    archive.archive_list = single.archive_list
-                    archive.shouldUpdateHtml = single.shouldUpdateHtml
-                    archive.shouldOutput = single.shouldOutput
+                    for attr in attrs:
+                        setattr(archive, attr, getattr(single, attr))
 
     def update_urls(self):
         for id, archive in self.archives.items():
@@ -299,9 +290,6 @@ class Archive(Page):
 
         if self.singles_all is None or len(self.singles_all) == 0:
             return []
-
-        if self.single is not None:
-            self.content = self.single.content
 
         config = archives.config
         dest_dir = self.dest_path.parent
