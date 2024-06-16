@@ -163,9 +163,6 @@ class Archives(Pages):
             if len(archive.id.parts) <= 2:
                 continue
 
-            if len(archive.id.parts) == 3:
-                archive.archive_type = archive.id.parts[1]
-
             archive.name = Page.clean_name(archive.id.name)
             archive.title = archive.name
             archive.slug = Page.to_slug(archive.name)  # todo
@@ -191,10 +188,9 @@ class Archives(Pages):
             if len(id.parts) < 3:
                 continue
 
-            archive_type = id.parts[1]
             parent = self.create_archive(id.parent)
 
-            if archive_type == 'taxonomy':
+            if archive.archive_type == 'taxonomy':
                 root_config = self.config.taxonomy[archive.root_name]
             else:
                 root_config = self.config.post_type[archive.root_name]
@@ -244,7 +240,6 @@ class Archive(Page):
 
         self.set_id(parent, name)
 
-        self.archive_type = ''
         self.name = str(name)
         self.title = self.name
         self.slug = ''
@@ -278,7 +273,6 @@ class Archive(Page):
     def set_id(self, parent, name):
         if parent is not None:
             self.id = PurePath(parent.id, name)
-            self.archive_type = self.id.parts[1]
         else:
             self.id = PurePath(name)
 
@@ -296,7 +290,6 @@ class Archive(Page):
         paginator = {}
         paginator['pages'] = []
 
-        self.archive_type = self.id.parts[1]
         if self.archive_type == 'date':
             target_singles = self.singles_all
 

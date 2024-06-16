@@ -29,7 +29,6 @@ class Page:
         self.id: PurePath = PurePath('')
         self.file_id = ''
 
-        self.archive_type = ''
         self.meta = {}
         self.title = ''
         self.name = ''
@@ -56,6 +55,10 @@ class Page:
 
         self.shouldUpdateHtml = True
         self.shouldOutput = True
+
+    @property
+    def archive_type(self):
+        return self.id.parts[1] if len(self.id.parts) >= 2 else ''
 
     @staticmethod
     def to_slug(dirty_slug: str):
