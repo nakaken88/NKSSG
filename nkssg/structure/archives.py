@@ -315,14 +315,15 @@ class Archive(Page):
         paginator['total_pages'] = len(paginator['pages'])
         paginator['first'] = paginator['pages'][0]
         paginator['last'] = paginator['pages'][-1]
+        total_elements = paginator['total_elements']
 
         for i in range(paginator['total_pages']):
             if i == 0:
                 start = 0
-                end = min(paginator['first_limit'], paginator['total_elements'])
+                end = min(paginator['first_limit'], total_elements)
             else:
                 start = end
-                end = min(start + paginator['limit'], paginator['total_elements'])
+                end = min(start + paginator['limit'], total_elements)
 
             paginator['paged'] = i + 1
 
