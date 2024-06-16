@@ -272,26 +272,22 @@ class Archive(Page):
 
         if self.archive_type == 'date':
             target_singles = self.singles_all
-
             post_type_dict = config.post_type[self.root_name]
-            paginator['limit'] = post_type_dict.get('limit') or 10
-
-        elif self.archive_type == 'section' or self.archive_type == 'simple':
-            target_singles = self.singles
-
-            post_type_dict = config.post_type[self.root_name]
-            paginator['limit'] = post_type_dict.get('limit') or len(target_singles)
+            limit = post_type_dict.get('limit') or 12
 
         elif self.archive_type == 'taxonomy':
             target_singles = self.singles_all
-
             post_type_dict = config.taxonomy[self.root_name]
-            paginator['limit'] = post_type_dict.limit
+            limit = post_type_dict.get('limit') or len(target_singles)
 
+        else:  # section or simple
+            target_singles = self.singles
+            post_type_dict = config.post_type[self.root_name]
+            limit = post_type_dict.get('limit') or len(target_singles)
+
+        paginator['limit'] = limit
+        paginator['first_limit'] = post_type_dict.get('first_limit', limit)
         paginator['total_elements'] = len(target_singles)
-
-        paginator['first_limit'] = post_type_dict.get('first_limit', paginator['limit'])
-
         paginator['path'] = post_type_dict.get('path', 'path')
 
         # count archive page

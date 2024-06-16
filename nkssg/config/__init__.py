@@ -64,6 +64,7 @@ class PostTypeConfig(BaseConfig):
     archive_type: str = 'section'
     slug: str = ''
     add_prefix_to_url: bool = True
+    limit: int = 0
 
 
 class PostTypeConfigManager(dict[str, PostTypeConfig]):
@@ -99,7 +100,7 @@ class TaxonomyConfig(BaseConfig):
     slug: str = ''
     desc: str = ''
     label: str = ''
-    limit: int = 10
+    limit: int = 0
     terms: dict[str, TermConfig] = field(default_factory=dict)
 
     def update(self, d: dict):
