@@ -326,18 +326,16 @@ class Archive(Page):
                 end = min(start + paginator['limit'], total_elements)
 
             paginator['paged'] = i + 1
+            paginator['prev'] = None
+            paginator['next'] = None
 
             paginator['has_prev'] = (i > 0)
             if paginator['has_prev']:
                 paginator['prev'] = paginator['pages'][i - 1]
-            else:
-                paginator['prev'] = None
 
             paginator['has_next'] = (i < paginator['total_pages'] - 1)
-            if i < paginator['total_pages'] - 1:
+            if paginator['has_next']:
                 paginator['next'] = paginator['pages'][i + 1]
-            else:
-                paginator['next'] = None
 
             template_file = self.lookup_template(themes)
             template = config.env.get_template(template_file)
