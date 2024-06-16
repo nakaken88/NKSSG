@@ -79,7 +79,7 @@ class Site:
             self.plugins.do_action('after_update_urls', target=self)
 
         self.singles.update_htmls(self.archives, self.themes)
-        self.archives.update_htmls(self.singles, self.themes)
+        self.archives.update_htmls(self.themes)
         self.plugins.do_action('after_update_site', target=self)
 
     def output(self):

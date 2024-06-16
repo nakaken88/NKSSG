@@ -214,11 +214,11 @@ class Archives(Pages):
         self.plugins.do_action(
             'after_update_archives_url', target=self)
 
-    def update_htmls(self, singles, themes: Themes):
+    def update_htmls(self, themes: Themes):
         self.plugins.do_action('before_update_archives_html', target=self)
 
         for archive in self.archives.values():
-            self.pages += archive.get_archives(singles, self, themes)
+            self.pages += archive.get_archives(self.config, themes)
 
         self.plugins.do_action('after_update_archives_html', target=self)
 
@@ -260,7 +260,7 @@ class Archive(Page):
     def singles_all_count(self):
         return len(self.singles_all)
 
-    def get_archives(self, singles, archives: Archives, themes: Themes):
+    def get_archives(self, config: Config, themes: Themes):
 
         if not self.shouldUpdateHtml:
             return []
@@ -268,7 +268,6 @@ class Archive(Page):
         if self.singles_all is None or len(self.singles_all) == 0:
             return []
 
-        config = archives.config
         dest_dir = self.dest_path.parent
 
         paginator = {}
