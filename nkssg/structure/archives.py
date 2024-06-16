@@ -258,14 +258,11 @@ class Archive(Page):
 
     @property
     def singles_all_count(self):
-        return len(self.singles_all)
+        return len(self.singles_all) if self.singles_all is not None else 0
 
     def get_archives(self, config: Config, themes: Themes):
 
-        if not self.shouldUpdateHtml:
-            return []
-
-        if self.singles_all is None or len(self.singles_all) == 0:
+        if not self.shouldUpdateHtml or self.singles_all_count == 0:
             return []
 
         dest_dir = self.dest_path.parent
