@@ -47,7 +47,7 @@ class Page:
         self.url = '/'
         self.abs_url = ''
         self.rel_url = ''
-        self.dest_path = 'index.html'
+        self.dest_path: Path = Path('index.html')
         self.dest_dir = ''
         self.aliases = []
 
