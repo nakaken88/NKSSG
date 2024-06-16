@@ -3,7 +3,7 @@ from pathlib import Path, PurePath
 from nkssg.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
-from nkssg.structure.singles import Singles
+from nkssg.structure.singles import Singles, Single
 from nkssg.structure.themes import Themes
 
 
@@ -200,10 +200,9 @@ class Archives(Pages):
                 root_config = self.config.post_type[archive.root_name]
 
             add_prefix_to_url = root_config.get('add_prefix_to_url', True)
-            flat_url = root_config.get('flat-url', False)
-            slug = Page.to_slug(root_config.slug or archive.root_name)
 
             if add_prefix_to_url:
+                slug = Page.to_slug(root_config.slug or archive.root_name)
                 root_dest = Path(slug, 'index.html')
             else:
                 root_dest = Path('index.html')
@@ -211,6 +210,7 @@ class Archives(Pages):
             if len(id.parts) == 3:
                 archive.dest_path = root_dest
             else:
+                flat_url = root_config.get('flat-url', False)
                 if flat_url:
                     base_path = root_dest.parent
                 else:
@@ -257,7 +257,7 @@ class Archive(Page):
 
         self.singles = []
         self.singles_all = []
-        self.single = None
+        self.single: Single = None
 
     def __str__(self):
         return f"Archive(id='{self.id}')"
