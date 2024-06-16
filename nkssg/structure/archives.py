@@ -26,7 +26,6 @@ class Archives(Pages):
         self.setup_post_type_archives(singles)
         self.setup_taxonomy_archives(singles)
         self.update_singles_all()
-        self.update_archive_attribute()
         self.link_section_archive_to_single(singles)
 
         self.plugins.do_action('after_setup_archives', target=self)
@@ -158,15 +157,6 @@ class Archives(Pages):
                         parent.singles_all.append(single)
                 current_id = current_id.parent
 
-    def update_archive_attribute(self):
-        for archive in self.archives.values():
-            if len(archive.id.parts) <= 2:
-                continue
-
-            archive.name = Page.clean_name(archive.id.name)
-            archive.title = archive.name
-            archive.slug = Page.to_slug(archive.name)  # todo
-
     def link_section_archive_to_single(self, singles: Singles):
         attrs = [
             'file_id', 'meta', 'title', 'name', 'slug', 'content',
@@ -240,9 +230,9 @@ class Archive(Page):
 
         self.set_id(parent, name)
 
-        self.name = str(name)
+        self.name = Page.clean_name(self.id.name)
         self.title = self.name
-        self.slug = ''
+        self.slug = Page.to_slug(self.name)
 
         self.page_type = 'archive'
 
