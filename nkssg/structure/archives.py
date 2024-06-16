@@ -218,7 +218,7 @@ class Archives(Pages):
         self.plugins.do_action('before_update_archives_html', target=self)
 
         for archive in self.archives.values():
-            self.pages += archive.get_archives(self.config, themes)
+            self.pages += archive.get_archive_pages(self.config, themes)
 
         self.plugins.do_action('after_update_archives_html', target=self)
 
@@ -260,7 +260,7 @@ class Archive(Page):
     def singles_all_count(self):
         return len(self.singles_all) if self.singles_all is not None else 0
 
-    def get_archives(self, config: Config, themes: Themes):
+    def get_archive_pages(self, config: Config, themes: Themes):
 
         if not self.shouldUpdateHtml or self.singles_all_count == 0:
             return []
@@ -290,7 +290,7 @@ class Archive(Page):
         paginator['total_elements'] = total_elements
 
         # count archive page
-        pages = []
+        pages: list[Page] = []
         start = 0
         end = min(first_limit, total_elements)
 
@@ -301,14 +301,13 @@ class Archive(Page):
             if page_index > 1:
                 parts = [paginator['path'], str(page_index)] + parts
 
-            archive = Archive(None, self.name)
-            archive.dest_path = Path(self.dest_path.parent, *parts)
-            archive.rel_url = archive._get_url_from_dest()
-            archive._url_setup(config)
+            archive_page = Page()
+            archive_page.dest_path = Path(self.dest_path.parent, *parts)
+            archive_page.rel_url = archive_page._get_url_from_dest()
+            archive_page._url_setup(config)
+            archive_page.page_number = page_index
 
-            archive.page_number = page_index
-
-            pages.append(archive)
+            pages.append(archive_page)
 
             start = end
             end = min(start + limit, total_elements)
