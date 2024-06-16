@@ -225,12 +225,12 @@ class Archives(Pages):
 
 class Archive(Page):
 
-    def __init__(self, parent, name):
+    def __init__(self, parent: 'Archive', name):
         super().__init__()
 
-        self.set_id(parent, name)
+        self.id = PurePath(parent.id if parent else '', name)
 
-        self.name = Page.clean_name(self.id.name)
+        self.name = Page.clean_name(name)
         self.title = self.name
         self.slug = Page.to_slug(self.name)
 
@@ -259,12 +259,6 @@ class Archive(Page):
     @property
     def singles_all_count(self):
         return len(self.singles_all)
-
-    def set_id(self, parent, name):
-        if parent is not None:
-            self.id = PurePath(parent.id, name)
-        else:
-            self.id = PurePath(name)
 
     def get_archives(self, singles, archives: Archives, themes: Themes):
 
