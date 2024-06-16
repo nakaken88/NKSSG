@@ -265,9 +265,6 @@ class Archive(Page):
         if not self.shouldUpdateHtml or self.singles_all_count == 0:
             return []
 
-        paginator = {}
-        paginator['pages'] = []
-
         if self.archive_type == 'date':
             target_singles = self.singles_all
             post_type_dict = config.post_type[self.root_name]
@@ -283,18 +280,23 @@ class Archive(Page):
             post_type_dict = config.post_type[self.root_name]
             limit = post_type_dict.get('limit') or len(target_singles)
 
+        paginator = {}
         paginator['limit'] = limit
-        paginator['first_limit'] = post_type_dict.get('first_limit', limit)
-        paginator['total_elements'] = len(target_singles)
         paginator['path'] = post_type_dict.get('path', 'path')
 
+        first_limit = post_type_dict.get('first_limit', 0) or limit
+        paginator['first_limit'] = first_limit
+        total_elements = len(target_singles)
+        paginator['total_elements'] = total_elements
+
         # count archive page
+        pages = []
         start = 0
-        end = min(paginator['first_limit'], paginator['total_elements'])
-        page_index = 1
+        end = min(first_limit, total_elements)
 
-        while page_index == 1 or start < end:
+        while len(pages) == 0 or start < end:
 
+            page_index = len(pages) + 1
             parts = ['index.html']
             if page_index > 1:
                 parts = [paginator['path'], str(page_index)] + parts
@@ -306,24 +308,23 @@ class Archive(Page):
 
             archive.page_number = page_index
 
-            paginator['pages'].append(archive)
+            pages.append(archive)
 
-            page_index = page_index + 1
             start = end
-            end = min(start + paginator['limit'], paginator['total_elements'])
+            end = min(start + limit, total_elements)
 
+        paginator['pages'] = pages
         paginator['total_pages'] = len(paginator['pages'])
         paginator['first'] = paginator['pages'][0]
         paginator['last'] = paginator['pages'][-1]
-        total_elements = paginator['total_elements']
 
         for i in range(paginator['total_pages']):
             if i == 0:
                 start = 0
-                end = min(paginator['first_limit'], total_elements)
+                end = min(first_limit, total_elements)
             else:
                 start = end
-                end = min(start + paginator['limit'], total_elements)
+                end = min(start + limit, total_elements)
 
             paginator['paged'] = i + 1
             paginator['prev'] = None
