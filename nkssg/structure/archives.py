@@ -265,8 +265,6 @@ class Archive(Page):
         if not self.shouldUpdateHtml or self.singles_all_count == 0:
             return []
 
-        dest_dir = self.dest_path.parent
-
         paginator = {}
         paginator['pages'] = []
 
@@ -297,12 +295,12 @@ class Archive(Page):
 
         while page_index == 1 or start < end:
 
-            archive = Archive(None, self.name)
-            if page_index == 1:
-                archive.dest_path = dest_dir / 'index.html'
-            else:
-                archive.dest_path = dest_dir / paginator['path'] / str(page_index) / 'index.html'
+            parts = ['index.html']
+            if page_index > 1:
+                parts = [paginator['path'], str(page_index)] + parts
 
+            archive = Archive(None, self.name)
+            archive.dest_path = Path(self.dest_path.parent, *parts)
             archive.rel_url = archive._get_url_from_dest()
             archive._url_setup(config)
 
