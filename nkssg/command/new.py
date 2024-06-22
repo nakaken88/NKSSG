@@ -92,9 +92,9 @@ def page(name, path, config: Config):
 
         if dash_count == 1 and line.strip() and line.strip()[0] != '#':
             line = line.replace(r'{path}', path)
-            parts = r'%Y %m %d %H %M %S'.split(' ')
-            for part in parts:
-                line = line.replace(part, config.now.strftime(part))
+
+            if '%' in line:
+                line = config.now.strftime(line)
 
             if line.startswith('file:'):
                 file_path = line[len('file:'):].strip()
