@@ -83,7 +83,7 @@ def page(name, path, config: Config):
         if line.strip() == '---':
             dash_count += 1
 
-        if dash_count == 1 and line.strip() and line.strip()[0] != '#':
+        if dash_count == 1 and line.strip().startswith('#'):
             line = line.replace(r'{path}', path)
 
             if '%' in line:
