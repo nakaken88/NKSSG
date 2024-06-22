@@ -63,14 +63,14 @@ def page(name, path, config: Config):
 
     for d in themes.dirs:
         for f in d.glob('**/*'):
-            if f.is_file() and f.stem == 'new_' + name:
+            if f.is_file() and f.stem == f'new_{name}':
                 template_file = f
                 break
         if template_file is not None:
             break
 
     if template_file is None:
-        log.warning(name + ' is not found')
+        log.warning(f'{name} is not found')
         return
 
     with open(template_file, 'r', encoding='UTF-8') as f:
@@ -88,7 +88,7 @@ def page(name, path, config: Config):
             break
 
         if line.strip() == '---':
-            dash_count = dash_count + 1
+            dash_count += 1
 
         if dash_count == 1 and line.strip() and line.strip()[0] != '#':
             line = line.replace(r'{path}', path)
