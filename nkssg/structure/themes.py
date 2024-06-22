@@ -45,12 +45,15 @@ class Themes:
         self.dirs.append(default_theme_dir)
         self.load_theme_config(default_theme_dir, default_theme_name)
 
-    def lookup_template(self, search_list: list[str]):
+    def lookup_template(self, search_list: list[str], full_path=False):
         for search in search_list:
             for d in self.dirs:
                 for f in d.glob('**/*'):
                     if f.is_file() and f.name == search:
-                        rel_path = f.relative_to(d)
-                        rel_path = str(rel_path).replace('\\', '/')
-                        return rel_path
+                        if full_path:
+                            path = f
+                        else:
+                            path = f.relative_to(d)
+                        path = str(path).replace('\\', '/')
+                        return path
         return ''

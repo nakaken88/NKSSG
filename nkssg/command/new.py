@@ -59,18 +59,11 @@ def theme_copy(theme_from: Path, theme_to: Path):
 def page(name, path, config: Config):
 
     themes = Themes(config)
-    template_file = None
+    search_list = [f'new_{name}.html']
+    template_file = themes.lookup_template(search_list, full_path=True)
 
-    for d in themes.dirs:
-        for f in d.glob('**/*'):
-            if f.is_file() and f.stem == f'new_{name}':
-                template_file = f
-                break
-        if template_file is not None:
-            break
-
-    if template_file is None:
-        log.warning(f'{name} is not found')
+    if not template_file:
+        log.warning(f'new_{name}.html is not found')
         return
 
     with open(template_file, 'r', encoding='UTF-8') as f:
