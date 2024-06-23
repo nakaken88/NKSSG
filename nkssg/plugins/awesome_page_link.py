@@ -82,12 +82,8 @@ class AwesomePageLinkPlugin(BasePlugin):
         page.content = text
 
     def split_url(self, url):
-        index = -1
-        if url.find('?') != -1:
-            index = url.find('?')
-        elif url.find('#') != -1:
-            index = url.find('#')
-
-        if index != -1:
-            return url[:(index)], url[(index):]
+        for delimiter in ['?', '#']:
+            index = url.find(delimiter)
+            if index != -1:
+                return url[:index], url[index:]
         return url, ''
