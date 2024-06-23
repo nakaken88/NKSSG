@@ -82,7 +82,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
                 new_path = Path(config.public_dir, img['new_path'])
 
                 if not old_path.exists():
-                    print(str(old_path) + ' is not found on ' + str(page.src_path))
+                    print(str(old_path) + f' is not found on {page}')
                     continue
                 if new_path.exists():
                     continue
