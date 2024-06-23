@@ -5,6 +5,15 @@ from nkssg.structure.plugins import BasePlugin
 
 
 class AwesomeImgLinkPlugin(BasePlugin):
+
+    src_pattern = re.compile(
+        r'<img\s+'                # Opening tag and space
+        r'[^>]*?'                 # Any attributes
+        r'src\s*=\s*'             # src attribute
+        r'["\'](.*?)["\']',       # Attribute value
+        re.I | re.S
+    )
+
     def after_update_singles_html(self, singles, **kwargs):
         mode = singles.config.get('mode') or 'draft'
         if mode == 'draft':
@@ -13,7 +22,6 @@ class AwesomeImgLinkPlugin(BasePlugin):
         self.site_config = singles.config
         self.keyword = self.config.get('keyword') or '?'
         self.strip_paths = self.config.get('strip_paths') or []
-        self.pattern = re.compile(r'<img[^<>]+src\s*?=\s*?["\'](.*?)["\']', re.I)
 
         for page in singles.pages:
             page.imgs = []
@@ -30,7 +38,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
         srcs = []
         replacers = []
 
-        for tag in self.pattern.finditer(page.html):
+        for tag in AwesomeImgLinkPlugin.src_pattern.finditer(page.html):
             src = tag.group(1)
             if not src.endswith(keyword):
                 continue
