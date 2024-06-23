@@ -42,17 +42,17 @@ class AwesomeImgLinkPlugin(BasePlugin):
         replacers = []
 
         for tag in AwesomeImgLinkPlugin.src_pattern.finditer(page.html):
-            src = tag.group(1)
+            src: str = tag.group(1)
             if not src.endswith(keyword):
                 continue
 
             src = src[:-len(keyword)]
             for strip_path in self.strip_paths:
-                if len(src) >= len(strip_path) and src[:len(strip_path)] == strip_path:
+                if src.startswith(strip_path):
                     src = src[len(strip_path):]
 
             old_link = src
-            if old_link[0] == '/':
+            if old_link.startswith('/'):
                 old_path = Path(docs_dir, old_link[1:])
             else:
                 old_path = Path(docs_dir, page.src_path.parent, old_link)
@@ -68,9 +68,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
 
         text = page.html
         for replacer in replacers[::-1]:
-            s = replacer[0]
-            e = replacer[1]
-            new_text = replacer[2]
+            s, e, new_text = replacer
             text = text[:s] + new_text + text[e:]
 
         page.html = text
