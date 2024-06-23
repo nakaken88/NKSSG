@@ -1,10 +1,12 @@
 import re
 
+from nkssg.structure.pages import Page
 from nkssg.structure.plugins import BasePlugin
+from nkssg.structure.site import Site
 
 
 class AwesomePageLinkPlugin(BasePlugin):
-    def after_update_urls(self, site, **kwargs):
+    def after_update_urls(self, site: Site, **kwargs):
         mode = site.config.get('mode') or 'draft'
         if mode == 'draft':
             return site
@@ -22,7 +24,7 @@ class AwesomePageLinkPlugin(BasePlugin):
             self.update_page_link(page)
         return site
 
-    def update_page_link(self, page):
+    def update_page_link(self, page: Page):
         config = self.site_config
         keyword = self.keyword
 
@@ -81,7 +83,7 @@ class AwesomePageLinkPlugin(BasePlugin):
 
         page.content = text
 
-    def split_url(self, url):
+    def split_url(self, url: str):
         for delimiter in ['?', '#']:
             index = url.find(delimiter)
             if index != -1:
