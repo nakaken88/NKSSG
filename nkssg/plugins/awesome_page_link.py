@@ -20,9 +20,7 @@ class AwesomePageLinkPlugin(BasePlugin):
         if mode == 'draft':
             return site
 
-        self.site_config = site.config
-        self.singles = site.singles
-        self.file_ids = self.singles.file_ids
+        self.site = site
         self.keyword = self.config.get('keyword', '?')
         self.strip_paths = self.config.get('strip_paths', [])
 
@@ -33,7 +31,8 @@ class AwesomePageLinkPlugin(BasePlugin):
         return site
 
     def update_page_link(self, page: Page):
-        config = self.site_config
+        docs_dir = self.site.config.docs_dir
+        singles = self.site.singles
         keyword = self.keyword
 
         if not any(keyword + quote in page.content for quote in ['"', "'"]):
@@ -51,8 +50,8 @@ class AwesomePageLinkPlugin(BasePlugin):
                 href = href[1:]
                 old_link, suffix = self.split_url(href)
 
-                if self.file_ids.get(old_link):
-                    new_link = self.file_ids[old_link].url + suffix
+                if singles.file_ids.get(old_link):
+                    new_link = singles.file_ids[old_link].url + suffix
                 else:
                     raise ValueError(
                         f'Error: File ID "{href}" is not found on {page}')
@@ -65,16 +64,16 @@ class AwesomePageLinkPlugin(BasePlugin):
                 old_link, suffix = self.split_url(href)
 
                 if old_link[0] == '/':
-                    new_path = config['docs_dir'] / old_link[1:]
+                    new_path = docs_dir / old_link[1:]
                 else:
-                    new_path = config['docs_dir'] / page.src_path.parent / old_link
+                    new_path = docs_dir / page.src_path.parent / old_link
 
                 new_path = new_path.resolve()
-                new_path = new_path.relative_to(config['docs_dir'])
+                new_path = new_path.relative_to(docs_dir)
 
                 new_link = old_link + suffix
-                if str(new_path) in self.singles.src_paths.keys():
-                    single = self.singles.src_paths[str(new_path)]
+                if str(new_path) in singles.src_paths.keys():
+                    single = singles.src_paths[str(new_path)]
                     new_link = single.url + suffix
 
             old_text = tag.group(0)
