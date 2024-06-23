@@ -18,7 +18,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
     )
 
     def after_update_singles_html(self, singles: Singles, **kwargs):
-        mode = singles.config.get('mode') or 'draft'
+        mode = singles.config.get('mode', 'draft')
         if mode == 'draft':
             return singles
 
@@ -65,8 +65,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
 
             page.imgs.append({'old_path': old_path, 'new_path': new_path})
 
-        for replacer in replacers[::-1]:
-            s, e, new_html = replacer
+        for s, e, new_html in replacers[::-1]:
             page.html = page.html[:s] + new_html + page.html[e:]
 
     def after_output_singles(self, site: Site, **kwargs):
