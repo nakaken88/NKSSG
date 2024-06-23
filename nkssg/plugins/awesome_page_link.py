@@ -54,9 +54,8 @@ class AwesomePageLinkPlugin(BasePlugin):
                 if self.file_ids.get(old_link):
                     new_link = self.file_ids[old_link].url + suffix
                 else:
-                    print('Error: File ID "' + href + '" is not found')
-                    print(' on ' + str(page.src_path))
-                    raise Exception('File ID error')
+                    raise ValueError(
+                        f'Error: File ID "{href}" is not found on {page}')
 
             else:
                 for strip_path in self.strip_paths:
