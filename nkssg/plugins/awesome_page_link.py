@@ -6,6 +6,15 @@ from nkssg.structure.site import Site
 
 
 class AwesomePageLinkPlugin(BasePlugin):
+
+    href_pattern = re.compile(
+        r'<a\s+'                # Opening tag and space
+        r'[^>]*?'               # Any attributes
+        r'href\s*=\s*'          # href attribute
+        r'["\'](.*?)["\']',     # Attribute value
+        re.I | re.S
+    )
+
     def after_update_urls(self, site: Site, **kwargs):
         mode = site.config.get('mode') or 'draft'
         if mode == 'draft':
@@ -14,9 +23,8 @@ class AwesomePageLinkPlugin(BasePlugin):
         self.site_config = site.config
         self.singles = site.singles
         self.file_ids = self.singles.file_ids
-        self.keyword = self.config.get('keyword') or '?'
-        self.strip_paths = self.config.get('strip_paths') or []
-        self.pattern = re.compile(r'<a[^<>]+href\s*?=\s*?["\'](.*?)["\']', re.I)
+        self.keyword = self.config.get('keyword', '?')
+        self.strip_paths = self.config.get('strip_paths', [])
 
         for page in site.singles:
             self.update_page_link(page)
@@ -33,7 +41,7 @@ class AwesomePageLinkPlugin(BasePlugin):
 
         replacers = []
 
-        for tag in self.pattern.finditer(page.content):
+        for tag in AwesomePageLinkPlugin.href_pattern.finditer(page.content):
             href = tag.group(1)
             if not href.endswith(keyword):
                 continue
