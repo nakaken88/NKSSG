@@ -2,6 +2,8 @@ import re
 import shutil
 
 from nkssg.structure.plugins import BasePlugin
+from nkssg.structure.singles import Singles, Single
+from nkssg.structure.site import Site
 
 
 class AwesomeImgLinkPlugin(BasePlugin):
@@ -14,7 +16,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
         re.I | re.S
     )
 
-    def after_update_singles_html(self, singles, **kwargs):
+    def after_update_singles_html(self, singles: Singles, **kwargs):
         mode = singles.config.get('mode') or 'draft'
         if mode == 'draft':
             return singles
@@ -23,12 +25,12 @@ class AwesomeImgLinkPlugin(BasePlugin):
         self.keyword = self.config.get('keyword') or '?'
         self.strip_paths = self.config.get('strip_paths') or []
 
-        for page in singles.pages:
+        for page in singles:
             page.imgs = []
             self.update_img_link(page)
         return singles
 
-    def update_img_link(self, page):
+    def update_img_link(self, page: Single):
         config = self.site_config
         keyword = self.keyword
 
@@ -73,7 +75,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
         page.html = text
         page.imgs = srcs
 
-    def after_output_singles(self, site, **kwargs):
+    def after_output_singles(self, site: Site, **kwargs):
         config = site.config
         for page in site.singles:
             for img in getattr(page, 'imgs', []):
