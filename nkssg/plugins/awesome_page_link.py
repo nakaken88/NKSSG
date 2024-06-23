@@ -36,7 +36,7 @@ class AwesomePageLinkPlugin(BasePlugin):
         config = self.site_config
         keyword = self.keyword
 
-        if not keyword + '"' in page.content and not keyword + '"' in page.content:
+        if not any(keyword + quote in page.content for quote in ['"', "'"]):
             return
 
         replacers = []
