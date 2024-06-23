@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 import shutil
 
-from nkssg.config import Config
+from nkssg.structure.config import Config
 from nkssg.structure.themes import Themes
 
 

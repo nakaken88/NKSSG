@@ -4,8 +4,8 @@ import shutil
 
 import jinja2
 
-from nkssg.config import Config
 from nkssg.structure.archives import Archives
+from nkssg.structure.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.singles import Singles
 from nkssg.structure.themes import Themes

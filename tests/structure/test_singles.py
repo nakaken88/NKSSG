@@ -2,7 +2,7 @@ import datetime
 from pathlib import Path
 import pytest
 
-from nkssg.config import Config
+from nkssg.structure.config import Config
 from nkssg.structure.pages import Page
 from nkssg.structure.singles import Single
 from nkssg.structure.archives import Archive

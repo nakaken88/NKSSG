@@ -1,6 +1,6 @@
 import pkg_resources
 
-from nkssg.config import Config
+from nkssg.structure.config import Config
 
 
 class Plugins():

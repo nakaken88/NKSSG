@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 
 from nkssg.command import build, new
-from nkssg.config import load_config
+from nkssg.structure.config import load_config
 
 
 PKG_DIR = Path(__file__).resolve().parent

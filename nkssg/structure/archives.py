@@ -1,6 +1,6 @@
 from pathlib import Path, PurePath
 
-from nkssg.config import Config, TermConfig
+from nkssg.structure.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.singles import Singles, Single

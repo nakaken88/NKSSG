@@ -4,7 +4,7 @@ import tempfile
 
 from livereload import Server
 
-from nkssg.config import Config
+from nkssg.structure.config import Config
 from nkssg.structure.site import Site
 
 

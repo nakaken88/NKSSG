@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 from ruamel.yaml import YAML, YAMLError
 
-from nkssg.config import Config
+from nkssg.structure.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes

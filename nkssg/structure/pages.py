@@ -2,7 +2,7 @@ from pathlib import Path, PurePath
 import shutil
 from urllib.parse import quote, unquote
 
-from nkssg.config import Config
+from nkssg.structure.config import Config
 
 
 class Pages:

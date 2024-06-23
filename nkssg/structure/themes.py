@@ -2,7 +2,7 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
-from nkssg.config import Config
+from nkssg.structure.config import Config
 
 
 class Themes:
