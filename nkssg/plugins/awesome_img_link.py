@@ -38,7 +38,6 @@ class AwesomeImgLinkPlugin(BasePlugin):
         if not any(keyword + quote in page.html for quote in ['"', "'"]):
             return
 
-        srcs = []
         replacers = []
 
         for tag in AwesomeImgLinkPlugin.src_pattern.finditer(page.html):
@@ -64,15 +63,11 @@ class AwesomeImgLinkPlugin(BasePlugin):
             new_text = old_text.replace(tag.group(1), new_src)
             replacers.append([tag.start(), tag.end(), new_text])
 
-            srcs.append({'old_path': old_path, 'new_path': new_path})
+            page.imgs.append({'old_path': old_path, 'new_path': new_path})
 
-        text = page.html
         for replacer in replacers[::-1]:
-            s, e, new_text = replacer
-            text = text[:s] + new_text + text[e:]
-
-        page.html = text
-        page.imgs = srcs
+            s, e, new_html = replacer
+            page.html = page.html[:s] + new_html + page.html[e:]
 
     def after_output_singles(self, site: Site, **kwargs):
         config = site.config
