@@ -28,7 +28,7 @@ class AwesomePageLinkPlugin(BasePlugin):
 
         for page in site.singles:
             self.update_page_link(page)
-        for page in site.archives.pages:
+        for page in site.archives:
             self.update_page_link(page)
         return site
 
