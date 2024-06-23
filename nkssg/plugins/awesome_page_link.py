@@ -46,7 +46,7 @@ class AwesomePageLinkPlugin(BasePlugin):
                 continue
 
             href = href[:-len(keyword)]
-            if href[0] == ':':
+            if href.startswith(':'):
                 href = href[1:]
                 old_link, suffix = self.split_url(href)
 
@@ -58,12 +58,12 @@ class AwesomePageLinkPlugin(BasePlugin):
 
             else:
                 for strip_path in self.strip_paths:
-                    if len(href) >= len(strip_path) and href[:len(strip_path)] == strip_path:
+                    if href.startswith(strip_path):
                         href = href[len(strip_path):]
 
                 old_link, suffix = self.split_url(href)
 
-                if old_link[0] == '/':
+                if old_link.startswith('/'):
                     new_path = docs_dir / old_link[1:]
                 else:
                     new_path = docs_dir / page.src_path.parent / old_link
@@ -71,10 +71,11 @@ class AwesomePageLinkPlugin(BasePlugin):
                 new_path = new_path.resolve()
                 new_path = new_path.relative_to(docs_dir)
 
-                new_link = old_link + suffix
                 if str(new_path) in singles.src_paths.keys():
                     single = singles.src_paths[str(new_path)]
                     new_link = single.url + suffix
+                else:
+                    new_link = old_link + suffix
 
             old_text = tag.group(0)
             new_text = old_text.replace(tag.group(1), new_link)
