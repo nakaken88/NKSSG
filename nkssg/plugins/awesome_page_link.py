@@ -82,13 +82,13 @@ class AwesomePageLinkPlugin(BasePlugin):
             new_text = old_text.replace(tag.group(1), new_link)
             replacers.append([tag.start(), tag.end(), new_text])
 
+        self.apply_replacements(page, replacers)
+
+    def apply_replacements(self, page: Page, replacers: list):
         text = page.content
         for replacer in replacers[::-1]:
-            s = replacer[0]
-            e = replacer[1]
-            new_text = replacer[2]
+            s, e, new_text = replacer
             text = text[:s] + new_text + text[e:]
-
         page.content = text
 
     def split_url(self, url: str):
