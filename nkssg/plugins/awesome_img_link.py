@@ -22,8 +22,8 @@ class AwesomeImgLinkPlugin(BasePlugin):
             return singles
 
         self.site_config = singles.config
-        self.keyword = self.config.get('keyword') or '?'
-        self.strip_paths = self.config.get('strip_paths') or []
+        self.keyword = self.config.get('keyword', '?')
+        self.strip_paths = self.config.get('strip_paths', [])
 
         for page in singles:
             page.imgs = []
@@ -34,7 +34,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
         config = self.site_config
         keyword = self.keyword
 
-        if not keyword + '"' in page.html and not keyword + '"' in page.html:
+        if not any(keyword + quote in page.html for quote in ['"', "'"]):
             return
 
         srcs = []
