@@ -33,7 +33,7 @@ class Page:
         self.title = ''
         self.name = ''
         self.slug = ''
-        self.content = ''
+        self.content: str = ''
         self.summary = ''
         self.image = {}
 
@@ -42,7 +42,7 @@ class Page:
         self.is_expired = False
         self.is_future = False
 
-        self.html = ''
+        self.html: str = ''
         self.url = '/'
         self.abs_url = ''
         self.rel_url = ''

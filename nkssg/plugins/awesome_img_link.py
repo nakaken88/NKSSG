@@ -42,7 +42,7 @@ class AwesomeImgLinkPlugin(BasePlugin):
         replacers = []
 
         for tag in AwesomeImgLinkPlugin.src_pattern.finditer(page.html):
-            src: str = tag.group(1)
+            src = tag.group(1)
             if not src.endswith(keyword):
                 continue
 
