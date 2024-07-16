@@ -3,6 +3,7 @@ site:
   site_url: ''
   site_desc: ''
   site_image: ''
+  language: 'en'
 
 post_type:
   post:
