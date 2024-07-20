@@ -1,4 +1,4 @@
-import pkg_resources
+from importlib.metadata import entry_points
 
 from nkssg.structure.config import Config
 
@@ -9,7 +9,7 @@ class Plugins():
         self.plugins = {}
         self.installed_plugins = {
             plugin.name: plugin
-            for plugin in pkg_resources.iter_entry_points('nkssg.plugins')
+            for plugin in entry_points(group='nkssg.plugins')
         }
 
         for plugin_name, plugin_config in config.plugins.items():
