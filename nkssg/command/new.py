@@ -73,7 +73,7 @@ markdown:
 
 plugins:
   autop: {}
-  awesome-img-link {}
+  awesome-img-link: {}
   awesome-page-link:
     strip_paths:
       - /docs
