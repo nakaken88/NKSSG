@@ -39,12 +39,78 @@ def site(project_dir, package_dir: Path):
     theme_to = project_dir / 'themes'
     theme_copy(theme_from, theme_to)
 
-    sample_post_from = Path(package_dir.parent, 'docs', 'post', 'sample.md')
-    sample_post_to = Path(project_dir, 'docs', 'post', 'sample.md')
-    shutil.copyfile(sample_post_from, sample_post_to)
+    Path(project_dir, 'docs', 'post', 'sample.md').write_text('''\
+---
+title: sample post
+tag: ["tag1", "tag2"]
+category: ["cat11"]
+---
+This is a sample post.
+''')
 
-    original_config_path = package_dir.parent / 'nkssg.yml'
-    shutil.copyfile(original_config_path, config_path)
+    config_path.write_text('''\
+site:
+  site_name: "Site Name"
+  site_url: ""
+  site_desc: ""
+  site_image: ""
+  language: "en"
+
+post_type:
+  post:
+    permalink: /%Y/%m/%d/%H%M%S/
+    archive_type: "date"
+  page:
+    permalink: /{slug}/
+    archive_type: "section"
+  page:
+    permalink: /{slug}/
+    archive_type: "none"
+  section:
+    archive_type: "section"
+
+markdown:
+  fenced_code: {}
+  toc:
+    marker: "[toc]"
+
+plugins:
+  autop: {}
+  awesome-img-link {}
+  awesome-page-link:
+    strip_paths:
+      - /docs
+  select-pages:
+    start: 0
+    step: 1
+
+theme:
+  name: default
+  child: child
+
+taxonomy:
+  tag:
+    label: Tag
+    term:
+      - tag1
+      - name: tag2
+        slug: tag_two
+      - tag3
+
+  category:
+    label: Category
+    term:
+      - cat1
+      - name: cat11
+        parent: cat1
+      - name: cat12
+        parent: cat1
+      - name: cat2
+        term:
+          - name: cat21
+          - cat22
+          - cat23
+''')
 
 
 def theme_copy(theme_from: Path, theme_to: Path):
