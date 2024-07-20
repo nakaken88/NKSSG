@@ -62,9 +62,6 @@ post_type:
     archive_type: "date"
   page:
     permalink: /{slug}/
-    archive_type: "section"
-  page:
-    permalink: /{slug}/
     archive_type: "none"
   section:
     archive_type: "section"
