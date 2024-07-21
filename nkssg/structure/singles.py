@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
 from fnmatch import fnmatch
 import markdown
@@ -106,12 +107,16 @@ class Singles(Pages):
     def update_htmls(self, archives, themes: Themes):
         self.plugins.do_action('before_update_singles_html', target=self)
 
-        for page in self.pages:
-            try:
-                page.update_html(self, archives, themes)
-            except Exception as e:
-                raise RuntimeError(f"Error updating HTML for page: "
-                                   f"{page}\nException: {e}")
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(page.update_html, self, archives, themes)
+                for page in self.pages
+            ]
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:
+                    print(e)
 
         self.plugins.do_action('after_update_singles_html', target=self)
 

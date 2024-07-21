@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path, PurePath
 
 from nkssg.structure.config import Config, TermConfig
@@ -217,8 +218,19 @@ class Archives(Pages):
     def update_htmls(self, themes: Themes):
         self.plugins.do_action('before_update_archives_html', target=self)
 
-        for archive in self.archives.values():
+        def render_archive_html(archive: Archive):
             self.pages += archive.get_archive_pages(self.config, themes)
+
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(render_archive_html, archive)
+                for archive in self.archives.values()
+            ]
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:
+                    print(f"Exception during archive HTML rendering: {e}")
 
         self.plugins.do_action('after_update_archives_html', target=self)
 
