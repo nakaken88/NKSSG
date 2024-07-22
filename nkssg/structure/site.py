@@ -131,7 +131,7 @@ class Site:
         extra_pages = set(extra_pages + self.config.extra_pages)
 
         for extra_page in extra_pages:
-            template_path = self.themes.lookup_template(extra_page)
+            template_path = self.themes.lookup_template([extra_page])
             if template_path:
                 self.output_extra_page(extra_page, template_path)
             elif extra_page not in self.config.extra_pages:
