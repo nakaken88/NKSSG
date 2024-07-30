@@ -1,28 +1,16 @@
 {% macro title_tag() -%}
-  {%-
-    if not mypage or not mypage.title or mypage.rel_url == "/"
-  -%}
-    {{ config.site.site_name }}
-  {%-
-    elif mypage.page_type == "single"
-  -%}
+  {%- if mypage and mypage.page_type == "single" -%}
     {{ mypage.title }} | {{ config.site.site_name }}
-  {%-
-    elif mypage.page_type != "archive"
-  -%}
-    {{ config.site.site_name }}
-  {%-
-    elif not paginator
-  -%}
-    {{ config.site.site_name }}
-  {%-
-    elif paginator.paged == 1
-  -%}
-    {{ mypage.title }} | {{ config.site.site_name }}
-  {%-
-    else
-  -%}
+
+  {%- elif mypage and mypage.page_type == "archive" and paginator.paged > 1 -%}
     {{ mypage.title }} | Page {{ paginator.paged }} | {{ config.site.site_name }}
+
+  {%- elif mypage and mypage.page_type == "archive" -%}
+    {{ mypage.title }} | {{ config.site.site_name }}
+
+  {%- else -%}
+    {{ config.site.site_name }}
+
   {%- endif -%}
 {%- endmacro %}
 
@@ -43,16 +31,18 @@
 
 {% macro get_card(file_id) -%}
 {% set page = singles.get_single_by_file_id(file_id) %}
-<a class="card" href="{{ page.url }}">
-  <span class="card-container">
-    <span class="page-image">
-      {{ get_thumb(page) }}
-    </span>
-    <span class="page-item-body">
-      {{ page.title }}
-    </span>
-  </span>
-</a>
+<div class="card large-card">
+  <a class="card" href="{{ page.url }}">
+    <div class="card__body">
+      <div class="card__image">
+        {{ get_thumb(page) }}
+      </div>
+      <div class="card__title">
+        {{ page.title }}
+      </div>
+    </div>
+  </a>
+</div>
 {%- endmacro %}
 
 

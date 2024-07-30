@@ -1,0 +1,27 @@
+{% for archive in archives if archive.root_name == "post" and archive.is_root -%}
+  {%- for page in archive.singles_all[:10] -%}
+    {%- if loop.first %}
+<div class="widget">
+  <div class="widget__title">Recent Posts</div>
+  <div class="widget__body ">
+    <ul>
+    {%- endif %}
+      <li class="card">
+        <a href="{{ page.url }}" class="card__link">
+          <div class="card__body">
+            <div class="card__image">
+              {{ sc.get_thumb(page) }}
+            </div>
+            <div class="card__title">
+              {{ page.title }}
+            </div>
+          </div>
+        </a>
+      </li>
+    {%- if loop.last %}
+    </ul>
+  </div>
+</div>
+    {%- endif %}
+  {%- endfor -%}
+{%- endfor %}

@@ -1,0 +1,22 @@
+{%- for page in pages if page.url != mypage.url %}
+  {%- if loop.first %}
+<h2>Page list</h2>
+<div class="page-list item-count-{{ loop.length }}">
+  {%- endif %}
+  <div class="card">
+    <a href="{{ page.url }}">
+      <div class="card__image">
+        {{ sc.get_thumb(page) }}
+      </div>
+    </a>
+    <div class="card__body">
+      <div class="card__date">
+        {{ page.date.strftime('%Y/%m/%d') }}
+      </div>
+      <a href="{{ page.url }}">{{ page.title }}</a>
+    </div>
+  </div>
+  {%- if loop.last %}
+</div>
+  {%- endif %}
+{%- endfor %}

@@ -1,31 +1,15 @@
 {% extends "main.html" %}
 
+{% block entry %}
+  {% include "partials/entry__breadcrumb.html" %}
+  {% include "partials/entry__date.html" %}
 
-{% block head_start_tag -%}
-  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
-{%- endblock %}
+  {% include "partials/entry__title.html" %}
+  {% include "partials/entry__thumbnail.html" %}
+  {% include "partials/entry__content.html" %}
 
-
-
-{% block content %}
-
-  {% include "partials/entry/breadcrumb.html" %}
-  {% include "partials/entry/date.html" %}
-
-<div class="entry">
-  {% include "partials/entry/title.html" %}
-
-  <p class="top-thumbnail">{{ sc.get_thumb(mypage) }}</p>
-
-  {% if mypage.content -%}
-  {{ mypage.content }}
-  {%- else -%}
-  <p>(no content)</p>
-  {%- endif %}
-</div>
-
-  {% include "partials/entry/backlink.html" %}
-  {% include "partials/entry/taxonomy-list.html" %}
-  {% include "partials/entry/next-prev.html" %}
-  {% include "partials/entry/display-path.html" %}
+  {% include "partials/entry__backlink.html" %}
+  {% include "partials/entry__taxonomy-list.html" %}
+  {% include "partials/entry__next-prev.html" %}
+  {% include "partials/entry__display-path.html" %}
 {% endblock %}

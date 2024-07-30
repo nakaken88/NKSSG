@@ -1,0 +1,16 @@
+{% for archive in archives | sort(attribute='singles_all_count', reverse=True) if archive.root_name == "tag" and not archive.is_root and archive.singles_all_count > 0 -%}
+  {%- if loop.first %}
+<div class="widget">
+  <div class="widget__title">Tag List</div>
+  <div class="widget__body">
+    <ul>
+  {%- endif %}
+      <li>
+        <a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})
+      <li>
+  {%- if loop.last %}
+    </ul>
+  </div>
+</div>
+  {%- endif %}
+{%- endfor %}

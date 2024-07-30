@@ -1,0 +1,7 @@
+<h1 class="entry__title">
+{%- if paginator and paginator.paged > 1 -%}
+  {{ mypage.title }}: Page {{ paginator.paged }}
+{%- else -%}
+  {{ mypage.title }}
+{%- endif -%}
+</h1>

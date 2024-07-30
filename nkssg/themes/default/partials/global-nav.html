@@ -1,0 +1,11 @@
+{% for a in archives if a.is_root and (a.archive_type in ['date', 'section', 'simple']) %}
+{% if loop.first %}
+<ul class="global-nav__list">
+{% endif %}
+  <li class="global-nav__item">
+    <a href="{{a.url}}" class="global-nav__link">{{a.name}}</a>
+  </li>
+{% if loop.last %}
+</ul>
+{% endif %}
+{% endfor%}

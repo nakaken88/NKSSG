@@ -1,0 +1,9 @@
+{% block content %}
+<div class="entry__content">
+{% if mypage.content -%}
+{{ mypage.content }}
+{%- elif mypage.page_type=='single' -%}
+<p>(no content)</p>
+{%- endif %}
+</div>
+{%- endblock %}

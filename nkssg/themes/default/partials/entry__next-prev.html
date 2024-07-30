@@ -1,0 +1,27 @@
+{% if mypage and (mypage.next_page or mypage.prev_page) -%}
+<nav class="entry__next-prev">
+  {%- set neighbor = mypage.next_page -%}
+  {%- if neighbor and mypage.post_type == neighbor.post_type %}
+  <div>
+    {%- if mypage.archive_type == "date" %}
+    Older:
+    {%- else %}
+    Next:
+    {%- endif %}
+    <a href="{{ neighbor.url }}">{{ neighbor.title }}</a>
+  </div>
+  {%- endif %}
+
+  {%- set neighbor = mypage.prev_page -%}
+  {%- if neighbor and mypage.post_type == neighbor.post_type %}
+  <div>
+    {%- if mypage.archive_type == "date" %}
+    Newer:
+    {%- else %}
+    Prev:
+    {%- endif %}
+    <a href="{{ neighbor.url }}">{{ neighbor.title }}</a>
+  </div>
+  {%- endif %}
+</nav>
+{%- endif -%}

@@ -1,0 +1,25 @@
+{%- macro breadcrumb(mypage) -%}
+  {%- set ns = namespace(crumbs=[mypage.title]) -%}
+
+  {%- set ns.archive_list = mypage.archive_list if mypage.page_type == 'single' else [mypage] -%}
+
+  {%- for archive in ns.archive_list if archive.archive_type == 'section' -%}
+    
+    {%- set ns.a = archive if mypage.page_type == 'single' else archive.parent -%}
+
+    {%- for _ in range(ns.a.id.parts | length - 2) -%}
+      {%- set ns.crumbs = ['<a href="' ~ ns.a.url ~ '">' ~ ns.a.name ~ '</a>'] + ns.crumbs -%}
+      {%- set ns.a = ns.a.parent -%}
+    {%- endfor -%}
+
+    {%- set ns.crumbs = ['<a href="' ~ config.site.site_url ~ '">Home</a>'] + ns.crumbs -%}
+
+    {%- set crumbs = ns.crumbs | join(' / ') -%}
+
+    <nav class="entry__breadcrumb">{{ ns.crumbs | join(' / ') }}</nav>
+  {%- endfor -%}
+{%- endmacro -%}
+
+{%- if mypage -%}
+  {{ breadcrumb(mypage) }}
+{%- endif -%}
