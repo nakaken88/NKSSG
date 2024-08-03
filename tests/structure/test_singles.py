@@ -14,12 +14,12 @@ from nkssg.structure.archives import Archive
     ("/pre/%Y/%m/%d/", "/pre/2001/02/03/"),     # date with prefix
     ("/%Y%m%d/%H%M%S/", "/20010203/040506/"),   # datetime
     ("/{slug}/", "/sample-slug/"),              # slug
-    ("/{filename}/", "/sample%20post/"),        # filename
+    ("/{filename}/", "/sample-post/"),          # filename
 ])
 def test_get_url_from_permalink_simple(permalink, expected):
     config = Config()
     config.update({'post_type': {'sample': {}}})
-    dummy_path = config.docs_dir / 'sample' / 'sample post.md'
+    dummy_path = config.docs_dir / 'sample' / '_10_sample post.md'
     single = Single(dummy_path, config)
 
     single.date = datetime.datetime(2001, 2, 3, 4, 5, 6)
@@ -50,7 +50,7 @@ def test_get_url_from_permalink_prefix(permalink, expected):
     ("/{sample_top}/{slug}/", "/dir1/sample-post/"),
     ("/{sample_last}/{slug}/", "/dir3/sample-post/"),
     ("/{sample_all}/{slug}/", "/dir1/dir2/dir3/sample-post/"),
-    ("/{sample_top}/{filename}/", "/dir1/sample%20post/"),
+    ("/{sample_top}/{filename}/", "/dir1/sample-post/"),
 ])
 def test_get_url_from_permalink_section_normal(permalink, expected):
     config = Config()

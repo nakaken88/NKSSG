@@ -523,7 +523,7 @@ class Single(Page):
                 filename_slug = post_type_slug
             else:
                 filename_slug = self.src_dir.parts[-1]
-                filename_slug = Page.to_slug(Page.clean_name(filename_slug))
+        filename_slug = Page.to_slug(Page.clean_name(filename_slug))
         return filename_slug
 
     def _replace_dynamic_parts_in_url(self, url: str):
