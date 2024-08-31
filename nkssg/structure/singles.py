@@ -505,7 +505,7 @@ class Single(Page):
 
         url = self.date.strftime(permalink)
 
-        if self.filename == 'index':
+        if self.filename == 'index' and len(self.src_dir.parts) == 1:
             url = url.replace('/{slug}/', '/')
             url = url.replace('/{filename}/', '/')
         else:
@@ -523,6 +523,7 @@ class Single(Page):
                 filename_slug = post_type_slug
             else:
                 filename_slug = self.src_dir.parts[-1]
+
         filename_slug = Page.to_slug(Page.clean_name(filename_slug))
         return filename_slug
 
@@ -537,6 +538,13 @@ class Single(Page):
             new_part = self._get_dynamic_part_replacement(slugs, part_type)
             url = url.replace(original_part, '/'.join(new_part))
             url = url.replace('//', '/')
+
+        url_parts = url.split('/')
+        if len(url_parts) >= 3 and url_parts[-2] == url_parts[-3]:
+            url = '/'.join(url_parts[:-2]) + '/'
+        else:
+            url = '/'.join(url_parts) + '/'
+        url = url.replace('//', '/')
         return url
 
     def _extract_part_type(self, part):
