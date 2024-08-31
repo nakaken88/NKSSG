@@ -24,7 +24,9 @@
   {%- endif -%}
 
   {%- if page.archive_type == "section" -%}
-    {%- if loop.first or page.archive_list[0].name != page.prev_page.archive_list[0].name -%}
+    {%- if loop.first or page.post_type != page.prev_page.post_type -%}
+    <h3>{{ page.archive_list[0].name }}</h3>
+    {%- elif page.archive_list[0].name != page.prev_page.archive_list[0].name -%}
     <h3>{{ page.archive_list[0].name }}</h3>
     {%- endif -%}
   {%- endif -%}
