@@ -215,8 +215,10 @@ class Archives(Pages):
         self.plugins.do_action(
             'after_update_archives_url', target=self)
 
-    def update_htmls(self, themes: Themes):
+    def update_htmls(self, singles: Singles, themes: Themes):
         self.plugins.do_action('before_update_archives_html', target=self)
+
+        self.link_section_archive_to_single(singles)
 
         def render_archive_html(archive: Archive):
             self.pages += archive.get_archive_pages(self.config, themes)
