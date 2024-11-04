@@ -1,4 +1,4 @@
-{% if paginator and paginator.pages -%}
+{% if paginator and paginator.pages and paginator.pages|length > 1 -%}
 <div class="pagination">
 {%- for page in paginator.pages %}
   {% if page.page_number == paginator.paged -%}
