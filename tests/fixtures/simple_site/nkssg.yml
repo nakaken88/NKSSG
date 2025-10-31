@@ -1,0 +1,16 @@
+site:
+  site_name: 'Test Site'
+  site_url: 'http://localhost:8000'
+  language: 'en'
+
+post_type:
+  post:
+    permalink: /posts/%Y/%m/{slug}/
+  page:
+    permalink: /{slug}/
+
+plugins:
+  autop: {}
+  awesome-page-link: {}
+  awesome-img-link: {}
+  select-pages: {}
