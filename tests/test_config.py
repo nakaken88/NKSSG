@@ -72,7 +72,7 @@ def test_markdown_config(config):
     assert config.markdown['toc']['marker'] == '[toc]'
 
 
-def test_taxonomy_config(config):
+def test_taxonomy_tag_config(config):
     yaml_text = """
 taxonomy:
   tag:
@@ -82,22 +82,50 @@ taxonomy:
       - name: tag2
         slug: tag_two
       - tag3
+"""
 
+    yaml = YAML(typ='safe')
+    config.update(yaml.load(yaml_text))
+
+    assert config.taxonomy['tag'].label == 'Tag'
+    assert config.taxonomy['tag'].terms['tag1'].name == 'tag1'
+    assert config.taxonomy['tag'].terms['tag2'].name == 'tag2'
+    assert config.taxonomy['tag'].terms['tag2'].slug == 'tag_two'
+
+
+def test_taxonomy_category_config(config):
+    yaml_text = """
+taxonomy:
   category:
     label: Category
     term:
       - cat1
       - name: cat11
         parent: cat1
-      - name: cat12
-        parent: cat1
-      - cat2
+      - name: cat111
+        parent: cat11
+      - name: cat2
+        term:
+          - name: cat21
+            term:
+              - name: cat211
+          - name: cat21
+            slug: cat_two_one
+      - name: cat31
+        parent: cat3
+      - name: cat3
 """
 
     yaml = YAML(typ='safe')
     config.update(yaml.load(yaml_text))
 
-    assert config.taxonomy['tag'].terms['tag2'].name == 'tag2'
-    assert config.taxonomy['tag'].terms['tag3'].name == 'tag3'
-    assert config.taxonomy['tag'].label == 'Tag'
+    assert config.taxonomy['category'].terms['cat1'].name == 'cat1'
+    assert config.taxonomy['category'].terms['cat1'].parent == ''
     assert config.taxonomy['category'].terms['cat11'].parent == 'cat1'
+    assert config.taxonomy['category'].terms['cat111'].parent == 'cat11'
+
+    assert config.taxonomy['category'].terms['cat21'].parent == 'cat2'
+    assert config.taxonomy['category'].terms['cat21'].slug == 'cat_two_one'
+    assert config.taxonomy['category'].terms['cat211'].parent == 'cat21'
+
+    assert config.taxonomy['category'].terms['cat31'].parent == 'cat3'
