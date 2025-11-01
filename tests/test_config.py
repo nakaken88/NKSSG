@@ -1,11 +1,15 @@
+import pytest
 from ruamel.yaml import YAML
 
 from nkssg.structure.config import Config
 
 
-def test_default_config():
-    config = Config()
+@pytest.fixture
+def config():
+    return Config()
 
+
+def test_default_config(config):
     assert config['site']['site_name'] == 'Site Title'
     assert config.site.site_name == 'Site Title'
     assert config.site.site_url == ''
@@ -17,7 +21,7 @@ def test_default_config():
     assert config.use_abs_url is True
 
 
-def test_site_config():
+def test_site_config(config):
     config_dict = {
         'site': {
             'site_name': 'example site',
@@ -25,14 +29,13 @@ def test_site_config():
         },
     }
 
-    config = Config()
     config.update(config_dict)
 
     assert config.site.site_name == 'example site'
     assert config.site.site_url == 'http://example.com'
 
 
-def test_post_type_config():
+def test_post_type_config(config):
     config_dict = {
         'post_type': {
             'post': {
@@ -44,7 +47,6 @@ def test_post_type_config():
         },
     }
 
-    config = Config()
     config.update(config_dict)
 
     assert config.post_type['post'].permalink == '/%Y/%m/%d/'
@@ -52,7 +54,7 @@ def test_post_type_config():
     assert config.post_type['sample'].permalink == '/{slug}/'
 
 
-def test_markdown_config():
+def test_markdown_config(config):
     config_dict = {
         'markdown': {
             'fenced_code': {},
@@ -63,7 +65,6 @@ def test_markdown_config():
         },
     }
 
-    config = Config()
     config.update(config_dict)
 
     assert config.markdown['fenced_code'] == {}
@@ -71,7 +72,7 @@ def test_markdown_config():
     assert config.markdown['toc']['marker'] == '[toc]'
 
 
-def test_taxonomy_config():
+def test_taxonomy_config(config):
     yaml_text = """
 taxonomy:
   tag:
@@ -93,7 +94,6 @@ taxonomy:
       - cat2
 """
 
-    config = Config()
     yaml = YAML(typ='safe')
     config.update(yaml.load(yaml_text))
 
