@@ -52,8 +52,8 @@ class SiteConfig(BaseConfig):
     def update(self, myDict: dict):
         super().update(myDict)
 
-        self.site_url = self.site_url.rstrip('/')
         self.site_url_original = self.site_url
+        self.site_url = self.site_url.rstrip('/')
         self.site_image = self.site_image.replace(self.site_url, '')
 
 
