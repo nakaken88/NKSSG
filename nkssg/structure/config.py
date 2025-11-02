@@ -202,23 +202,31 @@ class Config(BaseConfig):
             dir_key = f'{k}_dir'
             self.update({dir_key: self.base_dir / Path(v)})
 
-    def load_config(self, yaml_file_path):
+    def _update_from_yaml_string(self, yaml_content: str):
         yaml = YAML(typ='safe')
         try:
-            with open(yaml_file_path, 'r', encoding='utf8') as f:
-                data = yaml.load(f)
+            data = yaml.load(yaml_content)
+            if data:
                 self.update(data)
+        except YAMLError as e:
+            raise ValueError(f"The YAML format is incorrect: {e}")
 
+    def _update_from_yaml_file(self, yaml_file_path: Path):
+        try:
+            yaml_content = yaml_file_path.read_text(encoding='utf-8')
+            self._update_from_yaml_string(yaml_content)
         except FileNotFoundError:
             msg = f"The YAML file was not found: {yaml_file_path}"
             raise FileNotFoundError(msg)
-
-        except YAMLError as e:
-            raise ValueError(f"The YAML file format is incorrect: {e}")
-
         except Exception as e:
-            msg = f"An error occurred while loading the config file: {e}"
+            msg = f"An error occurred while loading the config file: {e}"     
             raise Exception(msg)
+
+    @classmethod
+    def from_file(cls, yaml_file_path: Path = Path('nkssg.yml')):  
+        config = cls()
+        config._update_from_yaml_file(yaml_file_path)
+        return config
 
     def update(self, data: dict):
         for k, v in data.items():
@@ -232,12 +240,3 @@ class Config(BaseConfig):
                 self.taxonomy.update(v)
             else:
                 super().update({k: v})
-
-
-def load_config(mode):
-    config = Config()
-    config.load_config('nkssg.yml')
-
-    config['mode'] = mode
-
-    return config

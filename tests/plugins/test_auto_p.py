@@ -5,8 +5,7 @@ from nkssg.structure.config import Config
 def test_auto_p_plugin_html_content():
     """Test that AutoPPlugin converts newlines in HTML content to <br> tags."""
     plugin = AutoPPlugin()
-    config = Config()
-    config.load_config('nkssg.yml')
+    config = Config.from_file()
     
     # A dummy Single object is required because on_get_content checks single.ext
     dummy_single = Single(abs_src_path=Config().docs_dir / "post" / "dummy.html", config=config)
@@ -22,8 +21,7 @@ def test_auto_p_plugin_html_content():
 def test_auto_p_plugin_markdown_content_no_change():
     """Test that AutoPPlugin does not modify Markdown content."""
     plugin = AutoPPlugin()
-    config = Config()
-    config.load_config('nkssg.yml')
+    config = Config.from_file()
     
     # A dummy Single object is required because on_get_content checks single.ext
     dummy_single = Single(abs_src_path=Config().docs_dir / "post" / "dummy.md", config=config)

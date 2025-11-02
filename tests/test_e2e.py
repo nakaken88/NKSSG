@@ -20,8 +20,7 @@ def test_build_simple_site(tmp_path):
         original_cwd = Path.cwd()
         os.chdir(tmp_path)
         try:
-            config = Config()
-            config.load_config('nkssg.yml')
+            config = Config.from_file()
             config.base_dir = tmp_path
             config['mode'] = 'build'
 

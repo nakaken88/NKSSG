@@ -11,8 +11,7 @@ from nkssg.structure.singles import Single
 @pytest.fixture
 def site_setup():
     """Provides a common setup for creating a mock site with config."""
-    config = Config()
-    config.load_config('nkssg.yml')
+    config = Config.from_file()
     config.site.site_url = "http://example.com"
     config.site.site_url_original = "http://example.com"
 
