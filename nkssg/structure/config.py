@@ -243,9 +243,6 @@ class Config(BaseConfig):
         except FileNotFoundError:
             msg = f"The YAML file was not found: {yaml_file_path}"
             raise FileNotFoundError(msg)
-        except Exception as e:
-            msg = f"An error occurred while loading the config file: {e}"     
-            raise Exception(msg)
 
     @classmethod
     def from_file(cls, yaml_file_path: Path = Path('nkssg.yml')):  
