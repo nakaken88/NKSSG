@@ -258,6 +258,8 @@ class Single(Page):
 
         except FileNotFoundError:
             raise FileNotFoundError(f"File not found: {path}")
+        except ValueError:
+            raise
         except Exception as e:
             raise Exception(
                 f"front matter parse error in {path}: {str(e)}")

@@ -133,3 +133,61 @@ def test_get_url_from_permalink_section_top(permalink, expected):
 
     result = single.get_url_from_permalink(permalink, 'new_sample', True)
     assert result == expected
+
+
+def test_parse_front_matter_full(tmp_path):
+    content = """---
+title: Test Title
+date: 2023-01-01
+tags: [tag1, tag2]
+---
+This is the content.
+"""
+    file_path = tmp_path / "test.md"
+    file_path.write_text(content, encoding="utf-8")
+
+    meta, doc = Single.parse_front_matter(file_path)
+
+    assert meta == {"title": "Test Title", "date": datetime.date(2023, 1, 1), "tags": ["tag1", "tag2"]}
+    assert doc == "\nThis is the content.\n"
+
+def test_parse_front_matter_no_front_matter(tmp_path):
+    content = "This is content without front matter."
+    file_path = tmp_path / "test.md"
+    file_path.write_text(content, encoding="utf-8")
+
+    meta, doc = Single.parse_front_matter(file_path)
+
+    assert meta == {}
+    assert doc == "This is content without front matter."
+
+def test_parse_front_matter_empty_front_matter(tmp_path):
+    content = """---
+---
+This is the content.
+"""
+    file_path = tmp_path / "test.md"
+    file_path.write_text(content, encoding="utf-8")
+
+    meta, doc = Single.parse_front_matter(file_path)
+
+    assert meta == {}
+    assert doc == "\nThis is the content.\n"
+
+def test_parse_front_matter_invalid_yaml(tmp_path):
+    content = """---
+title: : invalid:
+---
+This is the content.
+"""
+    file_path = tmp_path / "test.md"
+    file_path.write_text(content, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="YAML parsing error"):
+        Single.parse_front_matter(file_path)
+
+def test_parse_front_matter_file_not_found():
+    non_existent_path = Path("non_existent_file.md")
+    with pytest.raises(FileNotFoundError, match="File not found"):
+        Single.parse_front_matter(non_existent_path)
+
