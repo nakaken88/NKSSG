@@ -1,6 +1,7 @@
 import datetime
 from pathlib import Path
 import pytest
+import shutil
 
 from nkssg.structure.config import Config
 from nkssg.structure.pages import Page
@@ -181,3 +182,54 @@ def test_parse_front_matter_file_not_found():
     with pytest.raises(FileNotFoundError, match="File not found"):
         Single.parse_front_matter(non_existent_path)
 
+
+@pytest.mark.parametrize(
+    "front_matter_content, is_future, is_expired, expected_is_draft",
+    [
+        # Explicit draft flag
+        ("draft: true", False, False, True),
+        ("draft: false", False, False, False),
+        ("draft: 'true'", False, False, True),
+        ("draft: 'false'", False, False, False),
+        # Status flags
+        ("status: draft", False, False, True),
+        ("status: pending", False, False, True),
+        ("status: private", False, False, True),
+        ("status: publish", False, False, False),
+        # Future/Expired flags
+        ("", True, False, True),  # is_future = True
+        ("", False, True, True),  # is_expired = True
+        # Normal post
+        ("", False, False, False),
+        # Combined: draft: false overrides future/expired
+        ("draft: false", True, True, False),
+        # Combined: status: publish does NOT override future/expired
+        ("status: publish", True, True, True),
+    ]
+)
+def test_is_draft(tmp_path, config, front_matter_content, is_future, is_expired, expected_is_draft):
+    content = f"---\n{front_matter_content}\n---\nThis is content."
+    file_path = tmp_path / "test_post.md"
+    file_path.write_text(content, encoding="utf-8")
+
+    original_docs_dir = Single.docs_dir
+    Single.docs_dir = tmp_path
+    
+    dummy_post_type_dir = tmp_path / "sample"
+    dummy_post_type_dir.mkdir(exist_ok=True)
+    final_file_path = dummy_post_type_dir / file_path.name
+    shutil.copy(file_path, final_file_path)
+
+    single = Single(final_file_path, config)
+    
+    single.meta, _ = Single.parse_front_matter(final_file_path)
+    single.status = single.meta.get('status', 'publish')
+    single.is_future = is_future
+    single.is_expired = is_expired
+    
+    result = single._is_draft()
+
+    assert result == expected_is_draft
+    
+    # Restore original docs_dir
+    Single.docs_dir = original_docs_dir
