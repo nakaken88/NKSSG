@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 import shutil
+import click
 
 from nkssg.structure.config import Config
 from nkssg.structure.themes import Themes
@@ -22,8 +23,7 @@ def site(project_dir, package_dir: Path):
     config_path = project_dir / 'nkssg.yml'
 
     if config_path.exists():
-        log.warning('Project already exists.')
-        return
+        raise click.ClickException(f"Project '{project_dir.name}' already exists in '{project_dir.parent}'.")
 
     directories_to_create = [
         project_dir / 'docs' / 'post',
@@ -48,9 +48,11 @@ category: ["cat11"]
 This is a sample post.
 ''')
 
-    config_path.write_text('''\
+    site_name = project_dir.name
+
+    config_content = '''\
 site:
-  site_name: "Site Name"
+  site_name: "{site_name}"
   site_url: ""
   site_desc: ""
   site_image: ""
@@ -107,7 +109,10 @@ taxonomy:
           - name: cat21
           - cat22
           - cat23
-''')
+'''
+    config_content = config_content.replace('"{site_name}"', f'"{site_name}"')
+    
+    config_path.write_text(config_content, encoding='utf-8')
 
 
 def theme_copy(theme_from: Path, theme_to: Path):
