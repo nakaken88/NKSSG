@@ -26,7 +26,7 @@ def test_site_config(config):
     config_dict = {
         'site': {
             'site_name': 'example site',
-            'site_url': 'http://example.com/',  # 末尾スラッシュ付き
+            'site_url': 'http://example.com/',  # With trailing slash
             'site_image': 'http://example.com/images/hero.jpg',
         },
     }
@@ -34,9 +34,9 @@ def test_site_config(config):
     config.update(config_dict)
 
     assert config.site.site_name == 'example site'
-    assert config.site.site_url == 'http://example.com'  # スラッシュが除去されていること
-    assert config.site.site_url_original == 'http://example.com/' # 元のURLが保持されていること
-    assert config.site.site_image == '/images/hero.jpg'  # 相対パスになっていること
+    assert config.site.site_url == 'http://example.com'  # Assert that trailing slash is removed
+    assert config.site.site_url_original == 'http://example.com/' # Assert that original URL is preserved
+    assert config.site.site_image == '/images/hero.jpg'  # Assert that it becomes a relative path
 
 
 def test_post_type_config(config):
@@ -47,6 +47,9 @@ def test_post_type_config(config):
             },
             'sample': {
                 'archive_type': 'none',
+            },
+            'page': {
+                'archive_type': 'invalid_type',  # Set an invalid value
             }
         },
     }
@@ -56,6 +59,28 @@ def test_post_type_config(config):
     assert config.post_type['post'].permalink == '/%Y/%m/%d/'
     assert config.post_type['sample'].archive_type == 'none'
     assert config.post_type['sample'].permalink == '/{slug}/'
+    assert config.post_type['page'].archive_type == 'section'  # Assert that it falls back to 'section'
+
+
+
+def test_directory_paths_config(config):
+    config_dict = {
+        'directory': {
+            'docs': 'my_docs_path',
+            'public': 'my_public_path',
+        },
+    }
+
+    original_base_dir = config.base_dir  # base_dir is initialized with Path.cwd()
+
+    config.update(config_dict)
+
+    assert config.docs_dir == original_base_dir / 'my_docs_path'
+    assert config.public_dir == original_base_dir / 'my_public_path'
+    # Assert that other default directories remain unchanged
+    assert config.static_dir == original_base_dir / 'static'
+    assert config.themes_dir == original_base_dir / 'themes'
+
 
 
 def test_markdown_config(config):
