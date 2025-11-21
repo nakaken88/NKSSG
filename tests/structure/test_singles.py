@@ -2,10 +2,11 @@ import datetime
 from pathlib import Path
 import pytest
 import shutil
+from unittest.mock import MagicMock
 
 from nkssg.structure.config import Config
 from nkssg.structure.pages import Page
-from nkssg.structure.singles import Single
+from nkssg.structure.singles import Single, Singles
 from nkssg.structure.archives import Archive
 
 
@@ -232,4 +233,46 @@ def test_is_draft(tmp_path, config, front_matter_content, is_future, is_expired,
     assert result == expected_is_draft
     
     # Restore original docs_dir
+    Single.docs_dir = original_docs_dir
+
+
+def test_singles_initialization_and_collection(tmp_path: Path):
+    """
+    Tests that the Singles class correctly initializes and collects pages
+    from a dummy file structure, respecting post_type, doc_ext, and exclude rules.
+    """
+    (tmp_path / "post").mkdir()
+    (tmp_path / "post" / "first-post.md").touch()
+    (tmp_path / "post" / "_draft.md").touch()  # Should be excluded
+    (tmp_path / "page").mkdir()
+    (tmp_path / "page" / "about.html").touch()
+    (tmp_path / "page" / "notes.txt").touch()  # Invalid extension
+
+    original_docs_dir = Single.docs_dir
+    Single.docs_dir = tmp_path
+
+    cfg = Config()
+    cfg.mode = 'build'
+    cfg.docs_dir = tmp_path
+    cfg.post_type.update({'post': {}, 'page': {}})
+    cfg.doc_ext = ['md', 'html']
+    cfg.exclude = ['**/_*']
+
+    mock_plugins = MagicMock()
+
+    singles = Singles(cfg, mock_plugins)
+
+    assert len(singles.pages) == 2, "Should collect 2 valid pages"
+
+    collected_paths = {str(p.src_path) for p in singles.pages}
+    expected_paths = {
+        str(Path("post") / "first-post.md"),
+        str(Path("page") / "about.html")
+    }
+    assert collected_paths == expected_paths
+
+    # Check that the after_initialize_singles action was called
+    mock_plugins.do_action.assert_called_with('after_initialize_singles', target=singles)
+
+    # Teardown
     Single.docs_dir = original_docs_dir
