@@ -26,14 +26,17 @@ def test_site_config(config):
     config_dict = {
         'site': {
             'site_name': 'example site',
-            'site_url': 'http://example.com',
+            'site_url': 'http://example.com/',  # 末尾スラッシュ付き
+            'site_image': 'http://example.com/images/hero.jpg',
         },
     }
 
     config.update(config_dict)
 
     assert config.site.site_name == 'example site'
-    assert config.site.site_url == 'http://example.com'
+    assert config.site.site_url == 'http://example.com'  # スラッシュが除去されていること
+    assert config.site.site_url_original == 'http://example.com/' # 元のURLが保持されていること
+    assert config.site.site_image == '/images/hero.jpg'  # 相対パスになっていること
 
 
 def test_post_type_config(config):
