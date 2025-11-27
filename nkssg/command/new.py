@@ -3,6 +3,7 @@ from pathlib import Path
 import shutil
 import click
 
+import nkssg
 from nkssg.structure.config import Config
 from nkssg.structure.themes import Themes
 
@@ -10,7 +11,7 @@ from nkssg.structure.themes import Themes
 log = logging.getLogger(__name__)
 
 
-def site(project_dir, package_dir: Path):
+def site(project_dir):
 
     project_dir = Path(project_dir)
 
@@ -35,6 +36,7 @@ def site(project_dir, package_dir: Path):
     for directory in directories_to_create:
         directory.mkdir(parents=True, exist_ok=True)
 
+    package_dir = Path(nkssg.__file__).parent
     theme_from = package_dir / 'themes'
     theme_to = project_dir / 'themes'
     theme_copy(theme_from, theme_to)

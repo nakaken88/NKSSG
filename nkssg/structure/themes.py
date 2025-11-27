@@ -1,7 +1,6 @@
 from pathlib import Path
-
 from ruamel.yaml import YAML
-
+import nkssg
 from nkssg.structure.config import Config
 
 
@@ -40,7 +39,8 @@ class Themes:
 
     def set_default_theme(self, config: Config):
         default_theme_name = 'default'
-        default_theme_dir = config["PKG_DIR"] / 'themes' / default_theme_name
+        package_dir = Path(nkssg.__file__).parent
+        default_theme_dir = package_dir / 'themes' / default_theme_name
         config.theme['name'] = default_theme_name
         self.dirs.append(default_theme_dir)
         self.load_theme_config(default_theme_dir, default_theme_name)

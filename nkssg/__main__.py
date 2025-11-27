@@ -6,12 +6,8 @@ from nkssg.command import build, new
 from nkssg.structure.config import Config
 
 
-PKG_DIR = Path(__file__).resolve().parent
-
-
 def load_config(mode):
     config = Config.from_file()
-    config['PKG_DIR'] = PKG_DIR
     config['mode'] = mode
     return config
 
@@ -55,7 +51,7 @@ def build_draft(path, port):
 def new_project(name, path):
 
     if name == 'site':
-        new.site(path, PKG_DIR)
+        new.site(path)
     else:
         config = load_config('new')
         new.page(name, path, config)

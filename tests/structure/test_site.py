@@ -14,7 +14,6 @@ def base_config(tmp_path):
     config.base_dir = tmp_path
     config.docs_dir = tmp_path / 'docs'
     config.docs_dir.mkdir()
-    config['PKG_DIR'] = Path(nkssg.__file__).parent
     config['mode'] = 'build'
     return config
 

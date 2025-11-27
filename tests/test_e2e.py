@@ -24,10 +24,6 @@ def test_build_simple_site(tmp_path):
             config.base_dir = tmp_path
             config['mode'] = 'build'
 
-            import nkssg
-            pkg_dir = Path(nkssg.__file__).parent
-            config['PKG_DIR'] = pkg_dir
-
             config.set_directory_path({
                 'docs': 'docs',
                 'public': 'public',
