@@ -21,7 +21,8 @@ setup(
     extras_require={
         'develop': [
             'tox',
-            'pytest'
+            'pytest',
+            'pytest-mock'
         ]
     },
     entry_points={
