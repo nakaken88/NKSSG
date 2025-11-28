@@ -1,40 +1,44 @@
 from pathlib import Path
 import shutil
-import os
+
+import pytest
 
 from nkssg.command import build
 from nkssg.structure.config import Config
 from nkssg.structure.singles import Single
 
 
-def test_build_simple_site(tmp_path):
-    """
-    シンプルなサイトが正しくビルドされることを検証するE2Eテスト。
-    """
+@pytest.fixture
+def simple_site(tmp_path):
+    """Prepares a simple site fixture in a temporary directory."""
+    fixture_source = Path(__file__).parent / "fixtures" / "simple_site"
+    site_path = tmp_path / "test_site"
+    shutil.copytree(fixture_source, site_path)
+    return site_path
+
+
+def test_build_simple_site(simple_site):
+    """E2E test that verifies a simple site is built correctly."""
     original_docs_dir = Single.docs_dir
     try:
         Single.docs_dir = ''
-        fixture_path = Path(__file__).parent / "fixtures" / "simple_site"
-        shutil.copytree(fixture_path, tmp_path, dirs_exist_ok=True)
+        
+        config = Config.from_file(
+            yaml_file_path=simple_site / 'nkssg.yml',
+            mode='build',
+            base_dir=simple_site
+        )
 
-        original_cwd = Path.cwd()
-        os.chdir(tmp_path)
-        try:
-            config = Config.from_file(mode='build')
-            config.base_dir = tmp_path
+        config.set_directory_path({
+            'docs': 'docs',
+            'public': 'public',
+            'static': 'static',
+            'themes': 'themes'
+        })
 
-            config.set_directory_path({
-                'docs': 'docs',
-                'public': 'public',
-                'static': 'static',
-                'themes': 'themes'
-            })
+        build.build(config, clean=True)
 
-            build.build(config, clean=True)
-        finally:
-            os.chdir(original_cwd)
-
-        public_dir = tmp_path / "public"
+        public_dir = simple_site / "public"
 
         assert public_dir.is_dir()
 
