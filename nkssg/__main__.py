@@ -6,12 +6,6 @@ from nkssg.command import build, new
 from nkssg.structure.config import Config
 
 
-def load_config(mode):
-    config = Config.from_file()
-    config['mode'] = mode
-    return config
-
-
 @click.group()
 def cli():
     pass
@@ -21,7 +15,7 @@ def cli():
 @click.option('--clean', '-c', is_flag=True)
 def build_command(clean):
 
-    config = load_config('build')
+    config = Config.from_file(mode='build')
     build.build(config, clean)
 
 
@@ -31,7 +25,7 @@ def build_command(clean):
 @click.option('--port', '-p', default=5500)
 def build_serve(static, all, port):
 
-    config = load_config('serve')
+    config = Config.from_file(mode='serve')
     config['serve_all'] = all
     build.serve(config, static, port)
 
@@ -41,7 +35,7 @@ def build_serve(static, all, port):
 @click.option('--port', '-p', default=5500)
 def build_draft(path, port):
 
-    config = load_config('draft')
+    config = Config.from_file(mode='draft')
     build.draft(config, path, port)
 
 
@@ -53,7 +47,7 @@ def new_project(name, path):
     if name == 'site':
         new.site(path)
     else:
-        config = load_config('new')
+        config = Config.from_file(mode='new')
         new.page(name, path, config)
 
 

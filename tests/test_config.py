@@ -233,3 +233,26 @@ def test_term_missing_name_key_raises_error(tmp_path: Path):
 
     with pytest.raises(ValueError, match=r"Term dictionary must have a 'name' key: .*"):
         Config.from_file(yaml_file_path=config_file)
+
+
+def test_mode_handling(tmp_path: Path):
+    """
+    Tests that the 'mode' is correctly handled by both the constructor and from_file.
+    """
+    config_default = Config()
+    assert config_default.mode == 'build'
+
+    config_serve = Config(mode='serve')
+    assert config_serve.mode == 'serve'
+
+    config_with_data = Config(mode='draft')
+    config_with_data.update({'site': {'site_name': 'Test'}})
+    assert config_with_data.mode == 'draft'
+    assert config_with_data.site.site_name == 'Test'
+
+    (tmp_path / "empty.yml").touch()
+    config_from_file_default = Config.from_file(yaml_file_path=tmp_path / "empty.yml")
+    assert config_from_file_default.mode == 'build'
+
+    config_from_file_serve = Config.from_file(yaml_file_path=tmp_path / "empty.yml", mode='serve')
+    assert config_from_file_serve.mode == 'serve'

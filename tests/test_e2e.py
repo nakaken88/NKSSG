@@ -20,9 +20,8 @@ def test_build_simple_site(tmp_path):
         original_cwd = Path.cwd()
         os.chdir(tmp_path)
         try:
-            config = Config.from_file()
+            config = Config.from_file(mode='build')
             config.base_dir = tmp_path
-            config['mode'] = 'build'
 
             config.set_directory_path({
                 'docs': 'docs',

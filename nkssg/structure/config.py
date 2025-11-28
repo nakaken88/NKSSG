@@ -174,6 +174,8 @@ class TaxonomyConfigManager(dict[str, TaxonomyConfig]):
 @dataclass
 class Config(BaseConfig):
 
+    mode: str = 'build'
+
     site: SiteConfig = field(default_factory=SiteConfig)
 
     plugins: dict = field(default_factory=lambda: {
@@ -186,7 +188,7 @@ class Config(BaseConfig):
     _dir_types: list[str] = field(default_factory=lambda: [
         'docs', 'public', 'static', 'themes'
     ])
-    base_dir: Path = Path()
+    base_dir: Path = None
     docs_dir: Path = Path()
     public_dir: Path = Path()
     static_dir: Path = Path()
@@ -219,7 +221,8 @@ class Config(BaseConfig):
 
     def __post_init__(self):
         default_dirs = {dir_type: dir_type for dir_type in self._dir_types}
-        self.base_dir = Path.cwd()
+        if self.base_dir is None:
+            self.base_dir = Path.cwd()
         self.set_directory_path(default_dirs)
 
     def set_directory_path(self, data: dict):
@@ -232,6 +235,8 @@ class Config(BaseConfig):
         try:
             data = yaml.load(yaml_content)
             if data:
+                if 'mode' in data:
+                    del data['mode']
                 self.update(data)
         except YAMLError as e:
             raise ValueError(f"The YAML format is incorrect: {e}")
@@ -245,9 +250,11 @@ class Config(BaseConfig):
             raise FileNotFoundError(msg)
 
     @classmethod
-    def from_file(cls, yaml_file_path: Path = Path('nkssg.yml')):  
-        config = cls()
+    def from_file(cls, yaml_file_path: Path = Path('nkssg.yml'), mode: str = None, base_dir: Path = None):
+        config = cls(base_dir=base_dir)
         config._update_from_yaml_file(yaml_file_path)
+        if mode:
+            config.mode = mode
         return config
 
     def update(self, data: dict):

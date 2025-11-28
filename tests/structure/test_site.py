@@ -10,11 +10,12 @@ from nkssg.structure.site import Site
 def base_config(tmp_path):
     (tmp_path / 'nkssg.yml').touch()
     
-    config = Config.from_file(yaml_file_path=tmp_path / 'nkssg.yml')
-    config.base_dir = tmp_path
-    config.docs_dir = tmp_path / 'docs'
-    config.docs_dir.mkdir()
-    config['mode'] = 'build'
+    config = Config.from_file(
+        yaml_file_path=tmp_path / 'nkssg.yml',
+        mode='build',
+        base_dir=tmp_path
+    )
+    config.docs_dir.mkdir(exist_ok=True)
     return config
 
 @patch('nkssg.structure.site.Plugins')
