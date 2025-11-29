@@ -113,14 +113,14 @@ def test_init_child_theme_loads_correctly_with_parent_priority(
 
 
 def test_load_theme_non_existent_theme_is_ignored(
-    base_config, capsys, create_theme_structure
+    base_config, caplog, create_theme_structure
 ):
     """Test that a non-existent theme is ignored and the default theme is used as a fallback."""
     base_config.theme['name'] = "non_existent_theme"
 
     themes = Themes(base_config)
 
-    assert "non_existent_theme is not found" in capsys.readouterr().out
+    assert "non_existent_theme is not found" in caplog.text
 
     # Assert that it fell back to loading the default theme.
     assert len(themes.dirs) == 1
@@ -131,7 +131,7 @@ def test_load_theme_non_existent_theme_is_ignored(
     assert base_config.theme['updated'] is True
 
 
-def test_load_theme_config_invalid_yaml(base_config, capsys, create_theme_structure):
+def test_load_theme_config_invalid_yaml(base_config, caplog, create_theme_structure):
     """Test handling of invalid YAML in theme configuration."""
     theme_name = "bad_config_theme"
     create_theme_structure(theme_name, config_content="key: { value")
@@ -140,7 +140,7 @@ def test_load_theme_config_invalid_yaml(base_config, capsys, create_theme_struct
     themes = Themes(base_config)
 
     assert not themes.cnf
-    assert "Failed to load config for bad_config_theme" in capsys.readouterr().out
+    assert "Failed to load config for bad_config_theme" in caplog.text
 
 
 def test_lookup_template_exists_in_single_theme(base_config, create_theme_structure):

@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from ruamel.yaml import YAML
 import nkssg
@@ -27,7 +28,7 @@ class Themes:
                 self.load_theme_config(theme_dir, theme)
 
             elif not config.theme.get('updated'):
-                print(f"{theme} is not found")
+                logging.warning(f"{theme} is not found")
 
     def load_theme_config(self, theme_dir: Path, theme_name):
         cnf_path = theme_dir / Path(theme_name + '.yml')
@@ -35,7 +36,7 @@ class Themes:
             cnf = YAML(typ='safe').load(cnf_path) or {}
             self.cnf = {**self.cnf, **cnf}
         except Exception as e:
-            print(f"Failed to load config for {theme_name}: {e}")
+            logging.warning(f"Failed to load config for {theme_name}: {e}")
 
     def set_default_theme(self, config: Config):
         default_theme_name = 'default'
