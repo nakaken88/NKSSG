@@ -1,5 +1,5 @@
-import unittest
-from unittest.mock import MagicMock, patch
+import pytest
+from unittest.mock import MagicMock
 
 from nkssg.structure.config import Config
 from nkssg.structure.plugins import Plugins, BasePlugin
@@ -30,34 +30,35 @@ class DummyPluginD(BasePlugin):
         return target
 
 
-class TestPlugins(unittest.TestCase):
+def _create_mock_entry_point(name, plugin_class):
+    ep = MagicMock()
+    ep.name = name
+    ep.load.return_value = plugin_class
+    return ep
 
-    def _create_mock_entry_point(self, name, plugin_class):
-        ep = MagicMock()
-        ep.name = name
-        ep.load.return_value = plugin_class
-        return ep
 
-    @patch('nkssg.structure.plugins.entry_points')
-    def test_plugin_loading(self, mock_entry_points):
+class TestPlugins:
+
+    def test_plugin_loading(self, mocker):
         """Test that plugins are loaded correctly based on config."""
+        mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')
         mock_entry_points.return_value = [
-            self._create_mock_entry_point('plugin_a', DummyPluginA),
-            self._create_mock_entry_point('plugin_b', DummyPluginB),
+            _create_mock_entry_point('plugin_a', DummyPluginA),
+            _create_mock_entry_point('plugin_b', DummyPluginB),
         ]
 
         config = Config()
         config.update({'plugins': {'plugin_a': {}}})
         plugin_manager = Plugins(config)
 
-        self.assertIn('plugin_a', plugin_manager.plugins)
-        self.assertIsInstance(plugin_manager.plugins['plugin_a'], DummyPluginA)
-        self.assertNotIn('plugin_b', plugin_manager.plugins)
+        assert 'plugin_a' in plugin_manager.plugins
+        assert isinstance(plugin_manager.plugins['plugin_a'], DummyPluginA)
+        assert 'plugin_b' not in plugin_manager.plugins
 
-    @patch('nkssg.structure.plugins.entry_points')
-    @patch('builtins.print')
-    def test_missing_plugin_warning(self, mock_print, mock_entry_points):
+    def test_missing_plugin_warning(self, mocker):
         """Test that a warning is printed for a missing plugin."""
+        mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')
+        mock_print = mocker.patch('builtins.print')
         mock_entry_points.return_value = []
 
         config = Config()
@@ -66,12 +67,12 @@ class TestPlugins(unittest.TestCase):
 
         mock_print.assert_called_with('Warning: non_existent_plugin plugin is not found')
 
-    @patch('nkssg.structure.plugins.entry_points')
-    def test_do_action_execution_order(self, mock_entry_points):
+    def test_do_action_execution_order(self, mocker):
         """Test that do_action executes plugins in the specified order."""
+        mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')
         mock_entry_points.return_value = [
-            self._create_mock_entry_point('plugin_a', DummyPluginA),
-            self._create_mock_entry_point('plugin_b', DummyPluginB),
+            _create_mock_entry_point('plugin_a', DummyPluginA),
+            _create_mock_entry_point('plugin_b', DummyPluginB),
         ]
 
         # Config order is what matters
@@ -91,13 +92,13 @@ class TestPlugins(unittest.TestCase):
         initial_target = {'value': 10}
         # (10 + 1) * 2 = 22
         result = plugin_manager.do_action('on_test_action', target=initial_target)
-        self.assertEqual(result['value'], 22)
+        assert result['value'] == 22
 
-    @patch('nkssg.structure.plugins.entry_points')
-    def test_do_action_no_return(self, mock_entry_points):
+    def test_do_action_no_return(self, mocker):
         """Test that the original target is returned if a plugin returns None."""
+        mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')
         mock_entry_points.return_value = [
-            self._create_mock_entry_point('plugin_c', DummyPluginC),
+            _create_mock_entry_point('plugin_c', DummyPluginC),
         ]
         config = Config()
         config.update({'plugins': {'plugin_c': {}}})
@@ -108,14 +109,14 @@ class TestPlugins(unittest.TestCase):
         # But since it returns None, the `or target` logic should return the original.
         # Let's see if the object is modified in place.
         result = plugin_manager.do_action('on_test_action', target=initial_target)
-        self.assertEqual(result['value'], 15)
-        self.assertIs(result, initial_target) # It should be the same object
+        assert result['value'] == 15
+        assert result is initial_target
 
-    @patch('nkssg.structure.plugins.entry_points')
-    def test_do_action_no_method(self, mock_entry_points):
+    def test_do_action_no_method(self, mocker):
         """Test that plugins without the action method are skipped."""
+        mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')
         mock_entry_points.return_value = [
-            self._create_mock_entry_point('plugin_d', DummyPluginD),
+            _create_mock_entry_point('plugin_d', DummyPluginD),
         ]
         config = Config()
         config.update({'plugins': {'plugin_d': {}}})
@@ -123,19 +124,19 @@ class TestPlugins(unittest.TestCase):
 
         initial_target = {'value': 100}
         result = plugin_manager.do_action('on_test_action', target=initial_target)
-        self.assertEqual(result['value'], 100)
+        assert result['value'] == 100
 
-    @patch('nkssg.structure.plugins.entry_points')
-    def test_do_action_with_kwargs(self, mock_entry_points):
+    def test_do_action_with_kwargs(self, mocker):
         """Test that kwargs are passed correctly to plugin actions."""
-        # We need a plugin that accepts kwargs
         class KwargPlugin(BasePlugin):
+            __test__ = False  # Mark this as not a test class
             def on_test_action(self, target, **kwargs):
                 target['extra'] = kwargs.get('extra_data')
                 return target
 
+        mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')
         mock_entry_points.return_value = [
-            self._create_mock_entry_point('kwarg_plugin', KwargPlugin)
+            _create_mock_entry_point('kwarg_plugin', KwargPlugin)
         ]
         config = Config()
         config.update({'plugins': {'kwarg_plugin': {}}})
@@ -145,4 +146,4 @@ class TestPlugins(unittest.TestCase):
         extra = "some_extra_info"
         result = plugin_manager.do_action('on_test_action', target=initial_target, extra_data=extra)
 
-        self.assertEqual(result['extra'], extra)
+        assert result['extra'] == extra
