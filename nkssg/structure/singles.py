@@ -66,6 +66,7 @@ class Singles(Pages):
 
         self._setup_prev_next_page()
         self._setup_file_ids()
+        self._setup_src_paths()
 
     def _setup_draft_mode(self):
         page = self.pages[0]
@@ -95,6 +96,11 @@ class Singles(Pages):
                     f"for pages {page} and {self.file_ids[page_id]}")
             else:
                 self.file_ids[page_id] = page
+
+    def _setup_src_paths(self):
+        self.src_paths = {
+            page.src_path.as_posix(): page for page in self.pages
+        }
 
     def update_urls(self):
         for page in self.pages:

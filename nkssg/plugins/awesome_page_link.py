@@ -71,8 +71,8 @@ class AwesomePageLinkPlugin(BasePlugin):
                 new_path = new_path.resolve()
                 new_path = new_path.relative_to(docs_dir)
 
-                if str(new_path) in singles.src_paths.keys():
-                    single = singles.src_paths[str(new_path)]
+                if new_path.as_posix() in singles.src_paths.keys():
+                    single = singles.src_paths[new_path.as_posix()]
                     new_link = single.url + suffix
                 else:
                     new_link = old_link + suffix
