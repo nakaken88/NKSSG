@@ -1,5 +1,5 @@
 import pytest
-from ruamel.yaml import YAML
+
 from pathlib import Path
 
 from nkssg.structure.config import Config
@@ -112,9 +112,7 @@ taxonomy:
         slug: tag_two
       - tag3
 """
-
-    yaml = YAML(typ='safe')
-    config.update(yaml.load(yaml_text))
+    config._update_from_yaml_string(yaml_text)
 
     assert config.taxonomy['tag'].label == 'Tag'
     assert config.taxonomy['tag'].terms['tag1'].name == 'tag1'
@@ -145,8 +143,7 @@ taxonomy:
       - name: cat3
 """
 
-    yaml = YAML(typ='safe')
-    config.update(yaml.load(yaml_text))
+    config._update_from_yaml_string(yaml_text)
 
     assert config.taxonomy['category'].terms['cat1'].name == 'cat1'
     assert config.taxonomy['category'].terms['cat1'].parent == ''
