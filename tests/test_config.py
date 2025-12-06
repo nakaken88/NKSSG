@@ -253,3 +253,61 @@ def test_mode_handling(tmp_path: Path):
 
     config_from_file_serve = Config.from_file(yaml_file_path=tmp_path / "empty.yml", mode='serve')
     assert config_from_file_serve.mode == 'serve'
+
+
+def test_extra_values_handling(config):
+    """
+    Tests that extra, undefined values can be added and accessed via
+    dictionary-style access, but not attribute-style access.
+    """
+    config_dict = {
+        'extra_root_key': 'top_level_value',
+        'site': {
+            'extra_site_key': 'site_value'
+        }
+    }
+    config.update(config_dict)
+
+    # Test dictionary-style access for extra keys (should work)
+    assert config['extra_root_key'] == 'top_level_value'
+    assert config.site['extra_site_key'] == 'site_value'
+
+    # Test attribute-style access for extra keys (should raise AttributeError)
+    with pytest.raises(AttributeError):
+        _ = config.extra_root_key
+    with pytest.raises(AttributeError):
+        _ = config.site.extra_site_key
+
+    # Test that defined keys are not stored in extras
+    assert 'extra_root_key' in config.extras
+    assert 'extra_site_key' in config.site.extras
+    assert 'site_name' not in config.site.extras
+    assert 'site_name' in config.site.__dict__
+
+
+def test_key_error_for_undefined_key(config):
+    """
+    Tests that accessing a non-existent key using dictionary-style access
+    raises a KeyError.
+    """
+    with pytest.raises(KeyError, match=r"undefined_key not found in Config."):
+        _ = config['undefined_key']
+
+    with pytest.raises(KeyError, match=r"undefined_key not found in SiteConfig."):
+        _ = config.site['undefined_key']
+
+
+def test_get_method_with_default_value(config):
+    """
+    Tests that the .get() method returns the default value for non-existent keys.
+    """
+    # Test top-level
+    assert config.get('non_existent_key', 'default_root') == 'default_root'
+    assert config.get('non_existent_key') is None  # Default None
+
+    # Test nested within site
+    assert config.site.get('non_existent_key_site', 'default_site') == 'default_site'
+    assert config.site.get('non_existent_key_site') is None  # Default None
+
+    # Test get for existing key returns its value
+    assert config.site.get('site_name', 'default_name') == 'Site Title'
