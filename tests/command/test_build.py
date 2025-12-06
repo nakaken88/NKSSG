@@ -1,15 +1,13 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
-import shutil
 
 from nkssg.command.build import build
 from nkssg.structure.config import Config
-from nkssg.structure.site import Site
 
 
 @pytest.fixture
-def mock_config(tmp_path):
+def mock_config():
     """Fixture to create a mock Config object."""
     config = MagicMock(spec=Config)
     mock_public_dir = MagicMock(spec=Path)
