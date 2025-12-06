@@ -78,3 +78,84 @@ def test_handle_missing_home_template(base_config, mocker):
 
     assert blog_post_type.add_prefix_to_url is False
     assert blog_post_type.archive_type == 'section'
+
+
+def test_site_update_renders_html(site_fixture):
+    """
+    Integration test to verify that Site.update() correctly renders
+    HTML content for a Single page using the configured theme.
+    """
+    config = site_fixture # site_fixture yields a Config object
+    
+    # Ensure all necessary directories exist for Config to resolve paths
+    config.base_dir.mkdir(parents=True, exist_ok=True)
+    config.docs_dir.mkdir(parents=True, exist_ok=True)
+    config.themes_dir.mkdir(parents=True, exist_ok=True)
+    (config.themes_dir / 'default').mkdir(parents=True, exist_ok=True)
+    
+    site = Site(config)
+    
+    # Perform setup and update operations
+    site.setup()
+    site.update()
+
+    # Assertions
+    assert len(site.singles.pages) == 1
+    single_page = site.singles.pages[0]
+
+    assert single_page.title == "My Test Post Title"
+    assert single_page.content == "<p>This is the <strong>content</strong> of my test post.</p>"
+    assert single_page.html is not None
+    assert "My Test Post Title" in single_page.html
+    assert "<h1>My Test Post Title</h1>" in single_page.html
+    assert "This is the <strong>content</strong> of my test post." in single_page.html
+    assert "<!DOCTYPE html>" in single_page.html
+    assert "<html>" in single_page.html
+    assert "<head>" in single_page.html
+    assert "<body>" in single_page.html
+    assert "</div>" in single_page.html
+    assert "</html>" in single_page.html
+
+
+def test_site_output_writes_files(site_fixture):
+    """
+    Integration test to verify that Site.output() correctly writes
+    rendered HTML files to the public directory.
+    """
+    config = site_fixture  # site_fixture yields a Config object
+
+    # Ensure all necessary directories exist for Config to resolve paths
+    config.base_dir.mkdir(parents=True, exist_ok=True)
+    config.docs_dir.mkdir(parents=True, exist_ok=True)
+    config.themes_dir.mkdir(parents=True, exist_ok=True)
+    (config.themes_dir / 'default').mkdir(parents=True, exist_ok=True)
+
+    site = Site(config)
+
+    # Perform setup, update, and output operations
+    site.setup()
+    site.update()
+    site.output()
+
+    # Assertions
+    public_dir = config.public_dir
+    assert public_dir.is_dir()
+
+    # Check for the generated post HTML file
+    expected_post_path = public_dir / "my-test-post-title" / "index.html"
+    assert expected_post_path.is_file()
+
+    # Verify content of the generated file
+    generated_content = expected_post_path.read_text(encoding="utf-8")
+    assert "<h1>My Test Post Title</h1>" in generated_content
+    assert "This is the <strong>content</strong> of my test post." in generated_content
+    assert "<!DOCTYPE html>" in generated_content
+    assert "</html>" in generated_content
+
+    # Check for static files (e.g., style.css if it existed in the theme)
+    # For this fixture, we only added single.html, so there are no static files
+    # to check, but this section shows where such checks would go.
+    # For example:
+    # expected_css_path = public_dir / "themes" / "default" / "style.css"
+    # assert not expected_css_path.is_file() # Should not exist with current fixture setup
+
