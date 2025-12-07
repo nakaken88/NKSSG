@@ -277,3 +277,69 @@ def test_singles_initialization_and_collection(site_fixture):
         # Teardown
         Single.docs_dir = original_docs_dir
 
+
+@pytest.mark.parametrize("filename, meta_title, expected_title", [
+    ('my-post.md', None, 'my-post'),
+    ('my-post.md', 'A Custom Title', 'A Custom Title'),
+    ('index.md', None, 'sample'),
+    ('_10_my-post.md', None, 'my-post'),
+])
+def test_title_and_name_logic(config, tmp_path, filename, meta_title, expected_title):
+    """
+    Tests that _get_title correctly derives the title from filename or meta,
+    and that _get_name correctly mirrors the title.
+    """
+    original_docs_dir = Single.docs_dir
+    docs_dir = tmp_path / 'docs'
+    post_type_dir = docs_dir / 'sample'
+    post_type_dir.mkdir(parents=True, exist_ok=True)
+    file_path = post_type_dir / filename
+    file_path.touch()
+
+    Single.docs_dir = docs_dir
+    config.docs_dir = docs_dir
+
+    single = Single(file_path, config)
+    if meta_title:
+        single.meta['title'] = meta_title
+
+    # Test _get_title
+    title = single._get_title()
+    assert title == expected_title
+
+    # Test _get_name (which should be the same as the title)
+    single.title = title
+    assert single._get_name() == expected_title
+
+    Single.docs_dir = original_docs_dir
+
+
+@pytest.mark.parametrize("name, meta_slug, expected_slug", [
+    ('A Sample Post', None, 'a-sample-post'),
+    ('A Sample Post', 'custom-slug', 'custom-slug'),
+    ('日本語のタイトル', None, '日本語のタイトル'),
+    ('日本語のタイトル', 'nihongo-no-taitoru', 'nihongo-no-taitoru'),
+])
+def test_get_slug_logic(config, tmp_path, name, meta_slug, expected_slug):
+    """
+    Tests that _get_slug correctly generates a slug from the name,
+    and that a slug in the front matter takes precedence.
+    """
+    original_docs_dir = Single.docs_dir
+    docs_dir = tmp_path / 'docs'
+    post_type_dir = docs_dir / 'sample'
+    post_type_dir.mkdir(parents=True, exist_ok=True)
+    dummy_path = post_type_dir / 'dummy.md'
+    dummy_path.touch()
+
+    Single.docs_dir = docs_dir
+    config.docs_dir = docs_dir
+
+    single = Single(dummy_path, config)
+    single.name = name  # Set name directly for this test
+    if meta_slug:
+        single.meta['slug'] = meta_slug
+
+    assert single._get_slug('sample') == expected_slug
+
+    Single.docs_dir = original_docs_dir
