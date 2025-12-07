@@ -236,43 +236,44 @@ def test_is_draft(tmp_path, config, front_matter_content, is_future, is_expired,
     Single.docs_dir = original_docs_dir
 
 
-def test_singles_initialization_and_collection(tmp_path: Path):
+def test_singles_initialization_and_collection(site_fixture):
     """
     Tests that the Singles class correctly initializes and collects pages
     from a dummy file structure, respecting post_type, doc_ext, and exclude rules.
+    Refactored to use site_fixture.
     """
-    (tmp_path / "post").mkdir()
-    (tmp_path / "post" / "first-post.md").touch()
-    (tmp_path / "post" / "_draft.md").touch()  # Should be excluded
-    (tmp_path / "page").mkdir()
-    (tmp_path / "page" / "about.html").touch()
-    (tmp_path / "page" / "notes.txt").touch()  # Invalid extension
+    config = site_fixture
 
+    # Ensure Single.docs_dir is correctly set for the fixture context
     original_docs_dir = Single.docs_dir
-    Single.docs_dir = tmp_path
+    Single.docs_dir = config.docs_dir
 
-    cfg = Config()
-    cfg.mode = 'build'
-    cfg.docs_dir = tmp_path
-    cfg.post_type.update({'post': {}, 'page': {}})
-    cfg.doc_ext = ['md', 'html']
-    cfg.exclude = ['**/_*']
+    try:
+        mock_plugins = MagicMock()
 
-    mock_plugins = MagicMock()
+        singles = Singles(config, mock_plugins)
 
-    singles = Singles(cfg, mock_plugins)
+        # Expected files from site_fixture:
+        # - my-test-post.md (post)
+        # - first-post.md (post)
+        # - about.html (page)
+        # Excluded:
+        # - _draft.md (post, excluded by pattern)
+        # - notes.txt (page, invalid extension)
 
-    assert len(singles.pages) == 2, "Should collect 2 valid pages"
+        assert len(singles.pages) == 3, "Should collect 3 valid pages"
 
-    collected_paths = {str(p.src_path) for p in singles.pages}
-    expected_paths = {
-        str(Path("post") / "first-post.md"),
-        str(Path("page") / "about.html")
-    }
-    assert collected_paths == expected_paths
+        collected_paths = {str(p.src_path) for p in singles.pages}
+        expected_paths = {
+            str(Path("post") / "my-test-post.md"),
+            str(Path("post") / "first-post.md"),
+            str(Path("page") / "about.html")
+        }
+        assert collected_paths == expected_paths
 
-    # Check that the after_initialize_singles action was called
-    mock_plugins.do_action.assert_called_with('after_initialize_singles', target=singles)
+        # Check that the after_initialize_singles action was called
+        mock_plugins.do_action.assert_called_with('after_initialize_singles', target=singles)
+    finally:
+        # Teardown
+        Single.docs_dir = original_docs_dir
 
-    # Teardown
-    Single.docs_dir = original_docs_dir

@@ -37,7 +37,7 @@ post_type:
 """
     )
 
-    # Create a markdown post
+    # Create markdown posts and pages
     (posts_dir / "my-test-post.md").write_text(
         """---
 title: My Test Post Title
@@ -46,6 +46,13 @@ date: 2023-01-01
 This is the **content** of my test post.
 """
     )
+    (posts_dir / "first-post.md").touch() # Additional post
+    (posts_dir / "_draft.md").touch() # Should be excluded
+    
+    pages_dir = docs_dir / "page"
+    pages_dir.mkdir(parents=True, exist_ok=True)
+    (pages_dir / "about.html").touch() # Page with .html extension
+    (pages_dir / "notes.txt").touch() # Invalid extension, should be ignored
 
     # Create a simple single.html template
     (default_theme_dir / "single.html").write_text(
@@ -82,6 +89,11 @@ This is the **content** of my test post.
             'static': 'static',
             'themes': 'themes'
         })
+
+        # Set doc_ext and exclude rules to match the original test_singles_initialization_and_collection intent
+        config.doc_ext = ['md', 'html']
+        config.exclude = ['**/_*']
+        config.post_type.update({'post': {}, 'page': {}})
 
         yield config
 
