@@ -128,7 +128,8 @@ def test_get_url_from_permalink_section_top(config, permalink, expected):
 
 
 def test_parse_front_matter_full(tmp_path):
-    content = """---
+    content = """
+---
 title: Test Title
 date: 2023-01-01
 tags: [tag1, tag2]
@@ -154,7 +155,8 @@ def test_parse_front_matter_no_front_matter(tmp_path):
     assert doc == "This is content without front matter."
 
 def test_parse_front_matter_empty_front_matter(tmp_path):
-    content = """---
+    content = """
+---
 ---
 This is the content.
 """
@@ -167,7 +169,8 @@ This is the content.
     assert doc == "\nThis is the content.\n"
 
 def test_parse_front_matter_invalid_yaml(tmp_path):
-    content = """---
+    content = """
+---
 title: : invalid:
 ---
 This is the content.
@@ -343,3 +346,120 @@ def test_get_slug_logic(config, tmp_path, name, meta_slug, expected_slug):
     assert single._get_slug('sample') == expected_slug
 
     Single.docs_dir = original_docs_dir
+
+
+# --- Tests for __lt__ (sorting) method ---
+
+@pytest.fixture
+def create_single(tmp_path):
+    """
+    Fixture to create a Single object with a consistent setup for sorting tests.
+    """
+    docs_dir = tmp_path / 'docs'
+    docs_dir.mkdir()
+    
+    original_docs_dir = Single.docs_dir
+    Single.docs_dir = docs_dir
+
+    cfg = Config()
+    cfg.docs_dir = docs_dir
+    cfg.update({'post_type': {'post': {'archive_type': 'date'}, 'page': {}}})
+
+    def _maker(post_type: str, path_parts: list, order: int = None, date: datetime.datetime = None):
+        if post_type not in cfg.post_type:
+            new_pt_config = cfg.post_type.copy()
+            new_pt_config[post_type] = {}
+            cfg.post_type.update(new_pt_config)
+        
+        file_path = docs_dir.joinpath(post_type, *path_parts)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.touch()
+        
+        s = Single(file_path, cfg)
+        
+        if order is not None:
+            s.meta['order'] = order
+        if date:
+            s.date = date
+        
+        s._archive_type = cfg.post_type.get(post_type, {}).get('archive_type', 'section')
+        
+        return s
+
+    yield _maker
+
+    Single.docs_dir = original_docs_dir
+
+
+def test_single_lt_by_post_type_index(create_single):
+    """Tests sorting by post_type_index (post vs page)."""
+    s_post = create_single('post', ['post1.md'])
+    s_page = create_single('page', ['page1.md'])
+
+    assert s_post < s_page
+    assert not (s_page < s_post)
+
+
+def test_single_lt_by_order_for_section_archive(create_single):
+    """Tests sorting by 'order' metadata for a non-date archive type."""
+    # Use 'page' which has archive_type='section' by default
+    s1 = create_single('page', ['page1.md'], order=10)
+    s2 = create_single('page', ['page2.md'], order=5)
+    s3 = create_single('page', ['page3.md'], order=-1)
+    s4 = create_single('page', ['page4.md']) # No order, defaults to 0
+
+    assert s2 < s1 # 5 < 10
+    assert s3 < s4 # -1 < 0
+    assert s4 < s2 # 0 < 5
+
+    # Test tie-breaking with src_path when order is the same
+    s5 = create_single('page', ['b.md'], order=5)
+    s6 = create_single('page', ['a.md'], order=5)
+    assert s6 < s5
+
+
+def test_single_lt_by_date_for_date_archive(create_single):
+    """Tests sorting by date (desc) when archive_type is 'date'."""
+    # Use 'post' which has archive_type='date'
+    d_new = datetime.datetime(2023, 1, 2)
+    d_old = datetime.datetime(2023, 1, 1)
+
+    s1 = create_single('post', ['old.md'], date=d_old)
+    s2 = create_single('post', ['new.md'], date=d_new)
+    
+    assert s2 < s1 # Newer date comes first
+
+    # Fallback to src_path if dates are identical
+    s3 = create_single('post', ['b.md'], date=d_new)
+    s4 = create_single('post', ['a.md'], date=d_new)
+    assert s4 < s3
+
+
+def test_single_lt_order_is_ignored_for_date_archive(create_single):
+    """Tests that 'order' is ignored for date archives."""
+    d_new = datetime.datetime(2023, 1, 2)
+    d_old = datetime.datetime(2023, 1, 1)
+
+    # s2 has a higher order, but should still come first due to newer date
+    s1 = create_single('post', ['old.md'], date=d_old, order=1)
+    s2 = create_single('post', ['new.md'], date=d_new, order=99)
+
+    assert s2 < s1
+
+
+def test_single_lt_by_src_dir_for_section_archive(create_single):
+    """Tests sorting by src_dir for non-date archives."""
+    s1 = create_single('page', ['dir_a', 'post.md'])
+    s2 = create_single('page', ['dir_b', 'post.md'])
+
+    assert s1 < s2
+
+def test_single_lt_by_filename_for_section_archive(create_single):
+    """Tests sorting by filename (index first) for non-date archives."""
+    s_index = create_single('page', ['common', 'index.md'])
+    s_another = create_single('page', ['common', 'another.md'])
+    s_zoo = create_single('page', ['common', 'zoo.md'])
+
+    assert s_index < s_another
+    assert s_index < s_zoo
+    assert s_another < s_zoo
