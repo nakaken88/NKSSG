@@ -463,3 +463,82 @@ def test_single_lt_by_filename_for_section_archive(create_single):
     assert s_index < s_another
     assert s_index < s_zoo
     assert s_another < s_zoo
+
+
+# --- Tests for update_url method ---
+
+@pytest.fixture
+def url_test_single(tmp_path):
+    """Fixture to create a Single object for URL generation tests."""
+
+    docs_dir = tmp_path / 'docs'
+
+    original_docs_dir = Single.docs_dir
+    Single.docs_dir = docs_dir
+
+    cfg = Config()
+    cfg.docs_dir = docs_dir
+    cfg.public_dir = tmp_path / 'public'
+
+    def _maker(post_type, filename, permalink=None, meta_url=None, add_prefix=True):
+
+        # This config setup is specific to this test run
+        pt_config = cfg.post_type.get(post_type, {})
+        if permalink:
+            pt_config['permalink'] = permalink
+
+        pt_config['add_prefix_to_url'] = add_prefix
+        cfg.post_type.update({post_type: pt_config})
+
+        file_path = docs_dir / post_type / filename
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.touch()
+
+        s = Single(file_path, cfg)
+
+        s.slug = 'my-test-slug'
+        s.name = 'my test slug'
+        s.date = datetime.datetime(2023, 10, 26)
+
+        if meta_url:
+            s.meta['url'] = meta_url
+
+        return s, cfg
+
+    yield _maker
+
+    Single.docs_dir = original_docs_dir
+
+
+def test_update_url_with_meta_url(url_test_single):
+    """Tests that url from front matter is prioritized."""
+
+    single, config = url_test_single('post', 'test.md', meta_url='/custom/path/')
+
+    single.update_url(config)
+
+    assert single.rel_url == '/custom/path/'
+    assert single.dest_path == Path('custom/path/index.html')
+
+
+def test_update_url_with_permalink_default_prefix(url_test_single):
+    """Tests that url is generated from permalink, respecting the default prefix."""
+    # add_prefix defaults to True, so '/post/' should be prepended.
+
+    single, config = url_test_single('post', 'test.md', permalink='/%Y/{slug}/')
+
+    single.update_url(config)
+
+    assert single.rel_url == '/post/2023/my-test-slug/'
+    assert single.dest_path == Path('post/2023/my-test-slug/index.html')
+
+
+def test_update_url_with_permalink_no_prefix(url_test_single):
+    """Tests that url is generated from permalink without a prefix when configured."""
+
+    single, config = url_test_single('post', 'test.md', permalink='/%Y/{slug}/', add_prefix=False)
+
+    single.update_url(config)
+
+    assert single.rel_url == '/2023/my-test-slug/'
+    assert single.dest_path == Path('2023/my-test-slug/index.html')
