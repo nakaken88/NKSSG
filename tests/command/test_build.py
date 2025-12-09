@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 
-from nkssg.command.build import build
+from nkssg.command.build import build, serve
 from nkssg.structure.config import Config
 
 
@@ -13,6 +13,10 @@ def mock_config():
     mock_public_dir = MagicMock(spec=Path)
     mock_public_dir.exists.return_value = False
     config.public_dir = mock_public_dir
+    config.site = MagicMock() # Mock the site attribute
+    config.docs_dir = Path('path/to/docs')
+    config.themes_dir = MagicMock(spec=Path)
+    config.themes_dir.exists.return_value = False
     return config
 
 
@@ -81,3 +85,55 @@ def test_build_function_does_not_remove_public_dir_if_not_exists_and_clean_is_tr
     mock_site_instance.setup.assert_called_once()
     mock_site_instance.update.assert_called_once()
     mock_site_instance.output.assert_called_once()
+
+
+@patch('nkssg.command.build.start_server')
+@patch('nkssg.command.build.prepare_temp_dir')
+def test_serve_calls_dependencies_and_watches_docs_dir(
+    mock_prepare_temp_dir, mock_start_server, mock_config
+):
+    """
+    Test that serve() calls prepare_temp_dir and start_server,
+    and watches docs_dir by default.
+    """
+    serve(mock_config, static=False, port=8000)
+
+    assert mock_config.site.site_url == 'http://127.0.0.1:8000'
+    mock_prepare_temp_dir.assert_called_once_with(mock_config)
+    mock_start_server.assert_called_once_with(
+        mock_config, [Path('path/to/docs')], 8000
+    )
+
+
+@patch('nkssg.command.build.start_server')
+@patch('nkssg.command.build.prepare_temp_dir')
+def test_serve_watches_nothing_when_static_is_true(
+    mock_prepare_temp_dir, mock_start_server, mock_config
+):
+    """
+    Test that serve() with static=True results in an empty watch_paths.
+    """
+    serve(mock_config, static=True, port=8000)
+
+    assert mock_config.site.site_url == 'http://127.0.0.1:8000'
+    mock_prepare_temp_dir.assert_called_once_with(mock_config)
+    mock_start_server.assert_called_once_with(mock_config, [], 8000)
+
+
+@patch('nkssg.command.build.start_server')
+@patch('nkssg.command.build.prepare_temp_dir')
+def test_serve_watches_themes_dir_if_exists(
+    mock_prepare_temp_dir, mock_start_server, mock_config
+):
+    """
+    Test that serve() adds themes_dir to watch_paths if it exists.
+    """
+    mock_config.themes_dir.exists.return_value = True
+    serve(mock_config, static=False, port=8000)
+
+    assert mock_config.site.site_url == 'http://127.0.0.1:8000'
+    mock_prepare_temp_dir.assert_called_once_with(mock_config)
+    mock_start_server.assert_called_once_with(
+        mock_config, [Path('path/to/docs'), mock_config.themes_dir], 8000
+    )
+
