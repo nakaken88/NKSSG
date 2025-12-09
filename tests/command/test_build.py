@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 
-from nkssg.command.build import build, serve
+from nkssg.command.build import build, serve, prepare_temp_dir
 from nkssg.structure.config import Config
 
 
@@ -136,4 +136,21 @@ def test_serve_watches_themes_dir_if_exists(
     mock_start_server.assert_called_once_with(
         mock_config, [Path('path/to/docs'), mock_config.themes_dir], 8000
     )
+
+@patch('nkssg.command.build.tempfile')
+def test_prepare_temp_dir_creates_temp_dir_and_sets_config(
+    mock_tempfile, mock_config
+):
+    """
+    Test that prepare_temp_dir creates a temporary directory and
+    sets it to config.public_dir.
+    """
+    mock_temp_dir = Path('/tmp/fake_temp_dir')
+    mock_tempfile.mkdtemp.return_value = str(mock_temp_dir)
+
+    prepare_temp_dir(mock_config)
+
+    mock_tempfile.mkdtemp.assert_called_once_with(prefix='nkssg_')
+    assert mock_config.public_dir == mock_temp_dir
+
 
