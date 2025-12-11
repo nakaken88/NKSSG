@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 
-from nkssg.command.build import build, serve, prepare_temp_dir
+from nkssg.command.build import build, draft, serve, prepare_temp_dir
 from nkssg.structure.config import Config
 
 
@@ -154,3 +154,49 @@ def test_prepare_temp_dir_creates_temp_dir_and_sets_config(
     assert mock_config.public_dir == mock_temp_dir
 
 
+@patch('nkssg.command.build.start_server')
+@patch('nkssg.command.build.prepare_temp_dir')
+def test_draft_with_relative_path(
+    mock_prepare_temp_dir, mock_start_server, mock_config
+):
+    """
+    Test that draft() correctly handles a relative draft path.
+    """
+    mock_config.base_dir = Path('/fake/base')
+    draft_path = 'docs/draft.md'
+    expected_abs_path = Path('/fake/base/docs/draft.md')
+
+    mock_config.__getitem__.return_value = expected_abs_path
+
+    draft(mock_config, draft_path, port=8001)
+
+    mock_config.__setitem__.assert_called_with('draft_path', expected_abs_path)
+    assert mock_config.site.site_url == 'http://127.0.0.1:8001'
+    mock_prepare_temp_dir.assert_called_once_with(mock_config)
+    mock_start_server.assert_called_once_with(
+        mock_config, [expected_abs_path], 8001
+    )
+
+
+@patch('nkssg.command.build.start_server')
+@patch('nkssg.command.build.prepare_temp_dir')
+def test_draft_with_absolute_path(
+    mock_prepare_temp_dir, mock_start_server, mock_config
+):
+    """
+    Test that draft() correctly handles an absolute draft path.
+    """
+    mock_config.base_dir = Path('/fake/base')
+    draft_path = '/another/path/draft.md'
+    expected_abs_path = Path(draft_path)
+
+    mock_config.__getitem__.return_value = expected_abs_path
+
+    draft(mock_config, draft_path, port=8002)
+
+    mock_config.__setitem__.assert_called_with('draft_path', expected_abs_path)
+    assert mock_config.site.site_url == 'http://127.0.0.1:8002'
+    mock_prepare_temp_dir.assert_called_once_with(mock_config)
+    mock_start_server.assert_called_once_with(
+        mock_config, [expected_abs_path], 8002
+    )
