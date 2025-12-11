@@ -1,8 +1,8 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, ANY
 from pathlib import Path
 
-from nkssg.command.build import build, draft, serve, prepare_temp_dir
+from nkssg.command.build import build, draft, serve, prepare_temp_dir, start_server
 from nkssg.structure.config import Config
 
 
@@ -200,3 +200,55 @@ def test_draft_with_absolute_path(
     mock_start_server.assert_called_once_with(
         mock_config, [expected_abs_path], 8002
     )
+
+@patch('nkssg.command.build.build')
+@patch('nkssg.command.build.shutil')
+@patch('nkssg.command.build.Server')
+def test_start_server_normal_flow(
+    MockServer, mock_shutil, mock_build, mock_config
+):
+    """
+    Test the normal execution flow of start_server.
+    """
+    mock_server_instance = MockServer.return_value
+    watch_paths = [Path('/path/one'), Path('/path/two')]
+
+    start_server(mock_config, watch_paths, port=8080)
+
+    # Initial build call
+    mock_build.assert_called_once_with(mock_config)
+
+    # Server setup and watch calls
+    MockServer.assert_called_once()
+    assert mock_server_instance.watch.call_count == 2
+    mock_server_instance.watch.assert_any_call(str(watch_paths[0]), ANY)
+    mock_server_instance.watch.assert_any_call(str(watch_paths[1]), ANY)
+
+    # Serve call
+    mock_server_instance.serve.assert_called_once_with(
+        port=8080, root=mock_config.public_dir, open_url_delay=None
+    )
+
+    # Cleanup call in finally block
+    mock_shutil.rmtree.assert_called_once_with(mock_config.public_dir)
+
+
+@patch('nkssg.command.build.build')
+@patch('nkssg.command.build.shutil')
+@patch('nkssg.command.build.Server')
+def test_start_server_cleans_up_on_exception(
+    MockServer, mock_shutil, mock_build, mock_config
+):
+    """
+    Test that start_server cleans up the public_dir even if the server crashes.
+    """
+    mock_server_instance = MockServer.return_value
+    mock_server_instance.serve.side_effect = KeyboardInterrupt  # Simulate server crash
+
+    watch_paths = [Path('/path/one')]
+
+    with pytest.raises(KeyboardInterrupt):
+        start_server(mock_config, watch_paths, port=8080)
+
+    # Cleanup call in finally block should still be called
+    mock_shutil.rmtree.assert_called_once_with(mock_config.public_dir)
