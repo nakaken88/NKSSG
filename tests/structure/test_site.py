@@ -159,3 +159,102 @@ def test_site_output_writes_files(site_fixture):
     # expected_css_path = public_dir / "themes" / "default" / "style.css"
     # assert not expected_css_path.is_file() # Should not exist with current fixture setup
 
+
+def test_copy_static_files(base_config, mocker):
+    """Test that static files are copied correctly based on include/exclude rules."""
+    config = base_config
+    
+    # --- Setup ---
+    # Create static and theme directories
+    static_dir = config.base_dir / "static"
+    static_dir.mkdir()
+    (static_dir / "image.jpg").touch()
+
+    themes_dir = config.themes_dir
+    theme_path = themes_dir / "mytheme"
+    theme_path.mkdir(parents=True)
+    (theme_path / "style.css").touch()
+    (theme_path / "script.js").touch()
+    (theme_path / "ignored.txt").touch()
+    (theme_path / "template.html").touch() # Should not be copied by default
+
+    config.static_dir = static_dir
+    
+    # Mock Themes object and its configuration
+    mock_themes = MagicMock()
+    mock_themes.dirs = [theme_path]
+    mock_themes.cnf = {
+        'static_include': ['*style.css', '*script.js'],
+        'static_exclude': ['*.txt']
+    }
+    
+    mocker.patch('nkssg.structure.site.Themes', return_value=mock_themes)
+    
+    site = Site(config)
+    site.themes = mock_themes # Inject the mock
+    
+    # --- Execute ---
+    site.copy_static_files()
+    
+    # --- Assert ---
+    public_dir = config.public_dir
+    
+    # Check that regular static file was copied
+    assert (public_dir / "image.jpg").is_file()
+    
+    # Check theme files based on rules
+    theme_public_dir = public_dir / "themes" / "mytheme"
+    assert (theme_public_dir / "style.css").is_file()
+    assert (theme_public_dir / "script.js").is_file()
+    
+    # Check that excluded and non-included files were NOT copied
+    assert not (theme_public_dir / "ignored.txt").exists()
+    assert not (theme_public_dir / "template.html").exists()
+
+
+def test_copy_static_files_skips_newer_files(base_config, mocker):
+    """Test that copy_static_files does not overwrite newer files."""
+    config = base_config
+    
+    static_dir = config.base_dir / "static"
+    static_dir.mkdir()
+    source_file = static_dir / "file.txt"
+    source_file.touch()
+    
+    public_dir = config.public_dir
+    public_dir.mkdir()
+    dest_file = public_dir / "file.txt"
+    dest_file.touch()
+    
+    # Make source older than destination
+    source_mtime = source_file.stat().st_mtime
+    import time
+    time.sleep(0.01) # Ensure destination is newer
+    dest_file.touch()
+    dest_mtime_before = dest_file.stat().st_mtime
+    
+    assert source_mtime < dest_mtime_before
+
+    config.static_dir = static_dir
+    
+    site = Site(config)
+    
+    site.copy_static_files()
+    
+    dest_mtime_after = dest_file.stat().st_mtime
+    assert dest_mtime_after == dest_mtime_before # Timestamp should not have changed
+
+
+def test_site_initialization_with_empty_docs_dir(base_config):
+    """
+    Test that Site initialization does not fail with StopIteration
+    if the docs directory is empty and no post types are defined.
+    """
+    # Ensure docs dir is empty and has no subdirectories
+    assert not any(base_config.docs_dir.iterdir())
+    
+    try:
+        Site(base_config)
+    except StopIteration:
+        pytest.fail("Site initialization failed with StopIteration on empty docs dir.")
+

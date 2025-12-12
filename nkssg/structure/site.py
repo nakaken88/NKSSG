@@ -48,6 +48,10 @@ class Site:
         home_template = self.themes.lookup_template(['home.html'])
 
         if not home_template:
+            # If there are no post types defined, do nothing.
+            if not config.post_type:
+                return config
+
             _, post_type_config = next(iter(config.post_type.items()))
 
             post_type_config.add_prefix_to_url = False
