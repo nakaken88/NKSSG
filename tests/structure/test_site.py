@@ -236,3 +236,61 @@ def test_site_initialization_with_empty_docs_dir(base_config):
         Site(base_config)
     except StopIteration:
         pytest.fail("Site initialization failed with StopIteration on empty docs dir.")
+
+
+def test_output_extra_pages(base_config, mocker):
+    """Test that extra_pages defined in theme config are rendered correctly."""
+    config = base_config
+
+    theme_path = config.themes_dir / "mytheme"
+    theme_path.mkdir(parents=True)
+    
+    # Create dummy templates
+    (theme_path / "sitemap.xml").write_text("sitemap content")
+    (theme_path / "404.html").write_text("404 content")
+    (theme_path / "home.html").write_text("home content")
+    (theme_path / "dummy.html").write_text("This is a dummy test page.")
+    
+    # Mock Themes object
+    mock_themes = MagicMock()
+    mock_themes.dirs = [str(theme_path)]
+    mock_themes.cnf = {
+        'extra_pages': ['sitemap.xml', '404.html', 'home.html', 'dummy.html']
+    }
+    # Mock lookup_template to return the relative path for get_template
+    def lookup_side_effect(path_list):
+        for p in path_list:
+            if (theme_path / p).exists():
+                return p # Return relative path string
+        return None
+    mock_themes.lookup_template.side_effect = lookup_side_effect
+    
+    mocker.patch('nkssg.structure.site.Themes', return_value=mock_themes)
+    
+    site = Site(config)
+    site.themes = mock_themes # Inject the mock
+    
+    # update() is needed to set up the Jinja2 environment
+    site.update()
+
+    site.output_extra_pages()
+    
+    public_dir = config.public_dir
+    
+    sitemap_path = public_dir / "sitemap.xml"
+    assert sitemap_path.is_file()
+    assert sitemap_path.read_text() == "sitemap content"
+    
+    not_found_path = public_dir / "404.html"
+    assert not_found_path.is_file()
+    assert not_found_path.read_text() == "404 content"
+    
+    # home.html should be renamed to index.html
+    index_path = public_dir / "index.html"
+    assert index_path.is_file()
+    assert index_path.read_text() == "home content"
+    assert not (public_dir / "home.html").exists()
+
+    dummy_path = public_dir / "dummy.html"
+    assert dummy_path.is_file()
+    assert dummy_path.read_text() == "This is a dummy test page."
