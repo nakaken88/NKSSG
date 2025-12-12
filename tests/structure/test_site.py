@@ -294,3 +294,29 @@ def test_output_extra_pages(base_config, mocker):
     dummy_path = public_dir / "dummy.html"
     assert dummy_path.is_file()
     assert dummy_path.read_text() == "This is a dummy test page."
+
+
+@patch('nkssg.structure.site.Archives')
+@patch('nkssg.structure.site.Singles')
+def test_draft_mode_skips_archives(MockSingles, MockArchives, base_config):
+    """Test that in 'draft' mode, archive generation is skipped."""
+    config = base_config
+    config.mode = 'draft'
+
+    mock_archives = MockArchives.return_value
+    mock_singles = MockSingles.return_value
+
+    site = Site(config)
+    
+    # Execute the main lifecycle methods
+    site.update()
+    site.output()
+
+    # Assert that archive-related methods were NOT called
+    mock_archives.setup.assert_not_called()
+    mock_archives.output.assert_not_called()
+
+    # Assert that singles methods were still called
+    mock_singles.update_htmls.assert_called_once()
+    mock_singles.output.assert_called_once()
+
