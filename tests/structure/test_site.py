@@ -87,7 +87,6 @@ def test_site_update_renders_html(site_fixture):
     """
     config = site_fixture # site_fixture yields a Config object
     
-    # Ensure all necessary directories exist for Config to resolve paths
     config.base_dir.mkdir(parents=True, exist_ok=True)
     config.docs_dir.mkdir(parents=True, exist_ok=True)
     config.themes_dir.mkdir(parents=True, exist_ok=True)
@@ -95,11 +94,9 @@ def test_site_update_renders_html(site_fixture):
     
     site = Site(config)
     
-    # Perform setup and update operations
     site.setup()
     site.update()
 
-    # Assertions
     assert len(site.singles.pages) == 1
     single_page = site.singles.pages[0]
 
@@ -124,7 +121,6 @@ def test_site_output_writes_files(site_fixture):
     """
     config = site_fixture  # site_fixture yields a Config object
 
-    # Ensure all necessary directories exist for Config to resolve paths
     config.base_dir.mkdir(parents=True, exist_ok=True)
     config.docs_dir.mkdir(parents=True, exist_ok=True)
     config.themes_dir.mkdir(parents=True, exist_ok=True)
@@ -132,39 +128,27 @@ def test_site_output_writes_files(site_fixture):
 
     site = Site(config)
 
-    # Perform setup, update, and output operations
     site.setup()
     site.update()
     site.output()
 
-    # Assertions
     public_dir = config.public_dir
     assert public_dir.is_dir()
 
-    # Check for the generated post HTML file
     expected_post_path = public_dir / "my-test-post-title" / "index.html"
     assert expected_post_path.is_file()
 
-    # Verify content of the generated file
     generated_content = expected_post_path.read_text(encoding="utf-8")
     assert "<h1>My Test Post Title</h1>" in generated_content
     assert "This is the <strong>content</strong> of my test post." in generated_content
     assert "<!DOCTYPE html>" in generated_content
     assert "</html>" in generated_content
 
-    # Check for static files (e.g., style.css if it existed in the theme)
-    # For this fixture, we only added single.html, so there are no static files
-    # to check, but this section shows where such checks would go.
-    # For example:
-    # expected_css_path = public_dir / "themes" / "default" / "style.css"
-    # assert not expected_css_path.is_file() # Should not exist with current fixture setup
-
 
 def test_copy_static_files(base_config, mocker):
     """Test that static files are copied correctly based on include/exclude rules."""
     config = base_config
     
-    # --- Setup ---
     # Create static and theme directories
     static_dir = config.base_dir / "static"
     static_dir.mkdir()
@@ -193,21 +177,16 @@ def test_copy_static_files(base_config, mocker):
     site = Site(config)
     site.themes = mock_themes # Inject the mock
     
-    # --- Execute ---
     site.copy_static_files()
     
-    # --- Assert ---
     public_dir = config.public_dir
     
-    # Check that regular static file was copied
     assert (public_dir / "image.jpg").is_file()
     
-    # Check theme files based on rules
     theme_public_dir = public_dir / "themes" / "mytheme"
     assert (theme_public_dir / "style.css").is_file()
     assert (theme_public_dir / "script.js").is_file()
     
-    # Check that excluded and non-included files were NOT copied
     assert not (theme_public_dir / "ignored.txt").exists()
     assert not (theme_public_dir / "template.html").exists()
 
@@ -257,4 +236,3 @@ def test_site_initialization_with_empty_docs_dir(base_config):
         Site(base_config)
     except StopIteration:
         pytest.fail("Site initialization failed with StopIteration on empty docs dir.")
-
