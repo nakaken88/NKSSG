@@ -329,6 +329,84 @@ def test_output_extra_pages(base_config, mocker):
     assert dummy_path.read_text() == "This is a dummy test page."
 
 
+@patch('nkssg.structure.site.Themes')
+def test_output_extra_pages_merges_config_and_theme_extra_pages(MockThemes, base_config, mocker):
+    """
+    Test that output_extra_pages correctly merges extra_pages from both
+    site configuration and theme configuration, handling duplicates.
+    """
+    config = base_config
+    # Add extra_pages to site config
+    config.extra_pages = ['about.html', 'privacy.html', 'home.html']
+
+    theme_path = config.themes_dir / "mytheme"
+    theme_path.mkdir(parents=True)
+
+    # Create dummy templates
+    (theme_path / "about.html").write_text("about content")
+    (theme_path / "contact.html").write_text("contact content")
+    (theme_path / "home.html").write_text("home content (theme)")
+    (theme_path / "sitemap.xml").write_text("sitemap content")
+    (theme_path / "privacy.html").write_text("privacy policy")
+
+    # Mock Themes object
+    mock_themes = MockThemes.return_value
+    mock_themes.dirs = [str(theme_path)]
+    # Add extra_pages to theme config, including a duplicate and a new one
+    mock_themes.cnf = {
+        'extra_pages': ['contact.html', 'about.html', 'sitemap.xml']
+    }
+
+    # Mock lookup_template to return the relative path for get_template
+    def lookup_side_effect(path_list):
+        for p in path_list:
+            if (theme_path / p).exists():
+                return p  # Return relative path string
+        return None
+    mock_themes.lookup_template.side_effect = lookup_side_effect
+
+    site = Site(config)
+    site.themes = mock_themes  # Inject the mock
+
+    # update() is needed to set up the Jinja2 environment
+    site.update()
+
+    site.output_extra_pages()
+
+    public_dir = config.public_dir
+
+    # Verify all expected pages are created
+    assert (public_dir / "about.html").is_file()
+    assert (public_dir / "about.html").read_text() == "about content"
+
+    assert (public_dir / "privacy.html").is_file()
+    # Since privacy.html template is not created in theme_path,
+    # it should try to render it but if it fails it will log an error.
+    # We are not testing the content for pages only from config.extra_pages
+    # unless a template is explicitly created for it in theme_path.
+    # Here, we only assert its existence.
+
+    assert (public_dir / "contact.html").is_file()
+    assert (public_dir / "contact.html").read_text() == "contact content"
+
+    assert (public_dir / "sitemap.xml").is_file()
+    assert (public_dir / "sitemap.xml").read_text() == "sitemap content"
+
+    # home.html (from config or theme) should be renamed to index.html
+    index_path = public_dir / "index.html"
+    assert index_path.is_file()
+    # When duplicated, theme's version should be used if template exists
+    assert index_path.read_text() == "home content (theme)"
+    assert not (public_dir / "home.html").exists()
+
+    # Ensure no unexpected files were created
+    expected_files = {
+        "about.html", "privacy.html", "contact.html", "index.html", "sitemap.xml"
+    }
+    actual_files = {f.name for f in public_dir.iterdir() if f.is_file()}
+    assert actual_files == expected_files
+
+
 @patch('nkssg.structure.site.Archives')
 @patch('nkssg.structure.site.Singles')
 def test_draft_mode_skips_archives(MockSingles, MockArchives, base_config):
