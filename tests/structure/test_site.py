@@ -113,6 +113,31 @@ def test_handle_missing_home_template(base_config, mocker):
     assert blog_post_type.archive_type == 'section'
 
 
+def test_handle_missing_home_template_preserves_existing_archive_type(base_config, mocker):
+    """
+    Test that if home.html is missing and the first post_type already has
+    an archive_type set (not 'none'), it preserves the existing archive_type.
+    """
+    (base_config.docs_dir / 'news').mkdir()
+
+    # Manually configure 'news' post type with an existing archive_type
+    base_config.post_type.update({'news': {'archive_type': 'date'}})
+
+    # Mock Themes to simulate missing home.html
+    mocker.patch(
+        'nkssg.structure.site.Themes.lookup_template',
+        return_value=None
+    )
+
+    site = Site(base_config)
+    news_post_type = site.config.post_type['news']
+
+    # add_prefix_to_url should still be set to False
+    assert news_post_type.add_prefix_to_url is False
+    # The existing archive_type should be preserved, not overwritten to 'section'
+    assert news_post_type.archive_type == 'date'
+
+
 def test_site_update_renders_html(site_fixture):
     """
     Integration test to verify that Site.update() correctly renders
