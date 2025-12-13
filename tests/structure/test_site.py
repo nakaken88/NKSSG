@@ -407,6 +407,47 @@ def test_output_extra_pages_merges_config_and_theme_extra_pages(MockThemes, base
     assert actual_files == expected_files
 
 
+@patch('builtins.print')
+@patch('nkssg.structure.site.Themes')
+def test_output_extra_pages_logs_error_for_missing_template(
+    MockThemes, mock_print, base_config, mocker
+):
+    """
+    Test that output_extra_pages logs an error message when a template
+    for an extra page (not from site config) is not found.
+    """
+    config = base_config
+
+    theme_path = config.themes_dir / "mytheme"
+    theme_path.mkdir(parents=True)
+
+    # Configure theme with an extra_page for which no template will be found
+    mock_themes_instance = MockThemes.return_value
+    mock_themes_instance.dirs = [str(theme_path)]
+    mock_themes_instance.cnf = {
+        'extra_pages': ['nonexistent_template.html']
+    }
+
+    # Mock lookup_template to always return None, simulating a missing template
+    mock_themes_instance.lookup_template.return_value = None
+
+    site = Site(config)
+    site.themes = mock_themes_instance # Inject the mock
+
+    # Mock jinja2 environment as it won't be set up if templates are missing
+    site.config.env = MagicMock()
+
+    site.output_extra_pages()
+
+    # Assert that print was called with the expected error message
+    mock_print.assert_called_once_with(
+        'nonexistent_template.html is not found on extra pages'
+    )
+    # Ensure no file was created for the missing template
+    public_dir = config.public_dir
+    assert not (public_dir / "nonexistent_template.html").exists()
+
+
 @patch('nkssg.structure.site.Archives')
 @patch('nkssg.structure.site.Singles')
 def test_draft_mode_skips_archives(MockSingles, MockArchives, base_config):
