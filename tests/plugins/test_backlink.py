@@ -100,3 +100,142 @@ def test_backlink_plugin_ignores_external_links(site_setup):
     assert len(page_f.to_links) == 0
     assert len(page_f.back_links) == 1
 
+
+def test_backlink_plugin_handles_fragments_and_queries(site_setup):
+    """Test that BacklinkPlugin correctly handles URLs with fragments and query parameters."""
+    site = site_setup
+    config = site.config
+
+    page_g = Single(abs_src_path=config.docs_dir / "post/page_g.md", config=config)
+    page_h = Single(abs_src_path=config.docs_dir / "post/page_h.md", config=config)
+    page_i = Single(abs_src_path=config.docs_dir / "post/page_i.md", config=config)
+
+    page_g.rel_url = '/page-g/'
+    page_h.rel_url = '/page-h/'
+    page_i.rel_url = '/page-i/'
+
+    page_g.content = (
+        f'''<p>Link with fragment <a href="{page_h.rel_url}#section">Page H</a> '''
+        f'''and link with query <a href="{page_i.rel_url}?param=1">Page I</a>.</p>'''
+    )
+    page_h.content = '<p>Page H</p>'
+    page_i.content = '<p>Page I</p>'
+
+    site.singles = [page_g, page_h, page_i]
+
+    plugin = BacklinkPlugin()
+    plugin.after_update_urls(site)
+
+    assert page_h in page_g.to_links
+    assert page_i in page_g.to_links
+    assert len(page_g.to_links) == 2
+
+    assert page_g in page_h.back_links
+    assert page_g in page_i.back_links
+    assert len(page_h.back_links) == 1
+    assert len(page_i.back_links) == 1
+
+
+def test_backlink_plugin_is_case_insensitive(site_setup):
+    """Test that BacklinkPlugin handles URLs in a case-insensitive manner."""
+    site = site_setup
+    config = site.config
+
+    page_j = Single(abs_src_path=config.docs_dir / "post/page_j.md", config=config)
+    page_k = Single(abs_src_path=config.docs_dir / "post/page_k.md", config=config)
+
+    page_j.rel_url = '/page-j/'
+    page_k.rel_url = '/page-k/'
+    
+    # Link to Page K using an uppercase path
+    page_j.content = f'<p>Link to <a href="/Page-K/">Page K</a>.</p>'
+    page_k.content = '<p>Page K</p>'
+
+    site.singles = [page_j, page_k]
+
+    plugin = BacklinkPlugin()
+    plugin.after_update_urls(site)
+
+    assert page_k in page_j.to_links
+    assert len(page_j.to_links) == 1
+    assert page_j in page_k.back_links
+    assert len(page_k.back_links) == 1
+
+
+def test_backlink_plugin_handles_duplicate_links(site_setup):
+    """Test that BacklinkPlugin correctly handles multiple links to the same page."""
+    site = site_setup
+    config = site.config
+
+    page_l = Single(abs_src_path=config.docs_dir / "post/page_l.md", config=config)
+    page_m = Single(abs_src_path=config.docs_dir / "post/page_m.md", config=config)
+
+    page_l.rel_url = '/page-l/'
+    page_m.rel_url = '/page-m/'
+    
+    # Link to Page M twice
+    page_l.content = (
+        f'<p>Link to <a href="{page_m.rel_url}">Page M</a>. '
+        f'And another link to <a href="{page_m.rel_url}">Page M again</a>.</p>'
+    )
+    page_m.content = '<p>Page M</p>'
+
+    site.singles = [page_l, page_m]
+
+    plugin = BacklinkPlugin()
+    plugin.after_update_urls(site)
+
+    # There should be only one link in the set
+    assert page_m in page_l.to_links
+    assert len(page_l.to_links) == 1
+    
+    # And only one backlink
+    assert page_l in page_m.back_links
+    assert len(page_m.back_links) == 1
+
+
+def test_backlink_plugin_handles_self_links(site_setup):
+    """Test that BacklinkPlugin correctly handles a page linking to itself."""
+    site = site_setup
+    config = site.config
+
+    page_n = Single(abs_src_path=config.docs_dir / "post/page_n.md", config=config)
+    page_n.rel_url = '/page-n/'
+    
+    # Link to itself
+    page_n.content = f'<p>A link to <a href="{page_n.rel_url}">myself</a>.</p>'
+
+    site.singles = [page_n]
+
+    plugin = BacklinkPlugin()
+    plugin.after_update_urls(site)
+
+    # Should have a link to itself in both to_links and back_links
+    assert page_n in page_n.to_links
+    assert len(page_n.to_links) == 1
+    assert page_n in page_n.back_links
+    assert len(page_n.back_links) == 1
+
+
+def test_backlink_plugin_ignores_nonexistent_links(site_setup):
+    """Test that BacklinkPlugin ignores links to internal but nonexistent pages."""
+    site = site_setup
+    config = site.config
+
+    page_o = Single(abs_src_path=config.docs_dir / "post/page_o.md", config=config)
+    page_o.rel_url = '/page-o/'
+    
+    # Link to a page that is not in site.singles
+    page_o.content = '<p>A link to <a href="/nonexistent-page/">a ghost</a>.</p>'
+
+    site.singles = [page_o]
+
+    plugin = BacklinkPlugin()
+    plugin.after_update_urls(site)
+
+    # No links should be added
+    assert len(page_o.to_links) == 0
+    assert len(page_o.back_links) == 0
+    # The text of the link is still recorded
+    assert '/nonexistent-page/' in page_o.to_links_text
+    assert len(page_o.to_links_text) == 1
