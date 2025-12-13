@@ -49,6 +49,39 @@ def test_site_initialization(
     assert site.archives is not None
 
 
+@pytest.mark.parametrize(
+    "rel_path, static_include, static_exclude, expected",
+    [
+        ("foo/bar.txt", ["*.txt"], [], True),  # Simple include
+        ("foo/bar.txt", [], ["*.txt"], False), # Simple exclude
+        ("foo/bar.txt", ["*.txt"], ["foo/*.txt"], False), # Exclude takes precedence
+        ("foo/bar.txt", ["*.md"], ["*.txt"], False), # Exclude only
+        ("foo/bar.txt", ["*.md"], [], False), # Include only, no match
+        ("foo/bar.txt", [], [], False), # No patterns
+        ("foo/bar/baz.jpg", ["**/*.jpg"], [], True), # Glob include
+        ("foo/bar/baz.jpg", [], ["**/*.jpg"], False), # Glob exclude
+        ("foo/bar/baz.jpg", ["**/*.jpg"], ["foo/bar/*.jpg"], False), # Glob exclude takes precedence
+        ("root.html", ["*.html"], ["temp/*"], True), # Specific include, general exclude not matching
+        ("temp/ignore.html", ["*.html"], ["temp/*"], False), # Specific include, general exclude matching
+    ]
+)
+@patch('nkssg.structure.site.Themes')
+def test_is_target(
+    MockThemes, base_config, rel_path, static_include, static_exclude, expected
+):
+    """Test the is_target method with various include/exclude patterns, ensuring exclude takes precedence."""
+    mock_themes_instance = MockThemes.return_value
+    mock_themes_instance.cnf = {
+        'static_include': static_include,
+        'static_exclude': static_exclude
+    }
+
+    site = Site(base_config)
+    site.themes = mock_themes_instance # Inject the mock
+    
+    assert site.is_target(rel_path) == expected
+
+
 def test_setup_post_types_automatically_adds_from_dir(base_config):
     """Test that post types are automatically detected from the directory structure."""
     (base_config.docs_dir / 'post').mkdir()
