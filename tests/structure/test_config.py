@@ -2,7 +2,7 @@ import pytest
 
 from pathlib import Path
 
-from nkssg.structure.config import Config
+from nkssg.structure.config import Config, SiteConfig
 
 
 @pytest.fixture
@@ -311,3 +311,25 @@ def test_get_method_with_default_value(config):
 
     # Test get for existing key returns its value
     assert config.site.get('site_name', 'default_name') == 'Site Title'
+
+
+def test_base_config_setitem():
+    """
+    Tests that __setitem__ correctly updates both predefined attributes
+    and the 'extras' dictionary.
+    """
+    site_config = SiteConfig()
+
+    # 1. Update a predefined attribute
+    site_config['site_name'] = 'New Name'
+    assert site_config.site_name == 'New Name'
+    assert site_config['site_name'] == 'New Name'
+    assert 'site_name' not in site_config.extras  # Ensure predefined attributes are not stored in extras
+
+    # 2. Add an extra, undefined attribute
+    site_config['new_extra_key'] = 'extra_value'
+    assert site_config.extras['new_extra_key'] == 'extra_value'
+    assert site_config['new_extra_key'] == 'extra_value'
+    # Verify that attribute-style access fails for extra keys
+    with pytest.raises(AttributeError):
+        _ = site_config.new_extra_key
