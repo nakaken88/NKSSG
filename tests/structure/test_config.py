@@ -215,6 +215,23 @@ def test_from_file_with_invalid_yaml(tmp_path: Path):
         Config.from_file(yaml_file_path=config_file)
 
 
+def test_from_file_with_empty_yaml(tmp_path: Path):
+    """
+    Tests that loading an empty but valid YAML file results in default
+    configuration without raising an error.
+    """
+    config_file = tmp_path / "empty.yml"
+    config_file.touch()  # Create an empty file
+
+    try:
+        config = Config.from_file(yaml_file_path=config_file)
+        # Check that a default value is still present
+        assert config.site.site_name == 'Site Title'
+        assert config.use_abs_url is True
+    except Exception as e:
+        pytest.fail(f"Loading an empty YAML file raised an unexpected exception: {e}")
+
+
 def test_term_missing_name_key_raises_error(tmp_path: Path):
     """
     Tests that a ValueError is raised if a term dict is missing the 'name' key.
