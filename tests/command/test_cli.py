@@ -181,3 +181,13 @@ def test_cli_draft_command_missing_path_argument_fails():
     assert result.exit_code != 0
     assert "Error: Missing argument 'PATH'." in result.output
 
+
+def test_cli_new_command_missing_name_argument_fails():
+    """
+    Tests that the `new` command fails when the required name argument is missing.
+    """
+    runner = CliRunner()
+    result = runner.invoke(cli, ['new'])
+
+    assert result.exit_code != 0
+    assert "Error: Missing argument 'NAME'." in result.output
