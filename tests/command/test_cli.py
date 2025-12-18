@@ -198,3 +198,18 @@ def test_cli_new_page_command(MockConfig, mock_new_module):
     assert result.exit_code == 0, result.output
     MockConfig.from_file.assert_called_once_with(mode='new')
     mock_new_module.page.assert_called_once_with(page_name, page_path, mock_config_instance)
+
+
+def test_cli_draft_command_missing_path_argument_fails():
+    """
+    Tests that the `draft` command fails when the required path argument is missing.
+    """
+    runner = CliRunner()
+
+    # Act
+    result = runner.invoke(cli, ['draft'])
+
+    # Assert
+    assert result.exit_code != 0
+    assert "Error: Missing argument 'PATH'." in result.output
+
