@@ -183,6 +183,52 @@ def test_from_file_success(tmp_path: Path):
     assert config.site.site_name == 'Test Site'
 
 
+def test_from_file_with_base_dir(tmp_path: Path):
+    """
+    Tests that Config.from_file correctly sets the base_dir attribute
+    when provided as an argument, and that directory paths are relative to it.
+    """
+    config_content = """
+    site:
+      site_name: 'Test Site with Custom Base'
+    """
+    config_file = tmp_path / "test.yml"
+    config_file.write_text(config_content, encoding="utf-8")
+
+    custom_base_dir = tmp_path / "custom_root"
+    custom_base_dir.mkdir()
+
+    config = Config.from_file(yaml_file_path=config_file, base_dir=custom_base_dir)
+
+    assert config.base_dir == custom_base_dir
+    assert config.site.site_name == 'Test Site with Custom Base'
+    assert config.docs_dir == custom_base_dir / 'docs'
+    assert config.public_dir == custom_base_dir / 'public'
+    assert config.static_dir == custom_base_dir / 'static'
+    assert config.themes_dir == custom_base_dir / 'themes'
+
+
+def test_from_file_ignores_mode_key(tmp_path: Path):
+    """
+    Tests that the 'mode' key in the YAML file is ignored and does not
+    override the mode set during Config initialization.
+    """
+    config_content = """
+    mode: serve
+    site:
+      site_name: 'Test Site from YAML'
+    """
+    config_file = tmp_path / "test_with_mode.yml"
+    config_file.write_text(config_content, encoding="utf-8")
+
+    # Initialize Config with build mode, then load YAML with serve mode
+    config = Config.from_file(yaml_file_path=config_file, mode='build')
+
+    # The mode should remain 'build', as 'mode' in YAML is ignored
+    assert config.mode == 'build'
+    assert config.site.site_name == 'Test Site from YAML'
+
+
 def test_from_file_not_found():
     """
     Tests that a FileNotFoundError is raised if the file does not exist.
