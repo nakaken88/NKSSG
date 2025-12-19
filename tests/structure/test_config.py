@@ -282,6 +282,23 @@ def test_mode_handling(tmp_path: Path):
     assert config_from_file_serve.mode == 'serve'
 
 
+def test_config_init_with_base_dir(tmp_path):
+    """
+    Tests that if base_dir is passed during Config object initialization,
+    it correctly sets the base_dir attribute.
+    """
+    custom_base_dir = tmp_path / "custom_base"
+    custom_base_dir.mkdir()
+
+    config = Config(base_dir=custom_base_dir)
+
+    assert config.base_dir == custom_base_dir
+    assert config.docs_dir == custom_base_dir / 'docs'
+    assert config.public_dir == custom_base_dir / 'public'
+    assert config.static_dir == custom_base_dir / 'static'
+    assert config.themes_dir == custom_base_dir / 'themes'
+
+
 def test_extra_values_handling(config):
     """
     Tests that extra, undefined values can be added and accessed via
