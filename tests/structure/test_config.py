@@ -44,12 +44,19 @@ def test_post_type_config(config):
         'post_type': {
             'post': {
                 'permalink': '/%Y/%m/%d/',
+                'archive_type': 'Date', # Test uppercase conversion
             },
             'sample': {
                 'archive_type': 'none',
             },
             'page': {
                 'archive_type': 'invalid_type',  # Set an invalid value
+            },
+            'blog': {
+                'archive_type': 'Simple', # Test uppercase conversion
+            },
+            'news': {
+                'archive_type': 'date', # Test valid lowercase
             }
         },
     }
@@ -57,9 +64,12 @@ def test_post_type_config(config):
     config.update(config_dict)
 
     assert config.post_type['post'].permalink == '/%Y/%m/%d/'
+    assert config.post_type['post'].archive_type == 'date'  # Assert uppercase 'Date' becomes 'date'
     assert config.post_type['sample'].archive_type == 'none'
     assert config.post_type['sample'].permalink == '/{slug}/'
     assert config.post_type['page'].archive_type == 'section'  # Assert that it falls back to 'section'
+    assert config.post_type['blog'].archive_type == 'simple'  # Assert uppercase 'Simple' becomes 'simple'
+    assert config.post_type['news'].archive_type == 'date'  # Assert valid lowercase 'date' is kept
 
 
 
