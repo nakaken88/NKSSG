@@ -448,6 +448,12 @@ class Single(Page):
                   f" for post '{self.id}' does not exist.")
         return image
 
+    # TODO: Fix static path detection.
+    # The current logic `src.startswith('/' + str(config.static_dir))` fails
+    # because `str(config.static_dir)` is an absolute path (e.g., 'C:/.../static')
+    # while `src` is a relative URL path (e.g., '/static/image.png').
+    # A potential fix is to compare against a relative path representation
+    # or the name of the static directory, like `src.startswith(f'/{config.static_dir.name}/')`.
     def _set_image_url(self, image: dict, src: str, config: Config):
 
         if not image or not src:

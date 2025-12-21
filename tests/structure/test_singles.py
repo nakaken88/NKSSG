@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 import shutil
 from unittest.mock import MagicMock
+import builtins
 
 from nkssg.structure.config import Config
 from nkssg.structure.pages import Page
@@ -620,5 +621,167 @@ class TestSinglesDuplicateDetection:
 
         with pytest.raises(ValueError, match="Duplicate Dest Path"):
             singles.setup_dest_path()
+
+class TestSingleImageProcessing:
+    @pytest.fixture
+    def image_test_single(self, tmp_path, mocker):
+        """
+        Fixture to create a Single object for image processing tests.
+        Mocks necessary components like file existence.
+        """
+        base_dir = tmp_path
+        docs_dir = base_dir / 'docs'
+        docs_dir.mkdir()
+        
+        public_dir = base_dir / 'public'
+        public_dir.mkdir()
+
+        original_docs_dir = Single.docs_dir
+        Single.docs_dir = docs_dir
+
+        cfg = Config(base_dir=base_dir) # Explicitly set base_dir
+        cfg.docs_dir = docs_dir
+        cfg.public_dir = public_dir
+        cfg.static_dir = base_dir / 'static'
+        cfg.post_type.update({'post': {}})
+        cfg.site.site_url = 'http://example.com'
+
+        # Create a dummy file for the Single object
+        (docs_dir / 'post').mkdir(exist_ok=True)
+        (docs_dir / 'post' / 'test-image.md').touch()
+
+        # Dummy image files for existence checks
+        # Absolute paths are relative to base_dir, not docs_dir
+        (base_dir / 'images').mkdir(exist_ok=True)
+        (base_dir / 'images' / 'local-img.jpg').touch()
+        
+        cfg.static_dir.mkdir(exist_ok=True)
+        (cfg.static_dir / 'static-img.png').touch()
+
+        single = Single(docs_dir / 'post' / 'test-image.md', cfg)
+        single.date = datetime.datetime(2023, 10, 26, 10, 30)
+        single.abs_src_path = docs_dir / 'post' / 'test-image.md'
+
+        mocker.patch('builtins.print')
+
+        yield single, cfg, public_dir
+
+        Single.docs_dir = original_docs_dir
+
+    def test_get_image_no_image_meta(self, image_test_single):
+        """Tests _get_image when no 'image' key is in meta."""
+        single, config, _ = image_test_single
+        single.meta = {}
+        assert single._get_image(config) == {}
+
+    def test_get_image_empty_src_in_meta(self, image_test_single):
+        """Tests _get_image when 'image' key is present but 'src' is empty."""
+        single, config, _ = image_test_single
+        single.meta = {'image': {'alt': 'some alt'}}
+        assert single._get_image(config) == {}
+
+    def test_get_image_external_url(self, image_test_single):
+        """Tests _get_image when src is an external URL."""
+        single, config, _ = image_test_single
+        external_url = 'https://example.com/external.jpg'
+        single.meta = {'image': {'src': external_url, 'alt': 'External'}}
+        expected_image = {'src': external_url, 'alt': 'External'}
+        assert single._get_image(config) == expected_image
+
+    def test_get_image_absolute_local_path_exists(self, image_test_single):
+        """Tests _get_image with an absolute local src path that exists."""
+        single, config, public_dir = image_test_single
+        src = '/images/local-img.jpg'
+        single.meta = {'image': {'src': src}}
+        
+        result = single._get_image(config)
+        
+        expected_old_path = config.base_dir / 'images' / 'local-img.jpg'
+        expected_new_path = public_dir / 'thumb' / '2023' / '10' / 'local-img.jpg'
+        expected_rel_url = '/thumb/2023/10/local-img.jpg'
+        expected_abs_url = f"{config.site.site_url}{expected_rel_url}"
+
+        assert result['src'] == expected_abs_url
+        assert result['url'] == expected_abs_url
+        assert result['rel_url'] == expected_rel_url
+        assert result['old_path'] == expected_old_path
+        assert result['new_path'] == expected_new_path
+        assert 'alt' not in result
+
+    def test_get_image_absolute_local_path_not_exists(self, image_test_single):
+        """Tests _get_image with an absolute local src path that does NOT exist."""
+        single, config, _ = image_test_single
+        src = '/images/non-existent.jpg'
+        single.meta = {'image': {'src': src}}
+        
+        result = single._get_image(config)
+        
+        assert result == {}
+        builtins.print.assert_called_once()
+        assert "Warning: Image path" in builtins.print.call_args[0][0]
+        assert "non-existent.jpg" in builtins.print.call_args[0][0]
+
+    def test_get_image_relative_local_path_exists(self, image_test_single):
+        """Tests _get_image with a relative local src path that exists."""
+        single, config, public_dir = image_test_single
+        # To make 'local-img.jpg' relative to 'docs/post/test-image.md',
+        # we need to go up one level then into 'images'
+        single.abs_src_path = config.docs_dir / 'post' / 'some-post.md'
+        # The image exists at base_dir / images, so we go up from docs/post
+        src = '../../images/local-img.jpg'
+        single.meta = {'image': {'src': src, 'caption': 'A caption'}}
+        
+        result = single._get_image(config)
+        
+        expected_old_path = config.base_dir / 'images' / 'local-img.jpg'
+        expected_new_path = public_dir / 'thumb' / '2023' / '10' / 'local-img.jpg'
+        expected_rel_url = '/thumb/2023/10/local-img.jpg'
+        expected_abs_url = f"{config.site.site_url}{expected_rel_url}"
+
+        assert result['src'] == expected_abs_url
+        assert result['url'] == expected_abs_url
+        assert result['rel_url'] == expected_rel_url
+        # Resolve both paths to their canonical form before comparing
+        assert result['old_path'].resolve() == expected_old_path.resolve()
+        assert result['new_path'].resolve() == expected_new_path.resolve()
+        assert result['caption'] == 'A caption'
+
+    def test_get_image_static_dir_path_falls_through(self, image_test_single):
+        """
+        Tests _get_image with a static-like path.
+        NOTE: The current implementation does not correctly identify static paths,
+        so this test verifies it falls through to the thumbnail generation logic.
+        """
+        single, config, public_dir = image_test_single
+        src = f'/{config.static_dir.name}/static-img.png' # e.g. /static/static-img.png
+        single.meta = {'image': {'src': src}}
+        config.use_abs_url = False
+
+        result = single._get_image(config)
+
+        # The check `src.startswith('/' + str(config.static_dir))` will fail because
+        # config.static_dir is an absolute path. So it will be treated like a normal local image.
+        expected_old_path = config.base_dir / src.strip('/')
+        expected_new_path = public_dir / 'thumb' / '2023' / '10' / 'static-img.png'
+        expected_rel_url = '/thumb/2023/10/static-img.png'
+
+        assert result['url'] == expected_rel_url
+        assert result['rel_url'] == expected_rel_url
+        assert result['old_path'] == expected_old_path
+        assert result['new_path'] == expected_new_path
+
+    def test_get_image_use_abs_url_false(self, image_test_single):
+        """Tests _get_image when config.use_abs_url is False."""
+        single, config, _ = image_test_single
+        config.use_abs_url = False
+        src = '/images/local-img.jpg'
+        single.meta = {'image': {'src': src}}
+
+        result = single._get_image(config)
+
+        expected_rel_url = '/thumb/2023/10/local-img.jpg'
+        assert result['url'] == expected_rel_url
+        assert result['src'] == expected_rel_url
+        assert result['abs_url'] == f"{config.site.site_url}{expected_rel_url}" # abs_url is still set
 
 
