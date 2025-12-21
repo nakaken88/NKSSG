@@ -577,3 +577,48 @@ class TestGetCleanDate:
         assert "2023-99-99 12:00" in call_args[0]
         assert str(single_obj.id) in call_args[0]
 
+
+class TestSinglesDuplicateDetection:
+    def test_setup_file_ids_raises_on_duplicate(self, config):
+        """
+        Tests that _setup_file_ids raises ValueError on duplicate file IDs.
+        """
+        mock_plugins = MagicMock()
+        singles = Singles(config, mock_plugins)
+
+        # Create two different Single objects that resolve to the same file_id
+        s1 = MagicMock(spec=Single)
+        s1.file_id = "duplicate-id"
+        s1.__str__.return_value = "Single(src='post/a.md')"
+
+        s2 = MagicMock(spec=Single)
+        s2.file_id = "duplicate-id"
+        s2.__str__.return_value = "Single(src='post/b.md')"
+
+        singles.pages = [s1, s2]
+
+        with pytest.raises(ValueError, match="Duplicate file ID detected"):
+            singles._setup_file_ids()
+
+    def test_setup_dest_path_raises_on_duplicate(self, config):
+        """
+        Tests that setup_dest_path raises ValueError on duplicate destination paths.
+        """
+        mock_plugins = MagicMock()
+        singles = Singles(config, mock_plugins)
+
+        # Create two different Single objects that resolve to the same dest_path
+        s1 = MagicMock(spec=Single)
+        s1.dest_path = Path("public/dupe/path/index.html")
+        s1.__str__.return_value = "Single(src='post/a.md')"
+
+        s2 = MagicMock(spec=Single)
+        s2.dest_path = Path("public/dupe/path/index.html")
+        s2.__str__.return_value = "Single(src='post/b.md')"
+
+        singles.pages = [s1, s2]
+
+        with pytest.raises(ValueError, match="Duplicate Dest Path"):
+            singles.setup_dest_path()
+
+
