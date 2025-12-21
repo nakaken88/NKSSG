@@ -2,9 +2,10 @@ import datetime
 from pathlib import Path, PurePath
 import pytest
 import shutil
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import builtins
-import re # Added
+import re
+import jinja2
 
 from nkssg.structure.config import Config
 from nkssg.structure.pages import Page
@@ -908,4 +909,97 @@ class TestSingleInitializationAndPathParsing:
         assert single.ext == 'md'
         assert single.is_root is False
 
+
+class TestJinja2ShortcodesInContent:
+    @pytest.fixture
+    def single_with_jinja_content(self, tmp_path):
+        docs_dir = tmp_path / "docs"
+        docs_dir.mkdir()
+        
+        original_docs_dir = Single.docs_dir
+        Single.docs_dir = docs_dir
+
+        cfg = Config()
+        cfg.docs_dir = docs_dir
+        cfg.post_type.update({'post': {}})
+        
+        post_dir = docs_dir / "post"
+        post_dir.mkdir()
+        
+        content_with_jinja = """
+---
+title: My Shortcode Post
+---
+Hello, {{ mypage.title }}! The year is {{ config.now.year }}.
+"""
+        src_file = post_dir / "test-shortcode.md"
+        src_file.write_text(content_with_jinja, encoding="utf-8")
+
+        single = Single(src_file, cfg)
+        single.meta, doc_content = Single.parse_front_matter(src_file)
+        single.title = single.meta.get('title', 'Default Title')
+        single.content = doc_content
+        single.slug = 'my-shortcode-post'
+        single.date = datetime.datetime(2023, 1, 1)
+        cfg.now = datetime.datetime(2023, 5, 15)
+
+        yield single, cfg
+
+        Single.docs_dir = original_docs_dir
+
+
+    def test_jinja2_shortcode_in_content_rendering(self, single_with_jinja_content, mocker):
+        single, config = single_with_jinja_content
+
+        test_env = jinja2.Environment(loader=jinja2.FileSystemLoader(single.abs_src_path.parent))
+        test_env.globals.update({
+            'config': config,
+            'mypage': single
+        })
+        config.env = test_env
+
+        mock_themes = mocker.MagicMock()
+        mock_themes.lookup_template.return_value = "single.html"
+        
+        dummy_theme_path = single.abs_src_path.parent.parent / "dummy_theme"
+        (dummy_theme_path / "import").mkdir(parents=True, exist_ok=True)
+        (dummy_theme_path / "import" / "short-code.html").touch()
+        mock_themes.dirs = [dummy_theme_path]
+
+        mock_archives = mocker.MagicMock()
+        mock_singles_container = mocker.MagicMock()
+        mock_singles_container.config = config
+        # Configure plugins.do_action to return the original content to prevent it from being overwritten by a mock.
+        mock_plugins = mocker.MagicMock()
+        mock_plugins.do_action.side_effect = lambda *args, **kwargs: kwargs.get('target')
+        mock_singles_container.plugins = mock_plugins
+
+        mock_main_template_object = mocker.MagicMock()
+        mock_main_template_object.render.return_value = "FINAL RENDERED HTML"
+        mock_shortcode_template_object = mocker.MagicMock()
+
+        def get_template_side_effect(template_name, parent=None):
+            if template_name == "single.html":
+                return mock_main_template_object
+            elif template_name == "import/short-code.html":
+                return mock_shortcode_template_object
+            pytest.fail(f"Unexpected template requested: {template_name}")
+
+        with patch.object(config.env, 'get_template', side_effect=get_template_side_effect) as mock_get_template:
+            single.update_html(mock_singles_container, mock_archives, mock_themes)
+
+            # This is the core assertion for shortcode rendering.
+            expected_rendered_content = "Hello, My Shortcode Post! The year is 2023."
+            assert single.content.strip() == expected_rendered_content   
+
+            assert single.html == "FINAL RENDERED HTML"
+
+            # Ensure the main template was called with the correctly rendered content.
+            main_render_context = mock_main_template_object.render.call_args[0][0]
+            assert main_render_context['mypage'].content.strip() == expected_rendered_content
+
+            # Check that get_template was called for both the main and imported templates.
+            assert mock_get_template.call_count == 2
+            mock_get_template.assert_any_call("single.html")
+            mock_get_template.assert_any_call("import/short-code.html", None)
 
