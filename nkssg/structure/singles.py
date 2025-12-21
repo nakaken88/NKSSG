@@ -322,7 +322,7 @@ class Single(Page):
 
         epoch_datetime = datetime.datetime.fromtimestamp(0)
         if isinstance(dirty_date, datetime.date):  # yyyy-mm-dd
-            return datetime.datetime.combine(dirty_date, epoch_datetime.time())
+            return datetime.datetime.combine(dirty_date, datetime.time.min)
 
         if isinstance(dirty_date, str) and dirty_date.count(':') == 1:
             # yyyy-mm-dd HH:MM

@@ -542,3 +542,38 @@ def test_update_url_with_permalink_no_prefix(url_test_single):
 
     assert single.rel_url == '/2023/my-test-slug/'
     assert single.dest_path == Path('2023/my-test-slug/index.html')
+
+
+class TestGetCleanDate:
+    @pytest.mark.parametrize("input_date, expected_datetime", [
+        # Already a datetime object
+        (datetime.datetime(2023, 1, 1, 12, 30), datetime.datetime(2023, 1, 1, 12, 30)),
+        # A date object (should be converted to datetime at midnight)
+        (datetime.date(2023, 2, 15), datetime.datetime(2023, 2, 15, 0, 0)),
+        # String with HH:MM
+        ("2023-03-20 08:45", datetime.datetime(2023, 3, 20, 8, 45)),
+        # String with H:MM (non-zero-padded)
+        ("2023-03-20 8:45", datetime.datetime(2023, 3, 20, 8, 45)),
+        # None or other invalid types should return epoch
+        (None, datetime.datetime.fromtimestamp(0)),
+        (12345, datetime.datetime.fromtimestamp(0)),
+        ("An invalid string", datetime.datetime.fromtimestamp(0)),
+        # Invalid date string format
+        ("2023/03/20 08:45", datetime.datetime.fromtimestamp(0)), # Wrong separator
+    ])
+    def test_get_clean_date_various_formats(self, single_obj, input_date, expected_datetime):
+        """Tests _get_clean_date with various valid and invalid input formats."""
+        cleaned_date = single_obj._get_clean_date(input_date)
+        assert cleaned_date == expected_datetime
+
+    def test_get_clean_date_invalid_string_prints_warning(self, single_obj, mocker):
+        """Tests that an invalid date string prints a warning to the console."""
+        mock_print = mocker.patch('builtins.print')
+        single_obj._get_clean_date("2023-99-99 12:00") # An invalid date that still matches the format
+        
+        mock_print.assert_called_once()
+        # Check that the error message contains the problematic date value and the file id
+        call_args, _ = mock_print.call_args
+        assert "2023-99-99 12:00" in call_args[0]
+        assert str(single_obj.id) in call_args[0]
+
