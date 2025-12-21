@@ -1,9 +1,10 @@
 import datetime
-from pathlib import Path
+from pathlib import Path, PurePath
 import pytest
 import shutil
 from unittest.mock import MagicMock
 import builtins
+import re # Added
 
 from nkssg.structure.config import Config
 from nkssg.structure.pages import Page
@@ -783,5 +784,128 @@ class TestSingleImageProcessing:
         assert result['url'] == expected_rel_url
         assert result['src'] == expected_rel_url
         assert result['abs_url'] == f"{config.site.site_url}{expected_rel_url}" # abs_url is still set
+
+
+class TestSingleInitializationAndPathParsing:
+
+    @pytest.fixture(autouse=True)
+    def setup_single_docs_dir(self, tmp_path):
+        """Fixture to ensure Single.docs_dir is clean before and after tests."""
+        original_docs_dir = Single.docs_dir
+        Single.docs_dir = tmp_path / "docs" # Set a consistent docs_dir for tests
+        Single.docs_dir.mkdir(exist_ok=True)
+        yield
+        Single.docs_dir = original_docs_dir
+
+    @pytest.fixture
+    def mock_config_for_single_init(self, tmp_path):
+        """Mock Config object for Single initialization tests."""
+        cfg = Config(base_dir=tmp_path)
+        cfg.docs_dir = tmp_path / "docs"
+        cfg.post_type.update({'article': {}, 'page': {}})
+        return cfg
+
+    def test_single_init_success(self, mock_config_for_single_init):
+        """Tests successful initialization of Single object with valid path."""
+        config = mock_config_for_single_init
+        
+        # Create dummy file structure
+        (config.docs_dir / 'article').mkdir()
+        src_file = config.docs_dir / 'article' / 'my-post.md'
+        src_file.touch()
+
+        single = Single(src_file, config)
+
+        assert single.abs_src_path == src_file
+        assert single.src_path == Path('article/my-post.md')
+        assert single.id == PurePath('/docs/article/my-post.md')
+        assert single.post_type == 'article'
+        assert single.src_dir == Path('article')
+        assert single.filename == 'my-post'
+        assert single.ext == 'md'
+        # Check archive_type default
+        assert single.archive_type == 'section'
+
+    def test_abs_src_path_setter_success(self, mock_config_for_single_init):
+        """Tests successful assignment of abs_src_path and derived attributes."""
+        config = mock_config_for_single_init
+        
+        (config.docs_dir / 'page').mkdir()
+        src_file = config.docs_dir / 'page' / 'about.html'
+        src_file.touch()
+
+        single = Single(src_file, config) # Initial setup
+
+        # Change abs_src_path to a new valid path
+        new_src_file = config.docs_dir / 'article' / 'another-post.md'
+        new_src_file.parent.mkdir(exist_ok=True)
+        new_src_file.touch()
+
+        single.abs_src_path = new_src_file
+
+        assert single.abs_src_path == new_src_file
+        assert single.src_path == Path('article/another-post.md')
+        assert single.id == PurePath('/docs/article/another-post.md')
+        assert single.post_type == 'article'
+        assert single.src_dir == Path('article')
+        assert single.filename == 'another-post'
+        assert single.ext == 'md'
+
+    def test_abs_src_path_setter_not_descendant_raises_value_error(self, mock_config_for_single_init, tmp_path):
+        """Tests that assigning abs_src_path not descendant of Single.docs_dir raises ValueError."""
+        config = mock_config_for_single_init
+        
+        src_file = config.docs_dir / 'page' / 'about.html'
+        src_file.parent.mkdir(exist_ok=True)
+        src_file.touch()
+
+        single = Single(src_file, config)
+
+        # Attempt to assign a path outside docs_dir
+        outside_path = tmp_path / 'outside' / 'file.txt'
+        outside_path.parent.mkdir(exist_ok=True)
+        outside_path.touch()
+
+        expected_error_msg = f"The path '{outside_path}' must be a descendant of the docs dir '{Single.docs_dir}'."
+        with pytest.raises(ValueError, match=re.escape(expected_error_msg)):
+            single.abs_src_path = outside_path
+
+    def test_single_init_from_root_index_file(self, mock_config_for_single_init):
+        """Tests initialization for an index file directly under a post type."""
+        config = mock_config_for_single_init
+        
+        (config.docs_dir / 'article').mkdir(exist_ok=True)
+        src_file = config.docs_dir / 'article' / 'index.md'
+        src_file.touch()
+
+        single = Single(src_file, config)
+
+        assert single.abs_src_path == src_file
+        assert single.src_path == Path('article/index.md')
+        assert single.id == PurePath('/docs/article/index.md')
+        assert single.post_type == 'article'
+        assert single.src_dir == Path('article')
+        assert single.filename == 'index'
+        assert single.ext == 'md'
+        assert single.is_root is True
+
+    def test_single_init_from_nested_file(self, mock_config_for_single_init):
+        """Tests initialization for a file in a nested directory."""
+        config = mock_config_for_single_init
+        
+        (config.docs_dir / 'article' / '2023' / '10').mkdir(parents=True, exist_ok=True)
+        src_file = config.docs_dir / 'article' / '2023' / '10' / 'nested-post.md'
+        src_file.touch()
+
+        single = Single(src_file, config)
+
+        assert single.abs_src_path == src_file
+        assert single.src_path == Path('article/2023/10/nested-post.md')
+        assert single.id == PurePath('/docs/article/2023/10/nested-post.md')
+        assert single.post_type == 'article'
+        assert single.src_dir == Path('article/2023/10')
+        assert single.filename == 'nested-post'
+        assert single.ext == 'md'
+        assert single.is_root is False
 
 
