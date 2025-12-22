@@ -748,29 +748,69 @@ class TestSingleImageProcessing:
         assert result['new_path'].resolve() == expected_new_path.resolve()
         assert result['caption'] == 'A caption'
 
-    def test_get_image_static_dir_path_falls_through(self, image_test_single):
+    def test_get_image_simple_static_path_handled(self, image_test_single):
         """
-        Tests _get_image with a static-like path.
-        NOTE: The current implementation does not correctly identify static paths,
-        so this test verifies it falls through to the thumbnail generation logic.
+        Tests _get_image with a simple, non-nested static path, verifying it's
+        correctly recognized as static and its URL is generated directly.
         """
         single, config, public_dir = image_test_single
+        # Use a simple static directory for this test
+        config.static_dir = config.base_dir / 'static'
+        config.static_dir.mkdir(exist_ok=True)
+        
         src = f'/{config.static_dir.name}/static-img.png' # e.g. /static/static-img.png
+        
+        static_image_path = config.static_dir / 'static-img.png'
+        static_image_path.touch()
+        
         single.meta = {'image': {'src': src}}
         config.use_abs_url = False
 
         result = single._get_image(config)
 
-        # The check `src.startswith('/' + str(config.static_dir))` will fail because
-        # config.static_dir is an absolute path. So it will be treated like a normal local image.
-        expected_old_path = config.base_dir / src.strip('/')
-        expected_new_path = public_dir / 'thumb' / '2023' / '10' / 'static-img.png'
-        expected_rel_url = '/thumb/2023/10/static-img.png'
+        # After the fix, the URL should be the direct static path, not a thumbnail path.
+        expected_rel_url = src
+        expected_old_path = static_image_path
 
         assert result['url'] == expected_rel_url
         assert result['rel_url'] == expected_rel_url
         assert result['old_path'] == expected_old_path
-        assert result['new_path'] == expected_new_path
+        assert 'new_path' not in result # Verify thumbnail path is not generated
+
+    def test_get_image_static_dir_path_correctly_handled(self, image_test_single):
+        """
+        Tests _get_image with a static-like path (potentially nested),
+        verifying it's recognized as static and its URL is generated directly
+        without thumbnail processing.
+        """
+        single, config, public_dir = image_test_single
+        
+        # Simulate a nested static directory
+        nested_static_path = 'assets/static'
+        config.static_dir = config.base_dir / nested_static_path
+        config.static_dir.mkdir(parents=True, exist_ok=True)
+        
+        # The src URL should match the relative path from base_dir
+        src = f'/{nested_static_path}/my-static-img.png'
+        
+        # Ensure the dummy static file exists at the correct location
+        static_image_path = config.static_dir / 'my-static-img.png'
+        static_image_path.touch()
+
+        single.meta = {'image': {'src': src}}
+        config.use_abs_url = False
+
+        result = single._get_image(config)
+
+        # The final URL should be the direct path to the static asset
+        expected_rel_url = src
+        expected_old_path = static_image_path
+
+        assert result['url'] == expected_rel_url
+        assert result['rel_url'] == expected_rel_url
+        assert result['src'] == expected_rel_url
+        assert result['old_path'].resolve() == expected_old_path.resolve()
+        assert 'new_path' not in result # Thumbnail path should not be set for static images
 
     def test_get_image_use_abs_url_false(self, image_test_single):
         """Tests _get_image when config.use_abs_url is False."""
