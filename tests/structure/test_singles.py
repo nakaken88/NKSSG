@@ -624,6 +624,49 @@ class TestSinglesDuplicateDetection:
         with pytest.raises(ValueError, match="Duplicate Dest Path"):
             singles.setup_dest_path()
 
+    def test_singles_draft_mode_initialization(self, tmp_path):
+        """
+        Tests that when in 'draft' mode, Singles correctly initializes
+        by collecting only the specified draft file.
+        """
+        # Setup config for draft mode
+        config = Config(base_dir=tmp_path)
+        config.mode = 'draft'
+        config.docs_dir = tmp_path / 'docs'
+        config.docs_dir.mkdir()
+        
+        # Manually add the 'post' post_type to the config, as the Site class isn't running
+        config.post_type.update({'post': {}})
+        
+        # Create a dummy draft file
+        draft_content_dir = config.docs_dir / 'post'
+        draft_content_dir.mkdir()
+        dummy_draft_file = draft_content_dir / 'my-draft-post.md'
+        dummy_draft_file.touch()
+        
+        config.draft_path = dummy_draft_file
+        
+        # Create other files that should NOT be collected in draft mode
+        (config.docs_dir / 'page').mkdir()
+        (config.docs_dir / 'page' / 'about.md').touch()
+
+        original_docs_dir = Single.docs_dir
+        try:
+            # Reset the class variable to ensure it's set by the current config
+            Single.docs_dir = ''
+            
+            mock_plugins = MagicMock()
+            singles = Singles(config, mock_plugins)
+
+            assert len(singles.pages) == 1
+            assert singles.pages[0].abs_src_path == dummy_draft_file
+            
+            # Ensure do_action is called for draft mode
+            mock_plugins.do_action.assert_called_with('after_initialize_singles', target=singles)
+        finally:
+            # Restore the class variable to prevent side effects
+            Single.docs_dir = original_docs_dir
+
 class TestSingleImageProcessing:
     @pytest.fixture
     def image_test_single(self, tmp_path, mocker):
