@@ -1086,3 +1086,65 @@ Hello, {{ mypage.title }}! The year is {{ config.now.year }}.
             mock_get_template.assert_any_call("single.html")
             mock_get_template.assert_any_call("import/short-code.html", None)
 
+
+class TestGetSummary:
+    @pytest.mark.parametrize("content, meta_summary, expected", [
+        # Basic HTML stripping
+        (
+            "<p>This is <b>content</b>.</p>\nHere is more.",
+            None,
+            "This is content.Here is more."
+        ),
+        # Stripping script and style tags
+        (
+            "Content with <script>alert('xss');</script> and <style>body{color:red}</style> tags.",
+            None,
+            "Content with  and  tags."
+        ),
+        # Stripping Jinja2-like tags
+        (
+            "Values are {{ mypage.title }} and {% if true %} A {% endif %}.",
+            None,
+            "Values are  and ."
+        ),
+        # Replacing special characters
+        (
+            "Path is /a/b/c. It's a quote \" and backslash \\.",
+            None,
+            "Path is  a b c. It s a quote   and backslash  ."
+        ),
+        # Truncation
+        (
+            "This is a very long string designed to test the truncation functionality of the summary generation. It should be cut off at exactly 110 characters, not before and not after. Let's see if it works as expected.",
+            None,
+            "This is a very long string designed to test the truncation functionality of the summary generation. It should"
+        ),
+        # Using meta.summary (should ignore content and truncation)
+        (
+            "This content should be ignored.",
+            "This is a custom summary from the front matter.",
+            "This is a custom summary from the front matter."
+        ),
+        # Empty content
+        (
+            "",
+            None,
+            ""
+        ),
+        # All features combined
+        (
+            "<p>Title is {{ a }}. Don't use \"/\".</p>This is a very long string designed to test the truncation functionality of the summary generation. It should be cut off at exactly 110 characters.",
+            None,
+            "Title is . Don t use  . This is a very long string designed to test the truncation functionality of the summ"
+        )
+    ])
+    def test_get_summary_scenarios(self, single_obj, content, meta_summary, expected):
+        """Tests the _get_summary method with various scenarios."""
+        single_obj.content = content
+        if meta_summary:
+            single_obj.meta['summary'] = meta_summary
+        
+        summary = single_obj._get_summary()
+        
+        assert summary == expected
+
