@@ -234,7 +234,6 @@ class Single(Page):
         self.slug = self._get_slug(post_type_slug)
 
         self.content = self._get_content(doc, config, plugins)
-        self.summary = self._get_summary()
         self.image = self._get_image(config)
 
         self.file_id = self._get_file_id()
@@ -406,7 +405,7 @@ class Single(Page):
         summary = self.meta.get('summary', self.content)
         remove_patterns = [
             r'<script.*?script>', r'<style.*?style>',
-            r'<[^>]*?>', r'{{[^}]*?}}', r'{#[^}]*?#}', r'{%[^}]*?%}'
+            r'<.*?>'
         ]
         for pattern in remove_patterns:
             summary = re.sub(pattern, '', summary, flags=re.DOTALL)
@@ -616,6 +615,8 @@ class Single(Page):
             self.content = additional_statement + self.content
             self.content = config.env.from_string(self.content).render({
                 'mypage': self, 'meta': self.meta})
+            
+        self.summary = self._get_summary()
 
         context = {
             'config': config,

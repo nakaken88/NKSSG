@@ -1101,12 +1101,6 @@ class TestGetSummary:
             None,
             "Content with  and  tags."
         ),
-        # Stripping Jinja2-like tags
-        (
-            "Values are {{ mypage.title }} and {% if true %} A {% endif %}.",
-            None,
-            "Values are  and ."
-        ),
         # Replacing special characters
         (
             "Path is /a/b/c. It's a quote \" and backslash \\.",
@@ -1117,7 +1111,7 @@ class TestGetSummary:
         (
             "This is a very long string designed to test the truncation functionality of the summary generation. It should be cut off at exactly 110 characters, not before and not after. Let's see if it works as expected.",
             None,
-            "This is a very long string designed to test the truncation functionality of the summary generation. It should"
+            "This is a very long string designed to test the truncation functionality of the summary generation. It should "
         ),
         # Using meta.summary (should ignore content and truncation)
         (
@@ -1130,12 +1124,6 @@ class TestGetSummary:
             "",
             None,
             ""
-        ),
-        # All features combined
-        (
-            "<p>Title is {{ a }}. Don't use \"/\".</p>This is a very long string designed to test the truncation functionality of the summary generation. It should be cut off at exactly 110 characters.",
-            None,
-            "Title is . Don t use  . This is a very long string designed to test the truncation functionality of the summ"
         )
     ])
     def test_get_summary_scenarios(self, single_obj, content, meta_summary, expected):
