@@ -581,6 +581,82 @@ class TestGetCleanDate:
         assert str(single_obj.id) in call_args[0]
 
 
+class TestGetDate:
+    @pytest.fixture
+    def get_date_single(self, tmp_path):
+        """Fixture for creating a Single object for _get_date tests."""
+        docs_dir = tmp_path / "docs"
+        docs_dir.mkdir()
+        
+        original_docs_dir = Single.docs_dir
+        Single.docs_dir = docs_dir
+
+        cfg = Config()
+        cfg.docs_dir = docs_dir
+        cfg.post_type.update({'post': {}})
+        
+        def _maker(filename: str, meta_date: str = None, meta_modified: str = None):
+            post_dir = docs_dir / "post"
+            post_dir.mkdir(exist_ok=True, parents=True)
+            
+            file_path = post_dir / filename
+            
+            front_matter = "---\n"
+            if meta_date:
+                front_matter += f"date: {meta_date}\n"
+            if meta_modified:
+                front_matter += f"modified: {meta_modified}\n"
+            front_matter += "---\n"
+            
+            file_path.write_text(front_matter, encoding="utf-8")
+            
+            s = Single(file_path, cfg)
+            s.meta, _ = Single.parse_front_matter(file_path)
+            return s
+            
+        yield _maker
+
+        Single.docs_dir = original_docs_dir
+
+    @pytest.mark.parametrize("filename", ["20231026.md", "2023-10-26.md"])
+    def test_date_from_filename(self, get_date_single, filename):
+        """Tests that date is correctly parsed from a date-only filename."""
+        single = get_date_single(filename)
+        cdate, _ = single._get_date()
+        assert cdate == datetime.datetime(2023, 10, 26)
+
+    def test_date_from_front_matter_overrides_filename(self, get_date_single):
+        """Tests that front matter date takes precedence over filename date."""
+        single = get_date_single("2023-10-26.md", meta_date="2024-01-01")
+        cdate, _ = single._get_date()
+        assert cdate == datetime.datetime(2024, 1, 1)
+
+    def test_date_fallback_to_file_creation_time(self, get_date_single):
+        """Tests that date falls back to file creation time when not in filename or meta."""
+        known_date = datetime.datetime(2022, 5, 5)
+        single = get_date_single("my-post-without-date.md")
+        
+        # Manually set the initial date (which simulates file creation time)
+        single.date = known_date
+        
+        cdate, _ = single._get_date()
+        assert cdate == known_date
+
+    def test_modified_date_from_front_matter(self, get_date_single):
+        """Tests that modified date is correctly read from front matter."""
+        single = get_date_single("2023-10-26.md", meta_modified="2023-11-15 10:00")
+        _, mdate = single._get_date()
+        assert mdate == datetime.datetime(2023, 11, 15, 10, 0)
+
+    def test_modified_date_is_at_least_creation_date(self, get_date_single):
+        """Tests that modified date cannot be older than the creation date."""
+        # Here, filename date (Oct 26) is newer than meta modified date (Oct 1)
+        single = get_date_single("2023-10-26.md", meta_modified="2023-10-01")
+        cdate, mdate = single._get_date()
+        assert cdate == datetime.datetime(2023, 10, 26)
+        assert mdate == cdate # mdate should be bumped up to cdate
+
+
 class TestSinglesDuplicateDetection:
     def test_setup_file_ids_raises_on_duplicate(self, config):
         """
