@@ -11,6 +11,7 @@ from nkssg.structure.config import Config
 from nkssg.structure.pages import Page
 from nkssg.structure.singles import Single, Singles
 from nkssg.structure.archives import Archive
+from nkssg.structure.themes import Themes
 
 
 @pytest.fixture
@@ -655,6 +656,84 @@ class TestGetDate:
         cdate, mdate = single._get_date()
         assert cdate == datetime.datetime(2023, 10, 26)
         assert mdate == cdate # mdate should be bumped up to cdate
+
+
+class TestSingleTemplateLookup:
+    @pytest.fixture
+    def single_for_template_lookup(self, tmp_path, config):
+        """
+        Fixture to create a Single object for template lookup tests.
+        Returns the Single object, and a mock Themes object.
+        """
+        docs_dir = tmp_path / "docs"
+        docs_dir.mkdir()
+        
+        original_docs_dir = Single.docs_dir
+        Single.docs_dir = docs_dir
+
+        # Ensure a post_type exists for the Single object
+        config.post_type.update({'post': {}})
+
+        # Create a dummy file for the Single object
+        post_dir = docs_dir / "post"
+        post_dir.mkdir(exist_ok=True)
+        src_file = post_dir / "test-post.md"
+        src_file.touch()
+
+        single = Single(src_file, config)
+        single.meta = {} # Clear meta to control template override
+        single.post_type = 'post' # Ensure post_type is set
+
+        mock_themes = MagicMock(spec=Themes)
+        
+        yield single, config, mock_themes
+
+        Single.docs_dir = original_docs_dir
+
+    @pytest.mark.parametrize("config_mode, meta_template, available_templates, expected_template", [
+        # Draft mode takes precedence
+        ('draft', None, ['draft.html', 'single-post.html'], 'draft.html'),
+        ('draft', 'my-custom.html', ['draft.html', 'my-custom.html'], 'draft.html'),
+        
+        # meta.template takes precedence if not in draft mode
+        ('build', 'my-custom.html', ['my-custom.html', 'single-post.html'], 'my-custom.html'),
+        ('build', 'my-custom.html', ['single-post.html'], 'single-post.html'), # meta.template not found
+        
+        # single-{post_type}.html
+        ('build', None, ['single-post.html', 'single.html'], 'single-post.html'),
+        
+        # single.html
+        ('build', None, ['single.html', 'main.html'], 'single.html'),
+        
+        # main.html
+        ('build', None, ['main.html'], 'main.html'),
+        
+        # None found
+        ('build', None, [], None),
+        ('build', 'non-existent.html', [], None),
+    ])
+    def test_lookup_template_hierarchy(self, single_for_template_lookup, 
+                                       config_mode, meta_template, available_templates, expected_template):
+        """
+        Tests the template lookup hierarchy based on config mode, meta.template,
+        and available templates in the theme.
+        """
+        single, config, mock_themes = single_for_template_lookup
+        config.mode = config_mode
+        if meta_template:
+            single.meta['template'] = meta_template
+
+        # Configure the mock themes.lookup_template to simulate which templates are "found"
+        def mock_lookup_template_side_effect(search_list, full_path=False):
+            for tpl in search_list:
+                if tpl in available_templates:
+                    return tpl # Return the name as it would be found by Themes.lookup_template
+            return None
+        
+        mock_themes.lookup_template.side_effect = mock_lookup_template_side_effect
+
+        result = single.lookup_template(config, mock_themes)
+        assert result == expected_template
 
 
 class TestSinglesDuplicateDetection:
