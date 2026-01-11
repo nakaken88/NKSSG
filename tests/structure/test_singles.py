@@ -1136,3 +1136,48 @@ class TestGetSummary:
         
         assert summary == expected
 
+
+class TestSinglesSetup:
+    def test_setup_prev_next_page(self, config):
+        """
+        Tests that _setup_prev_next_page correctly links adjacent pages.
+        """
+        mock_plugins = MagicMock()
+        singles = Singles(config, mock_plugins)  # pages is initially empty
+
+        # Create three mock pages
+        page1 = MagicMock(spec=Single, name="Page 1")
+        page2 = MagicMock(spec=Single, name="Page 2")
+        page3 = MagicMock(spec=Single, name="Page 3")
+        singles.pages = [page1, page2, page3]
+
+        singles._setup_prev_next_page()
+
+        # Check links for Page 1
+        assert page1.prev_page is None
+        assert page1.next_page is page2
+
+        # Check links for Page 2
+        assert page2.prev_page is page1
+        assert page2.next_page is page3
+
+        # Check links for Page 3
+        assert page3.prev_page is page2
+        assert page3.next_page is None
+
+    def test_setup_prev_next_page_with_single_page(self, config):
+        """
+        Tests that _setup_prev_next_page works correctly with only one page.
+        """
+        mock_plugins = MagicMock()
+        singles = Singles(config, mock_plugins)  # pages is initially empty
+
+        page1 = MagicMock(spec=Single, name="Page 1")
+        singles.pages = [page1]
+
+        singles._setup_prev_next_page()
+
+        # Check links for the single page
+        assert page1.prev_page is None
+        assert page1.next_page is None
+
