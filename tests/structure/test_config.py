@@ -113,7 +113,7 @@ def test_get_method_with_default_value(config):
     assert config.site.get('site_name', 'default_name') == 'Site Title'
 
 
-# 3. update メソッド
+# 3. update method
 def test_site_config(config):
     config_dict = {
         'site': {
