@@ -24,10 +24,6 @@ def test_default_config(config):
 
 
 def test_config_init_with_base_dir(tmp_path):
-    """
-    Tests that if base_dir is passed during Config object initialization,
-    it correctly sets the base_dir attribute.
-    """
     custom_base_dir = tmp_path / "custom_base"
     custom_base_dir.mkdir()
 
@@ -41,9 +37,6 @@ def test_config_init_with_base_dir(tmp_path):
 
 
 def test_mode_handling(tmp_path: Path):
-    """
-    Tests that the 'mode' is correctly handled by both the constructor and from_file.
-    """
     config_default = Config()
     assert config_default.mode == 'build'
 
@@ -65,30 +58,21 @@ def test_mode_handling(tmp_path: Path):
 
 # 2. Dictionary-like Behavior
 def test_base_config_setitem():
-    """
-    Tests that __setitem__ correctly updates both predefined attributes
-    and the 'extras' dictionary.
-    """
     site_config = SiteConfig()
 
     site_config['site_name'] = 'New Name'
     assert site_config.site_name == 'New Name'
     assert site_config['site_name'] == 'New Name'
-    assert 'site_name' not in site_config.extras  # Ensure predefined attributes are not stored in extras
+    assert 'site_name' not in site_config.extras
 
     site_config['new_extra_key'] = 'extra_value'
     assert site_config.extras['new_extra_key'] == 'extra_value'
     assert site_config['new_extra_key'] == 'extra_value'
-    # Verify that attribute-style access fails for extra keys
     with pytest.raises(AttributeError):
         _ = site_config.new_extra_key
 
 
 def test_extra_values_handling(config):
-    """
-    Tests that extra, undefined values can be added and accessed via
-    dictionary-style access, but not attribute-style access.
-    """
     config_dict = {
         'extra_root_key': 'top_level_value',
         'site': {
@@ -97,17 +81,14 @@ def test_extra_values_handling(config):
     }
     config.update(config_dict)
 
-    # Test dictionary-style access for extra keys (should work)
     assert config['extra_root_key'] == 'top_level_value'
     assert config.site['extra_site_key'] == 'site_value'
 
-    # Test attribute-style access for extra keys (should raise AttributeError)
     with pytest.raises(AttributeError):
         _ = config.extra_root_key
     with pytest.raises(AttributeError):
         _ = config.site.extra_site_key
 
-    # Test that defined keys are not stored in extras
     assert 'extra_root_key' in config.extras
     assert 'extra_site_key' in config.site.extras
     assert 'site_name' not in config.site.extras
@@ -115,10 +96,6 @@ def test_extra_values_handling(config):
 
 
 def test_key_error_for_undefined_key(config):
-    """
-    Tests that accessing a non-existent key using dictionary-style access
-    raises a KeyError.
-    """
     with pytest.raises(KeyError, match=r"undefined_key not found in Config."):
         _ = config['undefined_key']
 
@@ -127,18 +104,12 @@ def test_key_error_for_undefined_key(config):
 
 
 def test_get_method_with_default_value(config):
-    """
-    Tests that the .get() method returns the default value for non-existent keys.
-    """
-    # Test top-level
     assert config.get('non_existent_key', 'default_root') == 'default_root'
-    assert config.get('non_existent_key') is None  # Default None
+    assert config.get('non_existent_key') is None
 
-    # Test nested within site
     assert config.site.get('non_existent_key_site', 'default_site') == 'default_site'
-    assert config.site.get('non_existent_key_site') is None  # Default None
+    assert config.site.get('non_existent_key_site') is None
 
-    # Test get for existing key returns its value
     assert config.site.get('site_name', 'default_name') == 'Site Title'
 
 
@@ -155,9 +126,9 @@ def test_site_config(config):
     config.update(config_dict)
 
     assert config.site.site_name == 'example site'
-    assert config.site.site_url == 'http://example.com'  # Assert that trailing slash is removed
-    assert config.site.site_url_original == 'http://example.com/' # Assert that original URL is preserved
-    assert config.site.site_image == '/images/hero.jpg'  # Assert that it becomes a relative path
+    assert config.site.site_url == 'http://example.com'  # trailing slash is removed
+    assert config.site.site_url_original == 'http://example.com/'
+    assert config.site.site_image == '/images/hero.jpg'  # becomes a relative path
 
 
 def test_post_type_config(config):
@@ -165,19 +136,19 @@ def test_post_type_config(config):
         'post_type': {
             'post': {
                 'permalink': '/%Y/%m/%d/',
-                'archive_type': 'Date', # Test uppercase conversion
+                'archive_type': 'Date',  # uppercase
             },
             'sample': {
                 'archive_type': 'none',
             },
             'page': {
-                'archive_type': 'invalid_type',  # Set an invalid value
+                'archive_type': 'invalid_type',  # falls back to 'section'
             },
             'blog': {
-                'archive_type': 'Simple', # Test uppercase conversion
+                'archive_type': 'Simple',  # uppercase
             },
             'news': {
-                'archive_type': 'date', # Test valid lowercase
+                'archive_type': 'date',
             }
         },
     }
@@ -185,12 +156,12 @@ def test_post_type_config(config):
     config.update(config_dict)
 
     assert config.post_type['post'].permalink == '/%Y/%m/%d/'
-    assert config.post_type['post'].archive_type == 'date'  # Assert uppercase 'Date' becomes 'date'
+    assert config.post_type['post'].archive_type == 'date'
     assert config.post_type['sample'].archive_type == 'none'
     assert config.post_type['sample'].permalink == '/{slug}/'
-    assert config.post_type['page'].archive_type == 'section'  # Assert that it falls back to 'section'
-    assert config.post_type['blog'].archive_type == 'simple'  # Assert uppercase 'Simple' becomes 'simple'
-    assert config.post_type['news'].archive_type == 'date'  # Assert valid lowercase 'date' is kept
+    assert config.post_type['page'].archive_type == 'section'
+    assert config.post_type['blog'].archive_type == 'simple'
+    assert config.post_type['news'].archive_type == 'date'
 
 
 def test_directory_paths_config(config):
@@ -207,7 +178,6 @@ def test_directory_paths_config(config):
 
     assert config.docs_dir == original_base_dir / 'my_docs_path'
     assert config.public_dir == original_base_dir / 'my_public_path'
-    # Assert that other default directories remain unchanged
     assert config.static_dir == original_base_dir / 'static'
     assert config.themes_dir == original_base_dir / 'themes'
 
@@ -232,9 +202,6 @@ def test_markdown_config(config):
 
 # 4. from_file
 def test_from_file_success(tmp_path: Path):
-    """
-    Tests that the config can be loaded correctly from a valid YAML file.
-    """
     config_content = """
     site:
       site_name: 'Test Site'
@@ -248,10 +215,6 @@ def test_from_file_success(tmp_path: Path):
 
 
 def test_from_file_with_base_dir(tmp_path: Path):
-    """
-    Tests that Config.from_file correctly sets the base_dir attribute
-    when provided as an argument, and that directory paths are relative to it.
-    """
     config_content = """
     site:
       site_name: 'Test Site with Custom Base'
@@ -273,10 +236,7 @@ def test_from_file_with_base_dir(tmp_path: Path):
 
 
 def test_from_file_ignores_mode_key(tmp_path: Path):
-    """
-    Tests that the 'mode' key in the YAML file is ignored and does not
-    override the mode set during Config initialization.
-    """
+    """mode in YAML is ignored so the CLI-specified mode takes precedence."""
     config_content = """
     mode: serve
     site:
@@ -285,26 +245,18 @@ def test_from_file_ignores_mode_key(tmp_path: Path):
     config_file = tmp_path / "test_with_mode.yml"
     config_file.write_text(config_content, encoding="utf-8")
 
-    # Initialize Config with build mode, then load YAML with serve mode
     config = Config.from_file(yaml_file_path=config_file, mode='build')
 
-    # The mode should remain 'build', as 'mode' in YAML is ignored
     assert config.mode == 'build'
     assert config.site.site_name == 'Test Site from YAML'
 
 
 def test_from_file_not_found():
-    """
-    Tests that a FileNotFoundError is raised if the file does not exist.
-    """
     with pytest.raises(FileNotFoundError):
         Config.from_file(yaml_file_path=Path("non_existent_file.yml"))
 
 
 def test_from_file_with_invalid_yaml(tmp_path: Path):
-    """
-    Tests that a ValueError is raised for malformed YAML.
-    """
     config_content = "site: { site_name: 'Test Site }"
     config_file = tmp_path / "test.yml"
     config_file.write_text(config_content, encoding="utf-8")
@@ -314,10 +266,6 @@ def test_from_file_with_invalid_yaml(tmp_path: Path):
 
 
 def test_from_file_with_empty_yaml(tmp_path: Path):
-    """
-    Tests that loading an empty but valid YAML file results in default
-    configuration without raising an error.
-    """
     config_file = tmp_path / "empty.yml"
     config_file.touch()
 
@@ -327,9 +275,6 @@ def test_from_file_with_empty_yaml(tmp_path: Path):
 
 
 def test_term_missing_name_key_raises_error(tmp_path: Path):
-    """
-    Tests that a ValueError is raised if a term dict is missing the 'name' key.
-    """
     config_content = """
     taxonomy:
       tag:
@@ -345,9 +290,6 @@ def test_term_missing_name_key_raises_error(tmp_path: Path):
 
 # 5. Taxonomy Parsing
 def test_invalid_term_name_is_ignored(tmp_path: Path):
-    """
-    Tests that terms with empty or whitespace-only names are ignored.
-    """
     config_content = """
     taxonomy:
       tag:
@@ -401,7 +343,7 @@ def test_taxonomy_category_config(config):
               - name: cat21
                 term:
                   - name: cat211
-              - name: cat21
+              - name: cat21  # duplicate: overwrites slug only
                 slug: cat_two_one
           - name: cat31
             parent: cat3
