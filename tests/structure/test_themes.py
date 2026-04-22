@@ -1,8 +1,6 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from pathlib import Path
-from ruamel.yaml import YAML
-import shutil
 
 import nkssg  # Needed for default theme path
 from nkssg.structure.config import Config
@@ -11,19 +9,16 @@ from nkssg.structure.themes import Themes
 
 @pytest.fixture
 def base_config(tmp_path):
-    """Fixture to create a mock Config object with necessary Path attributes."""
     config = MagicMock(spec=Config)
     config.base_dir = tmp_path
     config.themes_dir = tmp_path / "themes"
     config.themes_dir.mkdir(exist_ok=True)
     config.theme = {}
-
     return config
 
 
 @pytest.fixture
 def create_theme_structure(tmp_path):
-    """Helper to create theme directories and config files."""
     def _creator(theme_name, config_content=None, parent=None, templates=None):
         theme_dir = tmp_path / "themes" / theme_name
         theme_dir.mkdir(parents=True, exist_ok=True)
@@ -41,7 +36,6 @@ def create_theme_structure(tmp_path):
 
 
 def test_init_no_themes_loads_default(base_config, create_theme_structure):
-    """Test that if no themes are specified, the default theme is loaded."""
     # Ensure default theme exists for testing
     package_dir = Path(nkssg.__file__).parent
     default_theme_dir = package_dir / 'themes' / 'default'
@@ -57,7 +51,6 @@ def test_init_no_themes_loads_default(base_config, create_theme_structure):
 
 
 def test_init_single_theme_loads_correctly(base_config, create_theme_structure):
-    """Test loading a single theme specified in config."""
     theme_name = "my_single_theme"
     create_theme_structure(
         theme_name,
@@ -77,7 +70,6 @@ def test_init_single_theme_loads_correctly(base_config, create_theme_structure):
 def test_init_child_theme_loads_correctly_with_parent_priority(
     base_config, create_theme_structure
 ):
-    """Test loading a child theme which should prioritize its templates over parent."""
     parent_theme = "parent_theme"
     child_theme = "child_theme"
 
@@ -115,14 +107,11 @@ def test_init_child_theme_loads_correctly_with_parent_priority(
 def test_load_theme_non_existent_theme_is_ignored(
     base_config, caplog, create_theme_structure
 ):
-    """Test that a non-existent theme is ignored and the default theme is used as a fallback."""
     base_config.theme['name'] = "non_existent_theme"
 
     themes = Themes(base_config)
 
     assert "non_existent_theme is not found" in caplog.text
-
-    # Assert that it fell back to loading the default theme.
     assert len(themes.dirs) == 1
     package_dir = Path(nkssg.__file__).parent
     default_theme_dir = package_dir / 'themes' / 'default'
@@ -132,7 +121,6 @@ def test_load_theme_non_existent_theme_is_ignored(
 
 
 def test_load_theme_config_invalid_yaml(base_config, caplog, create_theme_structure):
-    """Test handling of invalid YAML in theme configuration."""
     theme_name = "bad_config_theme"
     create_theme_structure(theme_name, config_content="key: { value")
     base_config.theme['name'] = theme_name
@@ -144,7 +132,6 @@ def test_load_theme_config_invalid_yaml(base_config, caplog, create_theme_struct
 
 
 def test_lookup_template_exists_in_single_theme(base_config, create_theme_structure):
-    """Test lookup when template exists in a single theme."""
     theme_name = "test_theme"
     create_theme_structure(
         theme_name, templates={'layout/header.html': 'header_content'}
@@ -162,7 +149,6 @@ def test_lookup_template_exists_in_single_theme(base_config, create_theme_struct
 
 
 def test_lookup_template_child_theme_priority(base_config, create_theme_structure):
-    """Test lookup with child and parent themes, child should take precedence."""
     parent_theme = "parent_theme_lookup"
     child_theme = "child_theme_lookup"
 
@@ -186,7 +172,6 @@ def test_lookup_template_child_theme_priority(base_config, create_theme_structur
 
 
 def test_lookup_template_not_found(base_config, create_theme_structure):
-    """Test lookup when template does not exist in any loaded theme."""
     theme_name = "empty_theme"
     create_theme_structure(theme_name)
     base_config.theme['name'] = theme_name
@@ -198,7 +183,6 @@ def test_lookup_template_not_found(base_config, create_theme_structure):
 
 
 def test_lookup_template_full_path(base_config, create_theme_structure):
-    """Test lookup when full_path is True."""
     theme_name = "full_path_theme"
     theme_dir = create_theme_structure(
         theme_name, templates={'pages/home.html': 'home_content'}
