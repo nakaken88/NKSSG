@@ -153,9 +153,10 @@ def test_lookup_template_exists_in_single_theme(base_config, create_theme_struct
 
     themes = Themes(base_config)
 
-    found_path = themes.lookup_template(['header.html', 'layout/header.html'])
+    found_path = themes.lookup_template(['header.html'])
     assert found_path == 'layout/header.html'
 
+    # falls back to the next item in the list if the first is not found
     found_path = themes.lookup_template(['non_existent.html', 'header.html'])
     assert found_path == 'layout/header.html'
 
