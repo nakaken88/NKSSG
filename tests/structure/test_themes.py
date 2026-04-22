@@ -67,7 +67,7 @@ def test_init_single_theme_loads_correctly(base_config, create_theme_structure):
     assert base_config.theme['updated'] is True
 
 
-def test_init_child_theme_loads_correctly_with_parent_priority(
+def test_init_child_theme_takes_priority_over_parent(
     base_config, create_theme_structure
 ):
     parent_theme = "parent_theme"
