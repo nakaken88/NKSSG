@@ -116,6 +116,21 @@ def test_serve_watches_themes_dir_if_exists(
     )
 
 
+@patch('nkssg.command.build.start_server')
+@patch('nkssg.command.build.prepare_temp_dir')
+def test_serve_watches_only_themes_dir_when_static_and_themes_exist(
+    mock_prepare_temp_dir, mock_start_server, mock_config
+):
+    mock_config.themes_dir.exists.return_value = True
+    serve(mock_config, static=True, port=8000)
+
+    assert mock_config.site.site_url == 'http://127.0.0.1:8000'
+    mock_prepare_temp_dir.assert_called_once_with(mock_config)
+    mock_start_server.assert_called_once_with(
+        mock_config, [mock_config.themes_dir], 8000
+    )
+
+
 @patch('nkssg.command.build.tempfile')
 def test_prepare_temp_dir_creates_temp_dir_and_sets_config(
     mock_tempfile, mock_config
