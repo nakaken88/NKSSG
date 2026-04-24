@@ -152,3 +152,22 @@ def test_non_existent_path_link_is_not_resolved_and_keeps_original(mock_config, 
     # The current plugin behavior for non-existent path links is to return the path
     # with the keyword and suffix removed.
     assert test_page.content == '<p>Link to <a href="non_existent_file.md">Non Existent File</a></p>'
+
+
+def test_draft_mode_skips_processing(mock_config, mock_singles_and_site, create_mock_page):
+    singles, site = mock_singles_and_site
+    site.config.get.side_effect = lambda key, default=None: {
+        'mode': 'draft',
+        'keyword': '?',
+        'strip_paths': []
+    }.get(key, default)
+
+    original_content = '<p>Link to <a href="page_a.md?">Page A</a></p>'
+    test_page = create_mock_page(original_content, "current_page.md")
+    singles.__iter__.return_value = [test_page]
+
+    plugin = AwesomePageLinkPlugin()
+    plugin.config = {}
+    plugin.after_update_urls(site)
+
+    assert test_page.content == original_content

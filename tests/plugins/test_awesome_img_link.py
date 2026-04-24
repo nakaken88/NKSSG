@@ -147,3 +147,21 @@ def test_non_existent_source_image_is_handled(mock_config, mock_singles, create_
     assert "is not found" in captured.out
 
     assert not (page.dest_dir / "notfound.gif").exists()
+
+
+def test_draft_mode_skips_processing(mock_config, mock_singles, create_mock_page):
+    mock_config.get.side_effect = lambda key, default=None: {
+        'mode': 'draft',
+        'keyword': '?',
+        'strip_paths': []
+    }.get(key, default)
+
+    html_content = '<img src="/images/dummy.png?">'
+    page = create_mock_page(html_content)
+    mock_singles.__iter__.return_value = [page]
+
+    plugin = AwesomeImgLinkPlugin()
+    plugin.config = {}
+    plugin.after_update_singles_html(mock_singles)
+
+    assert page.html == html_content
