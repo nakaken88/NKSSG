@@ -74,14 +74,14 @@ class TestArchives:
             post_type='post',
             archive_list=[],
             date=datetime.datetime(2023, 1, 15),
-            id=PurePath('/docs/my-section/post-1') # ID for section based post
+            id=PurePath('/docs/my-section/post-1')
         )
         single2 = MagicMock(
             spec=Single,
             post_type='post',
             archive_list=[],
             date=datetime.datetime(2023, 2, 20),
-            id=PurePath('/docs/another-section/post-2') # ID for another section based post
+            id=PurePath('/docs/another-section/post-2')
         )
         single_list = [single1, single2]
         singles = MagicMock(spec=Singles)
