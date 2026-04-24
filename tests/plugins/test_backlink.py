@@ -10,7 +10,6 @@ from nkssg.structure.singles import Single
 
 @pytest.fixture
 def site_setup():
-    """Provides a common setup for creating a mock site with config."""
     config = Config.from_file()
     config.site.site_url = "http://example.com"
     config.site.site_url_original = "http://example.com"
@@ -21,7 +20,6 @@ def site_setup():
 
 
 def test_backlink_plugin_relative_link(site_setup):
-    """Test that BacklinkPlugin correctly handles relative internal links."""
     site = site_setup
     config = site.config
 
@@ -47,7 +45,6 @@ def test_backlink_plugin_relative_link(site_setup):
 
 
 def test_backlink_plugin_absolute_internal_link(site_setup):
-    """Test that BacklinkPlugin handles absolute internal links correctly."""
     site = site_setup
     config = site.config
 
@@ -73,7 +70,6 @@ def test_backlink_plugin_absolute_internal_link(site_setup):
 
 
 def test_backlink_plugin_ignores_external_links(site_setup):
-    """Test that BacklinkPlugin ignores external links and processes internal ones."""
     site = site_setup
     config = site.config
 
@@ -102,7 +98,6 @@ def test_backlink_plugin_ignores_external_links(site_setup):
 
 
 def test_backlink_plugin_handles_fragments_and_queries(site_setup):
-    """Test that BacklinkPlugin correctly handles URLs with fragments and query parameters."""
     site = site_setup
     config = site.config
 
@@ -137,7 +132,6 @@ def test_backlink_plugin_handles_fragments_and_queries(site_setup):
 
 
 def test_backlink_plugin_is_case_insensitive(site_setup):
-    """Test that BacklinkPlugin handles URLs in a case-insensitive manner."""
     site = site_setup
     config = site.config
 
@@ -146,8 +140,6 @@ def test_backlink_plugin_is_case_insensitive(site_setup):
 
     page_j.rel_url = '/page-j/'
     page_k.rel_url = '/page-k/'
-    
-    # Link to Page K using an uppercase path
     page_j.content = f'<p>Link to <a href="/Page-K/">Page K</a>.</p>'
     page_k.content = '<p>Page K</p>'
 
@@ -163,7 +155,6 @@ def test_backlink_plugin_is_case_insensitive(site_setup):
 
 
 def test_backlink_plugin_handles_duplicate_links(site_setup):
-    """Test that BacklinkPlugin correctly handles multiple links to the same page."""
     site = site_setup
     config = site.config
 
@@ -172,8 +163,6 @@ def test_backlink_plugin_handles_duplicate_links(site_setup):
 
     page_l.rel_url = '/page-l/'
     page_m.rel_url = '/page-m/'
-    
-    # Link to Page M twice
     page_l.content = (
         f'<p>Link to <a href="{page_m.rel_url}">Page M</a>. '
         f'And another link to <a href="{page_m.rel_url}">Page M again</a>.</p>'
@@ -185,24 +174,18 @@ def test_backlink_plugin_handles_duplicate_links(site_setup):
     plugin = BacklinkPlugin()
     plugin.after_update_urls(site)
 
-    # There should be only one link in the set
     assert page_m in page_l.to_links
     assert len(page_l.to_links) == 1
-    
-    # And only one backlink
     assert page_l in page_m.back_links
     assert len(page_m.back_links) == 1
 
 
 def test_backlink_plugin_handles_self_links(site_setup):
-    """Test that BacklinkPlugin correctly handles a page linking to itself."""
     site = site_setup
     config = site.config
 
     page_n = Single(abs_src_path=config.docs_dir / "post/page_n.md", config=config)
     page_n.rel_url = '/page-n/'
-    
-    # Link to itself
     page_n.content = f'<p>A link to <a href="{page_n.rel_url}">myself</a>.</p>'
 
     site.singles = [page_n]
@@ -210,7 +193,6 @@ def test_backlink_plugin_handles_self_links(site_setup):
     plugin = BacklinkPlugin()
     plugin.after_update_urls(site)
 
-    # Should have a link to itself in both to_links and back_links
     assert page_n in page_n.to_links
     assert len(page_n.to_links) == 1
     assert page_n in page_n.back_links
@@ -218,14 +200,11 @@ def test_backlink_plugin_handles_self_links(site_setup):
 
 
 def test_backlink_plugin_ignores_nonexistent_links(site_setup):
-    """Test that BacklinkPlugin ignores links to internal but nonexistent pages."""
     site = site_setup
     config = site.config
 
     page_o = Single(abs_src_path=config.docs_dir / "post/page_o.md", config=config)
     page_o.rel_url = '/page-o/'
-    
-    # Link to a page that is not in site.singles
     page_o.content = '<p>A link to <a href="/nonexistent-page/">a ghost</a>.</p>'
 
     site.singles = [page_o]
@@ -233,7 +212,6 @@ def test_backlink_plugin_ignores_nonexistent_links(site_setup):
     plugin = BacklinkPlugin()
     plugin.after_update_urls(site)
 
-    # No links should be added
     assert len(page_o.to_links) == 0
     assert len(page_o.back_links) == 0
     # The text of the link is still recorded
