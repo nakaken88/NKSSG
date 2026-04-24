@@ -165,3 +165,25 @@ def test_draft_mode_skips_processing(mock_config, mock_singles, create_mock_page
     plugin.after_update_singles_html(mock_singles)
 
     assert page.html == html_content
+
+
+def test_existing_dest_image_is_not_overwritten(mock_config, mock_singles, create_mock_page):
+    source_file = mock_config.docs_dir / "photo.png"
+    source_file.write_text("source content")
+
+    page = create_mock_page('<img src="/photo.png?">')
+    dest_file = page.dest_dir / "photo.png"
+    dest_file.write_text("existing content")
+
+    page.imgs = [{'old_path': source_file, 'new_path': dest_file}]
+    mock_singles.__iter__.return_value = [page]
+
+    site = MagicMock()
+    site.config = mock_config
+    site.singles = mock_singles
+
+    plugin = AwesomeImgLinkPlugin()
+    plugin.config = {}
+    plugin.after_output_singles(site)
+
+    assert dest_file.read_text() == "existing content"
