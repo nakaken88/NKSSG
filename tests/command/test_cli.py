@@ -6,11 +6,7 @@ from nkssg.__main__ import cli
 
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
-def test_cli_build_command(MockConfig, mock_build_module, tmp_path):
-    """
-    Tests that the `build` command calls the underlying build function
-    without the --clean flag.
-    """
+def test_cli_build_command(MockConfig, mock_build_module):
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
 
@@ -25,11 +21,7 @@ def test_cli_build_command(MockConfig, mock_build_module, tmp_path):
 
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
-def test_cli_build_command_with_clean_flag(MockConfig, mock_build_module, tmp_path):
-    """
-    Tests that the `build` command calls the underlying build function
-    with the --clean flag.
-    """
+def test_cli_build_command_with_clean_flag(MockConfig, mock_build_module):
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
 
@@ -44,10 +36,7 @@ def test_cli_build_command_with_clean_flag(MockConfig, mock_build_module, tmp_pa
 
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
-def test_cli_build_command_with_short_clean_flag(MockConfig, mock_build_module, tmp_path):
-    """
-    Tests that the `build` command works with the short -c flag for --clean.
-    """
+def test_cli_build_command_with_short_clean_flag(MockConfig, mock_build_module):
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
 
@@ -63,8 +52,6 @@ def test_cli_build_command_with_short_clean_flag(MockConfig, mock_build_module, 
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
 def test_cli_serve_command_defaults(MockConfig, mock_build_module):
-    """Tests the `serve` command with default options."""
-
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
     runner = CliRunner()
@@ -74,14 +61,12 @@ def test_cli_serve_command_defaults(MockConfig, mock_build_module):
     assert result.exit_code == 0, result.output
     MockConfig.from_file.assert_called_once_with(mode='serve')
     mock_build_module.serve.assert_called_once_with(mock_config_instance, False, 5500)
-    # For default, __setitem__ is called with False
     mock_config_instance.__setitem__.assert_called_once_with('serve_all', False)
 
 
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
 def test_cli_serve_command_with_all_options(MockConfig, mock_build_module):
-    """Tests the `serve` command with all options specified."""
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
     runner = CliRunner()
@@ -97,7 +82,6 @@ def test_cli_serve_command_with_all_options(MockConfig, mock_build_module):
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
 def test_cli_serve_command_with_short_options(MockConfig, mock_build_module):
-    """Tests the `serve` command with short form options."""
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
     runner = CliRunner()
@@ -113,7 +97,6 @@ def test_cli_serve_command_with_short_options(MockConfig, mock_build_module):
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
 def test_cli_draft_command_with_path(MockConfig, mock_build_module):
-    """Tests the `draft` command with a required path argument."""
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
     runner = CliRunner()
@@ -129,7 +112,6 @@ def test_cli_draft_command_with_path(MockConfig, mock_build_module):
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
 def test_cli_draft_command_with_port_option(MockConfig, mock_build_module):
-    """Tests the `draft` command with a specified port."""
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
     runner = CliRunner()
@@ -144,7 +126,6 @@ def test_cli_draft_command_with_port_option(MockConfig, mock_build_module):
 
 @patch('nkssg.__main__.new')
 def test_cli_new_site_command(mock_new_module):
-    """Tests the `new site` command."""
     runner = CliRunner()
     test_path = 'my-new-site'
 
@@ -157,7 +138,6 @@ def test_cli_new_site_command(mock_new_module):
 @patch('nkssg.__main__.new')
 @patch('nkssg.__main__.Config')
 def test_cli_new_page_command(MockConfig, mock_new_module):
-    """Tests the `new <name>` command for creating pages."""
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
     runner = CliRunner()
@@ -172,9 +152,6 @@ def test_cli_new_page_command(MockConfig, mock_new_module):
 
 
 def test_cli_draft_command_missing_path_argument_fails():
-    """
-    Tests that the `draft` command fails when the required path argument is missing.
-    """
     runner = CliRunner()
     result = runner.invoke(cli, ['draft'])
 
@@ -183,9 +160,6 @@ def test_cli_draft_command_missing_path_argument_fails():
 
 
 def test_cli_new_command_missing_name_argument_fails():
-    """
-    Tests that the `new` command fails when the required name argument is missing.
-    """
     runner = CliRunner()
     result = runner.invoke(cli, ['new'])
 
