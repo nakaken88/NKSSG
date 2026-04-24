@@ -171,3 +171,18 @@ def test_draft_mode_skips_processing(mock_config, mock_singles_and_site, create_
     plugin.after_update_urls(site)
 
     assert test_page.content == original_content
+
+
+def test_archive_links_are_resolved(mock_config, mock_singles_and_site, create_mock_page):
+    singles, site = mock_singles_and_site
+
+    archive_content = '<p>Link to <a href="page_a.md?">Page A</a></p>'
+    archive_page = create_mock_page(archive_content, "archive_page.md")
+    site.archives = [archive_page]
+    singles.__iter__.return_value = [singles.src_paths['page_a.md']]
+
+    plugin = AwesomePageLinkPlugin()
+    plugin.config = {}
+    plugin.after_update_urls(site)
+
+    assert archive_page.content == '<p>Link to <a href="/page/a/">Page A</a></p>'
