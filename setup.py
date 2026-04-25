@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='nkssg',
-    version='0.0.2-alpha',
+    version='0.0.3-alpha',
     description='NakaKen Static Site Generator',
     author='nakaken88',
     packages=find_packages(),
