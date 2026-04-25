@@ -217,3 +217,27 @@ def test_backlink_plugin_ignores_nonexistent_links(site_setup):
     # The text of the link is still recorded
     assert '/nonexistent-page/' in page_o.to_links_text
     assert len(page_o.to_links_text) == 1
+
+
+def test_backlink_plugin_resolves_original_site_url(site_setup):
+    site = site_setup
+    config = site.config
+    # site_url differs from site_url_original (e.g., in serve mode)
+    config.site.site_url = 'http://127.0.0.1:5500'
+    config.site.site_url_original = 'http://example.com'
+
+    page_p = Single(abs_src_path=config.docs_dir / "post/page_p.md", config=config)
+    page_q = Single(abs_src_path=config.docs_dir / "post/page_q.md", config=config)
+
+    page_p.rel_url = '/page-p/'
+    page_q.rel_url = '/page-q/'
+    page_p.content = f'<p>Link to <a href="http://example.com{page_q.rel_url}">Page Q</a>.</p>'
+    page_q.content = '<p>Page Q</p>'
+
+    site.singles = [page_p, page_q]
+
+    plugin = BacklinkPlugin()
+    plugin.after_update_urls(site)
+
+    assert page_q in page_p.to_links
+    assert page_p in page_q.back_links
