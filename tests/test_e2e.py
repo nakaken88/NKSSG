@@ -10,7 +10,6 @@ from nkssg.structure.singles import Single
 
 @pytest.fixture
 def simple_site(tmp_path):
-    """Prepares a simple site fixture in a temporary directory."""
     fixture_source = Path(__file__).parent / "fixtures" / "simple_site"
     site_path = tmp_path / "test_site"
     shutil.copytree(fixture_source, site_path)
@@ -18,7 +17,6 @@ def simple_site(tmp_path):
 
 
 def test_build_simple_site(simple_site):
-    """E2E test that verifies a simple site is built correctly."""
     original_docs_dir = Single.docs_dir
     try:
         Single.docs_dir = ''
