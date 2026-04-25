@@ -53,5 +53,10 @@ def test_build_simple_site(simple_site):
         assert "This is the <strong>about</strong> page." in page_content
 
         assert "Test Site" in page_content
+
+        page_archive_path = public_dir / "page" / "index.html"
+        assert page_archive_path.is_file()
+        page_archive_content = page_archive_path.read_text(encoding="utf-8")
+        assert "About Us" in page_archive_content
     finally:
         Single.docs_dir = original_docs_dir
