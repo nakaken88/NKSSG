@@ -556,11 +556,10 @@ class Single(Page):
         return url
 
     def _extract_part_type(self, part):
-        if '_top' in part:
-            return 'top', part[:-len('_top')]
-        elif '_last' in part:
-            return 'last', part[:-len('_last')]
-        return 'all', part[:-len('_all')]
+        for part_type in ['top', 'last', 'all']:
+            if part.endswith('_' + part_type):
+                return part_type, part[:-(len(part_type) + 1)]
+        return 'all', part
 
     def _get_target_archive_slugs(self, part):
         slugs = []
