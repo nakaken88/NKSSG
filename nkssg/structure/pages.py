@@ -145,7 +145,6 @@ class Page:
             output_path = self._get_dest_from_url(url)
             output_path = config.public_dir / output_path
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            print(output_path)
 
             with open(output_path, 'w', encoding='UTF-8') as f:
                 content = f'''
