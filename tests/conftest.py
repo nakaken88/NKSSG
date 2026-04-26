@@ -46,6 +46,10 @@ This is the **content** of my test post.
     (pages_dir / "about.html").touch()
     (pages_dir / "notes.txt").touch()
 
+    (default_theme_dir / "main.html").write_text(
+        "<!DOCTYPE html><html><body>{{ mypage.title }}</body></html>"
+    )
+
     (default_theme_dir / "single.html").write_text(
         """<!DOCTYPE html>
 <html>

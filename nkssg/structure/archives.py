@@ -230,10 +230,7 @@ class Archives(Pages):
                 for archive in self.archives.values()
             ]
             for future in as_completed(futures):
-                try:
-                    future.result()
-                except Exception as e:
-                    print(f"Exception during archive HTML rendering: {e}")
+                future.result()
 
         self.plugins.do_action('after_update_archives_html', target=self)
 

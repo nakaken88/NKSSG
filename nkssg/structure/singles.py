@@ -120,10 +120,7 @@ class Singles(Pages):
                 for page in self.pages
             ]
             for future in as_completed(futures):
-                try:
-                    future.result()
-                except Exception as e:
-                    print(e)
+                future.result()
 
         self.plugins.do_action('after_update_singles_html', target=self)
 
