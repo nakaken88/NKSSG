@@ -126,6 +126,19 @@ def test_get_url_from_permalink_section_top(config, permalink, expected):
     assert result == expected
 
 
+@pytest.mark.parametrize("input_part, expected_type, expected_name", [
+    ("category_top", "top", "category"),
+    ("category_last", "last", "category"),
+    ("category_all", "all", "category"),
+    ("category", "all", "category"),
+    ("top_category", "all", "top_category"),
+])
+def test_extract_part_type(single_obj, input_part, expected_type, expected_name):
+    part_type, name = single_obj._extract_part_type(input_part)
+    assert part_type == expected_type
+    assert name == expected_name
+
+
 def test_parse_front_matter_full(tmp_path):
     content = """
 ---
