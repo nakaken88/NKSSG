@@ -152,7 +152,7 @@ class Page:
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="uft-8">
+<meta charset="utf-8">
 <link rel="canonical" href="{self.url}"/>
 <meta http-equiv="refresh" content="0;url={self.url}">
 </head>
