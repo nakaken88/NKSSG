@@ -56,14 +56,14 @@ class TestPlugins:
 
     def test_missing_plugin_warning(self, mocker):
         mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')
-        mock_print = mocker.patch('builtins.print')
+        mock_logging = mocker.patch('nkssg.structure.plugins.logging')
         mock_entry_points.return_value = []
 
         config = Config()
         config.update({'plugins': {'non_existent_plugin': {}}})
         Plugins(config)
 
-        mock_print.assert_called_with('Warning: non_existent_plugin plugin is not found')
+        mock_logging.warning.assert_called_with('non_existent_plugin plugin is not found')
 
     def test_do_action_execution_order(self, mocker):
         mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')

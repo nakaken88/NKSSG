@@ -3,7 +3,6 @@ from pathlib import Path, PurePath
 import pytest
 import shutil
 from unittest.mock import MagicMock, patch
-import builtins
 import re
 import jinja2
 
@@ -527,11 +526,11 @@ class TestGetCleanDate:
         assert cleaned_date == expected_datetime
 
     def test_get_clean_date_invalid_string_prints_warning(self, single_obj, mocker):
-        mock_print = mocker.patch('builtins.print')
+        mock_logging = mocker.patch('nkssg.structure.singles.logging')
         single_obj._get_clean_date("2023-99-99 12:00")
 
-        mock_print.assert_called_once()
-        call_args, _ = mock_print.call_args
+        mock_logging.warning.assert_called_once()
+        call_args, _ = mock_logging.warning.call_args
         assert "2023-99-99 12:00" in call_args[0]
         assert str(single_obj.id) in call_args[0]
 
@@ -745,7 +744,7 @@ class TestSinglesDuplicateDetection:
 
 class TestSingleImageProcessing:
     @pytest.fixture
-    def image_test_single(self, tmp_path, mocker):
+    def image_test_single(self, tmp_path):
         base_dir = tmp_path
         docs_dir = base_dir / 'docs'
         docs_dir.mkdir()
@@ -776,8 +775,6 @@ class TestSingleImageProcessing:
         single = Single(docs_dir / 'post' / 'test-image.md', cfg)
         single.date = datetime.datetime(2023, 10, 26, 10, 30)
         single.abs_src_path = docs_dir / 'post' / 'test-image.md'
-
-        mocker.patch('builtins.print')
 
         yield single, cfg, public_dir
 
@@ -819,17 +816,17 @@ class TestSingleImageProcessing:
         assert result['new_path'] == expected_new_path
         assert 'alt' not in result
 
-    def test_get_image_absolute_local_path_not_exists(self, image_test_single):
+    def test_get_image_absolute_local_path_not_exists(self, image_test_single, mocker):
         single, config, _ = image_test_single
+        mock_logging = mocker.patch('nkssg.structure.singles.logging')
         src = '/images/non-existent.jpg'
         single.meta = {'image': {'src': src}}
 
         result = single._get_image(config)
 
         assert result == {}
-        builtins.print.assert_called_once()
-        assert "Warning: Image path" in builtins.print.call_args[0][0]
-        assert "non-existent.jpg" in builtins.print.call_args[0][0]
+        mock_logging.warning.assert_called_once()
+        assert "non-existent.jpg" in mock_logging.warning.call_args[0][0]
 
     def test_get_image_relative_local_path_exists(self, image_test_single):
         single, config, public_dir = image_test_single

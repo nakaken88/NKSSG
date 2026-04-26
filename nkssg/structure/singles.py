@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
+import logging
 from fnmatch import fnmatch
 import markdown
 from pathlib import Path, PurePath
@@ -140,7 +141,7 @@ class Singles(Pages):
     def get_single_by_file_id(self, file_id):
         single = self.file_ids.get(file_id)
         if single is None:
-            print('file_id:' + file_id + ' is not found.')
+            logging.warning(f'file_id: {file_id} is not found.')
         return single
 
 
@@ -328,7 +329,7 @@ class Single(Page):
             try:
                 return datetime.datetime.strptime(dirty_date, '%Y-%m-%d %H:%M')
             except ValueError:
-                print(f'{dirty_date} is not valid date value in {self.id}')
+                logging.warning(f'{dirty_date} is not valid date value in {self.id}')
                 return epoch_datetime
 
         return epoch_datetime
@@ -443,8 +444,7 @@ class Single(Page):
             image['old_path'] = image_path
         else:
             image = {}
-            print(f"Warning: Image path '{image_path}'"
-                  f" for post '{self.id}' does not exist.")
+            logging.warning(f"Image path '{image_path}' for post '{self.id}' does not exist.")
         return image
 
     def _set_image_url(self, image: dict, src: str, config: Config):

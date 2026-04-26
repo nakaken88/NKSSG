@@ -1,4 +1,5 @@
 import fnmatch
+import logging
 from pathlib import Path
 import shutil
 
@@ -139,7 +140,7 @@ class Site:
             if template_path:
                 self.output_extra_page(extra_page, template_path)
             elif extra_page not in self.config.extra_pages:
-                print(f'{extra_page} is not found on extra pages')
+                logging.warning(f'{extra_page} is not found on extra pages')
 
     def output_extra_page(self, extra_page, template_path):
         template = self.config.env.get_template(template_path)

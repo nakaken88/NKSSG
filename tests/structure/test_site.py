@@ -380,10 +380,10 @@ def test_output_extra_pages_merges_config_and_theme_extra_pages(MockThemes, base
     assert actual_files == expected_files
 
 
-@patch('builtins.print')
+@patch('nkssg.structure.site.logging')
 @patch('nkssg.structure.site.Themes')
 def test_output_extra_pages_logs_error_for_missing_template(
-    MockThemes, mock_print, base_config, mocker
+    MockThemes, mock_logging, base_config, mocker
 ):
     config = base_config
 
@@ -406,7 +406,7 @@ def test_output_extra_pages_logs_error_for_missing_template(
 
     site.output_extra_pages()
 
-    mock_print.assert_called_once_with(
+    mock_logging.warning.assert_called_once_with(
         'nonexistent_template.html is not found on extra pages'
     )
     public_dir = config.public_dir

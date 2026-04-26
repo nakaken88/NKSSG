@@ -1,4 +1,5 @@
 from importlib.metadata import entry_points
+import logging
 
 from nkssg.structure.config import Config
 
@@ -20,7 +21,7 @@ class Plugins():
                 plugin.config = plugin_config
                 self.plugins[plugin_name] = plugin
             else:
-                print('Warning: ' + plugin_name + ' plugin is not found')
+                logging.warning(f'{plugin_name} plugin is not found')
 
     def do_action(self, action_name, target=None, **kwargs):
 
