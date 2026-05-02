@@ -21,12 +21,12 @@ def build_command(clean):
 
 @cli.command(name='serve')
 @click.option('--static', '-s', is_flag=True)
-@click.option('--all', '-a', is_flag=True)
+@click.option('--all', '-a', 'serve_all', is_flag=True)
 @click.option('--port', '-p', default=5500)
-def build_serve(static, all, port):
+def build_serve(static, serve_all, port):
 
     config = Config.from_file(mode='serve')
-    config['serve_all'] = all
+    config['serve_all'] = serve_all
     build.serve(config, static, port)
 
 
