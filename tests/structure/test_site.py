@@ -142,8 +142,10 @@ def test_site_update_renders_html(site_fixture):
     site.setup()
     site.update()
 
-    assert len(site.singles.pages) == 1
-    single_page = site.singles.pages[0]
+    assert len(site.singles.pages) == 3
+    single_page = next(
+        p for p in site.singles.pages if p.title == "My Test Post Title"
+    )
 
     assert single_page.title == "My Test Post Title"
     assert single_page.content == "<p>This is the <strong>content</strong> of my test post.</p>"

@@ -205,19 +205,17 @@ class Config(BaseConfig):
 
     exclude: list = field(default_factory=list)
 
-    post_type: PostTypeConfigManager
-    post_type = field(default_factory=PostTypeConfigManager)
+    post_type: PostTypeConfigManager = field(default_factory=PostTypeConfigManager)
 
     theme: dict = field(default_factory=dict)
 
-    taxonomy: TaxonomyConfigManager
-    taxonomy = field(default_factory=TaxonomyConfigManager)
+    taxonomy: TaxonomyConfigManager = field(default_factory=TaxonomyConfigManager)
 
     use_abs_url: bool = True
 
-    now = datetime.datetime.now()
+    now: datetime.datetime = field(default_factory=datetime.datetime.now)
 
-    env: jinja2.Environment = jinja2.Environment()
+    env: jinja2.Environment = field(default_factory=jinja2.Environment)
 
     def __post_init__(self):
         default_dirs = {dir_type: dir_type for dir_type in self._dir_types}
