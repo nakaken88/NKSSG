@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 import shutil
 import tempfile
 
@@ -40,7 +41,7 @@ def start_server(config: Config, watch_paths, port=5500):
 def prepare_temp_dir(config: Config):
     temp_dir = Path(tempfile.mkdtemp(prefix='nkssg_'))
     config.public_dir = temp_dir
-    print(f'{temp_dir} is created.')
+    logging.info(f'{temp_dir} is created.')
 
 
 def serve(config: Config, static=False, port=5500):
