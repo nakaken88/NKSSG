@@ -185,9 +185,8 @@ class Config(BaseConfig):
         'select-pages': {}
     })
 
-    _dir_types: list[str] = field(default_factory=lambda: [
-        'docs', 'public', 'static', 'themes'
-    ])
+    _DIR_TYPES = ['docs', 'public', 'static', 'themes']
+
     base_dir: Path = None
     docs_dir: Path = Path()
     public_dir: Path = Path()
@@ -218,7 +217,7 @@ class Config(BaseConfig):
     env: jinja2.Environment = field(default_factory=jinja2.Environment)
 
     def __post_init__(self):
-        default_dirs = {dir_type: dir_type for dir_type in self._dir_types}
+        default_dirs = {dir_type: dir_type for dir_type in self._DIR_TYPES}
         if self.base_dir is None:
             self.base_dir = Path.cwd()
         self.set_directory_path(default_dirs)
