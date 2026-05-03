@@ -198,6 +198,16 @@ def test_parse_front_matter_file_not_found():
         Single.parse_front_matter(non_existent_path)
 
 
+@pytest.mark.parametrize("page_date, now, expected", [
+    (datetime.datetime(2020, 1, 1), datetime.datetime(2025, 1, 1), False),  # past
+    (datetime.datetime(2030, 1, 1), datetime.datetime(2025, 1, 1), True),   # future
+    (datetime.datetime(2025, 1, 1), datetime.datetime(2025, 1, 1), False),  # same moment
+])
+def test_is_future(single_obj, page_date, now, expected):
+    single_obj.date = page_date
+    assert single_obj._is_future(now) is expected
+
+
 @pytest.mark.parametrize(
     "front_matter_content, is_future, is_expired, expected_is_draft",
     [

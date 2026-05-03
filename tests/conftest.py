@@ -38,12 +38,12 @@ date: 2023-01-01
 This is the **content** of my test post.
 """
     )
-    (posts_dir / "first-post.md").touch()
+    (posts_dir / "first-post.md").write_text("---\ndate: 2022-06-01\n---\n")
     (posts_dir / "_draft.md").touch()  # Should be excluded
 
     pages_dir = docs_dir / "page"
     pages_dir.mkdir(parents=True, exist_ok=True)
-    (pages_dir / "about.html").touch()
+    (pages_dir / "about.html").write_text("---\ndate: 2022-06-01\n---\n")
     (pages_dir / "notes.txt").touch()
 
     (default_theme_dir / "main.html").write_text(
