@@ -101,7 +101,7 @@ def test_handle_missing_home_template(base_config, mocker):
 
     mocker.patch(
         'nkssg.structure.site.Themes.lookup_template',
-        return_value=''
+        return_value=None
     )
 
     site = Site(base_config)
@@ -118,7 +118,7 @@ def test_handle_missing_home_template_preserves_existing_archive_type(base_confi
 
     mocker.patch(
         'nkssg.structure.site.Themes.lookup_template',
-        return_value=''
+        return_value=None
     )
 
     site = Site(base_config)
@@ -288,7 +288,7 @@ def test_output_extra_pages(base_config, mocker):
         for p in path_list:
             if (theme_path / p).exists():
                 return p
-        return ''
+        return None
     mock_themes.lookup_template.side_effect = lookup_side_effect
 
     mocker.patch('nkssg.structure.site.Themes', return_value=mock_themes)
@@ -343,7 +343,7 @@ def test_output_extra_pages_merges_config_and_theme_extra_pages(MockThemes, base
         for p in path_list:
             if (theme_path / p).exists():
                 return p
-        return ''
+        return None
     mock_themes.lookup_template.side_effect = lookup_side_effect
 
     site = Site(config)
@@ -398,7 +398,7 @@ def test_output_extra_pages_logs_error_for_missing_template(
         'extra_pages': ['nonexistent_template.html']
     }
 
-    mock_themes_instance.lookup_template.return_value = ''
+    mock_themes_instance.lookup_template.return_value = None
 
     site = Site(config)
     site.themes = mock_themes_instance

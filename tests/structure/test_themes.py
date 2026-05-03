@@ -179,7 +179,7 @@ def test_lookup_template_not_found(base_config, create_theme_structure):
     themes = Themes(base_config)
 
     found_path = themes.lookup_template(['non_existent_template.html'])
-    assert found_path == ''
+    assert found_path is None
 
 
 def test_lookup_template_full_path(base_config, create_theme_structure):

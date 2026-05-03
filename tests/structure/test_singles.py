@@ -660,8 +660,8 @@ class TestSingleTemplateLookup:
         ('build', None, ['main.html'], 'main.html'),
 
         # None found
-        ('build', None, [], ''),
-        ('build', 'non-existent.html', [], ''),
+        ('build', None, [], None),
+        ('build', 'non-existent.html', [], None),
     ])
     def test_lookup_template_hierarchy(self, single_for_template_lookup,
                                        config_mode, meta_template, available_templates, expected_template):
@@ -674,7 +674,7 @@ class TestSingleTemplateLookup:
             for tpl in search_list:
                 if tpl in available_templates:
                     return tpl
-            return ''
+            return None
 
         mock_themes.lookup_template.side_effect = mock_lookup_template_side_effect
 

@@ -350,6 +350,8 @@ class Archive(Page):
                 paginator['next'] = paginator['pages'][i + 1]
 
             template_file = self.lookup_template(themes)
+            if not template_file:
+                raise ValueError(f"No template found for '{self.id}'.")
             template = config.env.get_template(template_file)
 
             paginator['pages'][i].html = template.render({

@@ -603,7 +603,9 @@ class Single(Page):
         config = singles.config
         plugins = singles.plugins
         template_file = self.lookup_template(config, themes)
-        template = config.env.get_template(str(template_file))
+        if not template_file:
+            raise ValueError(f"No template found for '{self.id}'.")
+        template = config.env.get_template(template_file)
 
         if any(x in self.content for x in ['{{', '{#', '{%']):
             additional_statement = self._get_shortcode_import_statement(themes)

@@ -57,9 +57,9 @@ class Themes:
         self.dirs.append(default_theme_dir)
         self.load_theme_config(default_theme_dir, default_theme_name)
 
-    def lookup_template(self, search_list: list[str], full_path=False):
+    def lookup_template(self, search_list: list[str], full_path=False) -> str | None:
         for search in search_list:
             if search in self._template_cache:
                 rel, abs_ = self._template_cache[search]
                 return abs_ if full_path else rel
-        return ''
+        return None
