@@ -18,6 +18,17 @@ class Themes:
             self.set_default_theme(config)
 
         config.theme['updated'] = True
+        self._template_cache = self._build_template_cache()
+
+    def _build_template_cache(self):
+        cache = {}
+        for d in reversed(self.dirs):
+            for f in d.glob('**/*'):
+                if f.is_file():
+                    rel = str(f.relative_to(d)).replace('\\', '/')
+                    abs_ = str(f).replace('\\', '/')
+                    cache[f.name] = (rel, abs_)
+        return cache
 
     def load_theme(self, config: Config, path):
         theme = config.theme.get(path)
@@ -48,13 +59,7 @@ class Themes:
 
     def lookup_template(self, search_list: list[str], full_path=False):
         for search in search_list:
-            for d in self.dirs:
-                for f in d.glob('**/*'):
-                    if f.is_file() and f.name == search:
-                        if full_path:
-                            path = f
-                        else:
-                            path = f.relative_to(d)
-                        path = str(path).replace('\\', '/')
-                        return path
+            if search in self._template_cache:
+                rel, abs_ = self._template_cache[search]
+                return abs_ if full_path else rel
         return ''
