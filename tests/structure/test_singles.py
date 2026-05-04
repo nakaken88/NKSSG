@@ -525,11 +525,11 @@ class TestGetCleanDate:
         # String with H:MM (non-zero-padded)
         ("2023-03-20 8:45", datetime.datetime(2023, 3, 20, 8, 45)),
         # None or other invalid types should return epoch
-        (None, datetime.datetime.fromtimestamp(0)),
-        (12345, datetime.datetime.fromtimestamp(0)),
-        ("An invalid string", datetime.datetime.fromtimestamp(0)),
+        (None, datetime.datetime(1970, 1, 1)),
+        (12345, datetime.datetime(1970, 1, 1)),
+        ("An invalid string", datetime.datetime(1970, 1, 1)),
         # Invalid date string format (wrong separator)
-        ("2023/03/20 08:45", datetime.datetime.fromtimestamp(0)),
+        ("2023/03/20 08:45", datetime.datetime(1970, 1, 1)),
     ])
     def test_get_clean_date_various_formats(self, single_obj, input_date, expected_datetime):
         cleaned_date = single_obj._get_clean_date(input_date)

@@ -14,6 +14,8 @@ from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Pages, Page
 from nkssg.structure.themes import Themes
 
+_EPOCH = datetime.datetime(1970, 1, 1)
+
 
 class Singles(Pages):
     def __init__(self, config: Config, plugins: Plugins):
@@ -317,7 +319,6 @@ class Single(Page):
         if isinstance(dirty_date, datetime.datetime):  # yyyy-mm-dd HH:MM:SS
             return dirty_date
 
-        epoch_datetime = datetime.datetime.fromtimestamp(0)
         if isinstance(dirty_date, datetime.date):  # yyyy-mm-dd
             return datetime.datetime.combine(dirty_date, datetime.time.min)
 
@@ -327,9 +328,8 @@ class Single(Page):
                 return datetime.datetime.strptime(dirty_date, '%Y-%m-%d %H:%M')
             except ValueError:
                 logging.warning(f'{dirty_date} is not valid date value in {self.id}')
-                return epoch_datetime
 
-        return epoch_datetime
+        return _EPOCH
 
     def _get_status(self):
         return self.meta.get('status', 'publish')
