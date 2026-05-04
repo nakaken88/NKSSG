@@ -1,3 +1,5 @@
+{# sc = shortcode: Jinja2 macros auto-imported into page content and templates. #}
+
 {% macro title_tag() -%}
   {%- if mypage and mypage.page_type == "single" -%}
     {{ mypage.title }} | {{ config.site.site_name }}

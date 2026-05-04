@@ -1083,29 +1083,21 @@ Hello, {{ mypage.title }}! The year is {{ config.now.year }}.
 
         mock_themes = mocker.MagicMock()
         mock_themes.lookup_template.return_value = "single.html"
-
-        dummy_theme_path = single.abs_src_path.parent.parent / "dummy_theme"
-        (dummy_theme_path / "import").mkdir(parents=True, exist_ok=True)
-        (dummy_theme_path / "import" / "short-code.html").touch()
-        mock_themes.dirs = [dummy_theme_path]
+        mock_themes.shortcode_import_statement = ''
 
         mock_archives = mocker.MagicMock()
         mock_singles_container = mocker.MagicMock()
         mock_singles_container.config = config
-        # Configure plugins.do_action to return the original content to prevent it from being overwritten by a mock.
         mock_plugins = mocker.MagicMock()
         mock_plugins.do_action.side_effect = lambda *args, **kwargs: kwargs.get('target')
         mock_singles_container.plugins = mock_plugins
 
         mock_main_template_object = mocker.MagicMock()
         mock_main_template_object.render.return_value = "FINAL RENDERED HTML"
-        mock_shortcode_template_object = mocker.MagicMock()
 
         def get_template_side_effect(template_name, parent=None):
             if template_name == "single.html":
                 return mock_main_template_object
-            elif template_name == "import/short-code.html":
-                return mock_shortcode_template_object
             pytest.fail(f"Unexpected template requested: {template_name}")
 
         with patch.object(config.env, 'get_template', side_effect=get_template_side_effect) as mock_get_template:
@@ -1119,9 +1111,8 @@ Hello, {{ mypage.title }}! The year is {{ config.now.year }}.
             main_render_context = mock_main_template_object.render.call_args[0][0]
             assert main_render_context['mypage'].content.strip() == expected_rendered_content
 
-            assert mock_get_template.call_count == 2
+            assert mock_get_template.call_count == 1
             mock_get_template.assert_any_call("single.html")
-            mock_get_template.assert_any_call("import/short-code.html", None)
 
 
 class TestGetSummary:

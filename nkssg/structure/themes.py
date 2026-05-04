@@ -19,6 +19,7 @@ class Themes:
 
         config.theme['updated'] = True
         self._template_cache = self._build_template_cache()
+        self.shortcode_import_statement = self._build_shortcode_import_statement()
 
     def _build_template_cache(self):
         cache = {}
@@ -56,6 +57,15 @@ class Themes:
         config.theme['name'] = default_theme_name
         self.dirs.append(default_theme_dir)
         self.load_theme_config(default_theme_dir, default_theme_name)
+
+    def _build_shortcode_import_statement(self) -> str:
+        result = []
+        for filename, (rel, _) in self._template_cache.items():
+            if rel.startswith('import/') and filename.endswith('.html'):
+                alias = filename[:-5]
+                if alias.isidentifier():
+                    result.append(f'{{% import "{rel}" as {alias} %}}')
+        return ''.join(result)
 
     def lookup_template(self, search_list: list[str], full_path=False) -> str | None:
         for search in search_list:
