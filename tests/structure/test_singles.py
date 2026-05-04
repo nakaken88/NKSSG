@@ -1129,17 +1129,23 @@ class TestGetSummary:
             None,
             "Content with  and  tags."
         ),
-        # Replacing special characters
+        # Special characters are HTML-escaped, not replaced with spaces
         (
             "Path is /a/b/c. It's a quote \" and backslash \\.",
             None,
-            "Path is  a b c. It s a quote   and backslash  ."
+            "Path is /a/b/c. It&#x27;s a quote &quot; and backslash \\."
         ),
-        # Truncation
+        # Truncation at 160 characters (plain text before escaping)
         (
-            "This is a very long string designed to test the truncation functionality of the summary generation. It should be cut off at exactly 110 characters, not before and not after. Let's see if it works as expected.",
+            "This is a very long string designed to test the truncation functionality of the summary generation. It should be cut off at exactly 160 characters, not before and not after. Let's see if it works as expected or not.",
             None,
-            "This is a very long string designed to test the truncation functionality of the summary generation. It should "
+            "This is a very long string designed to test the truncation functionality of the summary generation. It should be cut off at exactly 160 characters, not before a"
+        ),
+        # HTML entities are decoded then re-escaped
+        (
+            "<p>A &amp; B &lt;tag&gt; and &quot;quoted&quot;</p>",
+            None,
+            "A &amp; B &lt;tag&gt; and &quot;quoted&quot;"
         ),
         # Using meta.summary (should ignore content and truncation)
         (

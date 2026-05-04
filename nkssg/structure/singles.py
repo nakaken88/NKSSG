@@ -1,5 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
+import html
+from html.parser import HTMLParser
 import logging
 from fnmatch import fnmatch
 import markdown
@@ -399,21 +401,35 @@ class Single(Page):
         else:
             return content
 
+    class _SummaryTextExtractor(HTMLParser):
+        _SKIP_TAGS = {'script', 'style'}
+
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self._parts = []
+            self._skip = False
+
+        def handle_starttag(self, tag, attrs):
+            if tag in self._SKIP_TAGS:
+                self._skip = True
+
+        def handle_endtag(self, tag):
+            if tag in self._SKIP_TAGS:
+                self._skip = False
+
+        def handle_data(self, data):
+            if not self._skip:
+                self._parts.append(data)
+
+        def get_text(self):
+            return ''.join(self._parts).replace('\r\n', '').replace('\n', '')
+
     def _get_summary(self):
-        summary = self.meta.get('summary', self.content)
-        remove_patterns = [
-            r'<script.*?script>', r'<style.*?style>',
-            r'<.*?>'
-        ]
-        for pattern in remove_patterns:
-            summary = re.sub(pattern, '', summary, flags=re.DOTALL)
-
-        for word in ['/', '\\', '"', "'"]:
-            summary = summary.replace(word, ' ')
-
-        summary = summary.replace('\r\n', '').replace('\n', '')
-        summary = summary[:110]
-        return summary
+        raw = self.meta.get('summary', self.content)
+        parser = self._SummaryTextExtractor()
+        parser.feed(raw)
+        summary = parser.get_text()[:160]
+        return html.escape(summary)
 
     def _get_image(self, config: Config):
         image: dict = self.meta.get('image', {})
