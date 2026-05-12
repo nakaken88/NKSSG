@@ -7,7 +7,7 @@ from nkssg.structure.config import Config
 
 class Pages:
     def __init__(self):
-        self.config: Config = None
+        self.config: Config | None = None
         self.pages: list[Page] = []
 
     def __iter__(self):

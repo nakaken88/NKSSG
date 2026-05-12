@@ -187,7 +187,7 @@ class Config(BaseConfig):
 
     _DIR_TYPES = ['docs', 'public', 'static', 'themes']
 
-    base_dir: Path = None
+    base_dir: Path | None = None
     docs_dir: Path = Path()
     public_dir: Path = Path()
     static_dir: Path = Path()
@@ -247,7 +247,7 @@ class Config(BaseConfig):
             raise FileNotFoundError(msg)
 
     @classmethod
-    def from_file(cls, yaml_file_path: Path = Path('nkssg.yml'), mode: str = None, base_dir: Path = None):
+    def from_file(cls, yaml_file_path: Path = Path('nkssg.yml'), mode: str | None = None, base_dir: Path | None = None):
         config = cls(base_dir=base_dir)
         config._update_from_yaml_file(yaml_file_path)
         if mode:

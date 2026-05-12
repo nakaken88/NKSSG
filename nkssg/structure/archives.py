@@ -254,7 +254,7 @@ class Archive(Page):
 
         self.singles = []
         self.singles_all = []
-        self.single: Single = None
+        self.single: Single | None = None
 
     def __str__(self):
         return f"Archive(id='{self.id}')"
