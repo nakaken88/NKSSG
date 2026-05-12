@@ -270,7 +270,7 @@ class Archive(Page):
 
     @property
     def singles_all_count(self):
-        return len(self.singles_all) if self.singles_all is not None else 0
+        return len(self.singles_all)
 
     def get_archive_pages(self, config: Config, themes: Themes):
 
