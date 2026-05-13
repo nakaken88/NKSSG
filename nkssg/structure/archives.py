@@ -54,25 +54,23 @@ class Archives(Pages):
     def setup_post_type_archives(self, singles: Singles):
         for single in singles.pages:
             post_type_name = single.post_type
-            post_type_config = self.config.post_type.get(post_type_name, {})
-
-            archive_type = post_type_config.get('archive_type', '').lower()
+            archive_type = single.archive_type
 
             if archive_type == 'section':
-                id = self.modified_id(single.id.parent, 1, 'section')
+                archive_id = self.modified_id(single.id.parent, 1, 'section')
 
             elif archive_type == 'simple':
-                id = PurePath('/simple', post_type_name)
+                archive_id = PurePath('/simple', post_type_name)
 
             elif archive_type == 'date':
                 yyyy = str(single.date.year).zfill(4)
                 mm = str(single.date.month).zfill(2)
-                id = PurePath('/date', post_type_name, yyyy, mm)
+                archive_id = PurePath('/date', post_type_name, yyyy, mm)
 
             else:
                 continue
 
-            archive = self.create_archive(id)
+            archive = self.create_archive(archive_id)
 
             archive.singles.append(single)
             single.archive_list.append(archive)

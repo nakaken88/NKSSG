@@ -25,6 +25,7 @@ class TestArchives:
         single1 = MagicMock(
             spec=Single,
             post_type='post',
+            archive_type='date',
             archive_list=[],
             date=datetime.datetime(2023, 1, 15),
             id=PurePath('/docs/2023/01/15/post-1')
@@ -32,6 +33,7 @@ class TestArchives:
         single2 = MagicMock(
             spec=Single,
             post_type='post',
+            archive_type='date',
             archive_list=[],
             date=datetime.datetime(2023, 2, 20),
             id=PurePath('/docs/2023/02/20/post-2')
@@ -72,6 +74,7 @@ class TestArchives:
         single1 = MagicMock(
             spec=Single,
             post_type='post',
+            archive_type='section',
             archive_list=[],
             date=datetime.datetime(2023, 1, 15),
             id=PurePath('/docs/my-section/post-1')
@@ -79,6 +82,7 @@ class TestArchives:
         single2 = MagicMock(
             spec=Single,
             post_type='post',
+            archive_type='section',
             archive_list=[],
             date=datetime.datetime(2023, 2, 20),
             id=PurePath('/docs/another-section/post-2')
