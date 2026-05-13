@@ -296,71 +296,55 @@ class Archive(Page):
         paginator['limit'] = limit
         paginator['path'] = post_type_dict.get('path', 'path')
 
-        first_limit = post_type_dict.get('first_limit', 0) or limit
+        first_limit = post_type_dict.get('first_limit') or limit
         paginator['first_limit'] = first_limit
         total_elements = len(target_singles)
         paginator['total_elements'] = total_elements
 
-        # count archive page
+        # 1. compute slices
+        slices = []
+        start, end = 0, min(first_limit, total_elements)
+        while not slices or start < end:
+            slices.append((start, end))
+            start, end = end, min(end + limit, total_elements)
+
+        # 2. create page objects
         pages: list[Page] = []
-        start = 0
-        end = min(first_limit, total_elements)
-
-        while len(pages) == 0 or start < end:
-
-            page_index = len(pages) + 1
-            parts = ['index.html']
-            if page_index > 1:
-                parts = [paginator['path'], str(page_index)] + parts
-
-            archive_page = Page()
-            archive_page.dest_path = Path(self.dest_path.parent, *parts)
-            archive_page.rel_url = archive_page._get_url_from_dest()
-            archive_page._url_setup(config)
-            archive_page.page_number = page_index
-
-            pages.append(archive_page)
-
-            start = end
-            end = min(start + limit, total_elements)
+        for i, _ in enumerate(slices):
+            page_index = i + 1
+            parts = [paginator['path'], str(page_index), 'index.html'] if page_index > 1 else ['index.html']
+            page = Page()
+            page.dest_path = Path(self.dest_path.parent, *parts)
+            page.rel_url = page._get_url_from_dest()
+            page._url_setup(config)
+            page.page_number = page_index
+            pages.append(page)
 
         paginator['pages'] = pages
-        paginator['total_pages'] = len(paginator['pages'])
-        paginator['first'] = paginator['pages'][0]
-        paginator['last'] = paginator['pages'][-1]
+        paginator['total_pages'] = len(pages)
+        paginator['first'] = pages[0]
+        paginator['last'] = pages[-1]
 
         template_file = self.lookup_template(themes)
         if not template_file:
             raise ValueError(f"No template found for '{self.id}'.")
         template = config.env.get_template(template_file)
 
-        for i in range(paginator['total_pages']):
-            if i == 0:
-                start = 0
-                end = min(first_limit, total_elements)
-            else:
-                start = end
-                end = min(start + limit, total_elements)
-
+        # 3. render
+        for i, (start, end) in enumerate(slices):
             paginator['paged'] = i + 1
-            paginator['prev'] = None
-            paginator['next'] = None
+            paginator['has_prev'] = i > 0
+            paginator['prev'] = pages[i - 1] if paginator['has_prev'] else None
+            paginator['has_next'] = i < paginator['total_pages'] - 1
+            paginator['next'] = pages[i + 1] if paginator['has_next'] else None
 
-            paginator['has_prev'] = (i > 0)
-            if paginator['has_prev']:
-                paginator['prev'] = paginator['pages'][i - 1]
-
-            paginator['has_next'] = (i < paginator['total_pages'] - 1)
-            if paginator['has_next']:
-                paginator['next'] = paginator['pages'][i + 1]
-
-            paginator['pages'][i].html = template.render({
+            pages[i].html = template.render({
                 'mypage': self,
                 'pages': target_singles[start:end],
                 'paginator': paginator,
                 })
 
-        return paginator['pages']
+        return pages
 
     def lookup_template(self, themes: Themes):
         prefix = f'archive-{self.archive_type}'
