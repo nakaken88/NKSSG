@@ -157,3 +157,56 @@ class TestArchives:
         assert len(cat2_archive.singles) == 1
         assert single1 in cat2_archive.singles
         assert single2 not in cat2_archive.singles
+
+    def test_setup_taxonomy_archives_nested(self):
+        config = Config()
+
+        config.taxonomy = TaxonomyConfigManager()
+
+        cat_tax_config = TaxonomyConfig(name='category', slug='categories')
+        cat_tax_config.terms['cat1'] = TermConfig(name='cat1', slug='cat1')
+        cat_tax_config.terms['cat2'] = TermConfig(name='cat2', slug='cat2', parent='cat1')
+        cat_tax_config.terms['cat3'] = TermConfig(name='cat3', slug='cat3', parent='cat2')
+        config.taxonomy['category'] = cat_tax_config
+
+        mock_plugins = MagicMock(spec=Plugins)
+        archives = Archives(config, mock_plugins)
+        archives.setup_taxonomy_archives(MagicMock(spec=Singles, __iter__=lambda _: iter([])))
+
+        # cat1 is root-level: /taxonomy/category/cat1
+        cat1_id = PurePath('/taxonomy', 'category', 'cat1')
+        assert cat1_id in archives.archives
+
+        # cat2 is child of cat1: /taxonomy/category/cat1/cat2
+        cat2_id = PurePath('/taxonomy', 'category', 'cat1', 'cat2')
+        assert cat2_id in archives.archives
+
+        # cat3 is child of cat2: /taxonomy/category/cat1/cat2/cat3
+        cat3_id = PurePath('/taxonomy', 'category', 'cat1', 'cat2', 'cat3')
+        assert cat3_id in archives.archives
+
+        # long_ids maps short IDs to hierarchical IDs
+        short_cat2 = PurePath('/taxonomy', 'category', 'cat2')
+        short_cat3 = PurePath('/taxonomy', 'category', 'cat3')
+        assert archives.long_ids[short_cat2] == cat2_id
+        assert archives.long_ids[short_cat3] == cat3_id
+
+    def test_setup_taxonomy_archives_nested_reverse_order(self):
+        config = Config()
+
+        config.taxonomy = TaxonomyConfigManager()
+
+        # Define child before parent
+        cat_tax_config = TaxonomyConfig(name='category', slug='categories')
+        cat_tax_config.terms['cat2'] = TermConfig(name='cat2', slug='cat2', parent='cat1')
+        cat_tax_config.terms['cat1'] = TermConfig(name='cat1', slug='cat1')
+        config.taxonomy['category'] = cat_tax_config
+
+        mock_plugins = MagicMock(spec=Plugins)
+        archives = Archives(config, mock_plugins)
+        archives.setup_taxonomy_archives(MagicMock(spec=Singles, __iter__=lambda _: iter([])))
+
+        cat1_id = PurePath('/taxonomy', 'category', 'cat1')
+        cat2_id = PurePath('/taxonomy', 'category', 'cat1', 'cat2')
+        assert cat1_id in archives.archives
+        assert cat2_id in archives.archives

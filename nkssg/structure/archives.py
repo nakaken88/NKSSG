@@ -78,43 +78,31 @@ class Archives(Pages):
     def setup_taxonomy_archives(self, singles):
 
         for tax_name, tax_config in self.config.taxonomy.items():
-            root_id = PurePath('/taxonomy', tax_name)
             self.initialize_taxonomy_archives(tax_name, tax_config.terms)
-            self.reassign_id(root_id, tax_config.terms)
 
         self.add_singles_to_taxonomy_archives(singles)
 
     def initialize_taxonomy_archives(
             self, tax_name, terms: dict[str, TermConfig]):
 
-        for term_name, term_config in terms.items():
+        base_id = PurePath('/taxonomy', tax_name)
+        term_paths: dict[str, PurePath] = {}
 
-            archive_id = PurePath('/taxonomy', tax_name, term_name)
-            archive = self.create_archive(archive_id)
-
-            parent_id = PurePath('/taxonomy', tax_name, term_config.parent)
-            parent = self.create_archive(parent_id)
-
-            parent.children[term_name] = archive
-
-    def reassign_id(self, base_id: PurePath, terms: dict[str, TermConfig]):
-
-        ids_to_remove: set[PurePath] = set()
-        base_archive = self.create_archive(base_id)
-
-        for child_name, child_archive in base_archive.children.items():
-            term_config = terms[child_name]
-            if term_config.parent in ('', base_id.name):
-                new_id = base_archive.id / child_name
-                self.create_archive(new_id)
-                self.long_ids[child_archive.id] = new_id
-                self.reassign_id(child_archive.id, terms)
+        def get_path(term_name: str) -> PurePath:
+            if term_name in term_paths:
+                return term_paths[term_name]
+            parent_name = terms[term_name].parent
+            if parent_name in ('', tax_name):
+                path = base_id / term_name
             else:
-                ids_to_remove.add(child_archive.id)
+                path = get_path(parent_name) / term_name
+            term_paths[term_name] = path
+            return path
 
-        for archive_id in ids_to_remove:
-            del self.archives[archive_id]
-            del base_archive.children[archive_id.name]
+        for term_name in terms:
+            archive_id = get_path(term_name)
+            self.create_archive(archive_id)
+            self.long_ids[PurePath('/taxonomy', tax_name, term_name)] = archive_id
 
     def add_singles_to_taxonomy_archives(self, singles: Singles):
         taxonomy_root_archive = self.create_archive(PurePath('/taxonomy'))
