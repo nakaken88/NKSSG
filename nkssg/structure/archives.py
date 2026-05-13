@@ -32,14 +32,14 @@ class Archives(Pages):
 
         self.plugins.do_action('after_setup_archives', target=self)
 
-    def create_archive(self, id: PurePath) -> 'Archive':
-        if id in self.archives:
-            return self.archives[id]
+    def create_archive(self, archive_id: PurePath) -> 'Archive':
+        if archive_id in self.archives:
+            return self.archives[archive_id]
 
-        parent = self.create_archive(id.parent)
-        archive = Archive(parent, id.name)
+        parent = self.create_archive(archive_id.parent)
+        archive = Archive(parent, archive_id.name)
 
-        parent.children[id.name] = archive
+        parent.children[archive_id.name] = archive
         archive.parent = parent
 
         self.archives[archive.id] = archive
@@ -89,8 +89,8 @@ class Archives(Pages):
 
         for term_name, term_config in terms.items():
 
-            id = PurePath('/taxonomy', tax_name, term_name)
-            archive = self.create_archive(id)
+            archive_id = PurePath('/taxonomy', tax_name, term_name)
+            archive = self.create_archive(archive_id)
 
             parent_id = PurePath('/taxonomy', tax_name, term_config.parent)
             parent = self.create_archive(parent_id)
@@ -112,9 +112,9 @@ class Archives(Pages):
             else:
                 ids_to_remove.add(child_archive.id)
 
-        for id in ids_to_remove:
-            del self.archives[id]
-            del base_archive.children[id.name]
+        for archive_id in ids_to_remove:
+            del self.archives[archive_id]
+            del base_archive.children[archive_id.name]
 
     def add_singles_to_taxonomy_archives(self, singles: Singles):
         taxonomy_root_archive = self.create_archive(PurePath('/taxonomy'))
@@ -131,8 +131,8 @@ class Archives(Pages):
                         logging.warning(f'{root_name}: {term} is not found ({single})')
                         continue
 
-                    id = self.long_ids[short_id]
-                    archive = self.create_archive(id)
+                    archive_id = self.long_ids[short_id]
+                    archive = self.create_archive(archive_id)
                     if single not in archive.singles:
                         archive.singles.append(single)
                         single.archive_list.append(archive)
@@ -174,11 +174,11 @@ class Archives(Pages):
                         setattr(archive, attr, getattr(single, attr))
 
     def update_urls(self):
-        for id, archive in self.archives.items():
-            if len(id.parts) < 3:
+        for archive_id, archive in self.archives.items():
+            if len(archive_id.parts) < 3:
                 continue
 
-            parent = self.create_archive(id.parent)
+            parent = self.create_archive(archive_id.parent)
 
             if archive.archive_type == 'taxonomy':
                 root_config = self.config.taxonomy[archive.root_name]
@@ -193,7 +193,7 @@ class Archives(Pages):
             else:
                 root_dest = Path('index.html')
 
-            if len(id.parts) == 3:
+            if len(archive_id.parts) == 3:
                 archive.dest_path = root_dest
             else:
                 flat_url = root_config.get('flat-url', False)
