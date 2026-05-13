@@ -329,6 +329,11 @@ class Archive(Page):
         paginator['first'] = paginator['pages'][0]
         paginator['last'] = paginator['pages'][-1]
 
+        template_file = self.lookup_template(themes)
+        if not template_file:
+            raise ValueError(f"No template found for '{self.id}'.")
+        template = config.env.get_template(template_file)
+
         for i in range(paginator['total_pages']):
             if i == 0:
                 start = 0
@@ -348,11 +353,6 @@ class Archive(Page):
             paginator['has_next'] = (i < paginator['total_pages'] - 1)
             if paginator['has_next']:
                 paginator['next'] = paginator['pages'][i + 1]
-
-            template_file = self.lookup_template(themes)
-            if not template_file:
-                raise ValueError(f"No template found for '{self.id}'.")
-            template = config.env.get_template(template_file)
 
             paginator['pages'][i].html = template.render({
                 'mypage': self,
