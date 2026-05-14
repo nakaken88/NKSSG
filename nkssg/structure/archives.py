@@ -126,22 +126,26 @@ class Archives(Pages):
                         single.archive_list.append(archive)
 
     def update_singles_all(self):
+        seen: dict['Archive', set] = {}
+
         for archive in self.archives.values():
             if len(archive.id.parts) <= 2 or archive.children:
                 continue
 
             archive.singles_all = archive.singles[:]
+            seen[archive] = set(archive.singles)
+
             current = archive
             while len(current.id.parts) > 3:
                 parent = current.parent
-
-                for single in parent.singles:
-                    if single not in parent.singles_all:
-                        parent.singles_all.append(single)
+                if parent not in seen:
+                    parent.singles_all = parent.singles[:]
+                    seen[parent] = set(parent.singles)
 
                 for single in current.singles_all:
-                    if single not in parent.singles_all:
+                    if single not in seen[parent]:
                         parent.singles_all.append(single)
+                        seen[parent].add(single)
                 current = parent
 
     def link_section_archive_to_single(self, singles: Singles):
