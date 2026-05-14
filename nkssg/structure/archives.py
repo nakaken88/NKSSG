@@ -131,10 +131,9 @@ class Archives(Pages):
                 continue
 
             archive.singles_all = archive.singles[:]
-            current_id = archive.id
-            while len(current_id.parts) > 3:
-                current = self.archives[current_id]
-                parent = self.archives[current_id.parent]
+            current = archive
+            while len(current.id.parts) > 3:
+                parent = current.parent
 
                 for single in parent.singles:
                     if single not in parent.singles_all:
@@ -143,7 +142,7 @@ class Archives(Pages):
                 for single in current.singles_all:
                     if single not in parent.singles_all:
                         parent.singles_all.append(single)
-                current_id = current_id.parent
+                current = parent
 
     def link_section_archive_to_single(self, singles: Singles):
         attrs = [
@@ -234,8 +233,8 @@ class Archive(Page):
 
         self.page_type = 'archive'
 
-        self.parent = None
-        self.parents = []
+        self.parent: 'Archive | None' = None
+        self.parents: list['Archive'] = []
         self.children: dict[str, 'Archive'] = {}
 
         self.singles = []
