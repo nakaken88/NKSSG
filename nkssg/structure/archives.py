@@ -110,10 +110,10 @@ class Archives(Pages):
             for single in singles:
                 if single.meta.get(root_name) is None:
                     continue
-                if not isinstance(single.meta[root_name], list):
-                    single.meta[root_name] = [single.meta[root_name]]
-
-                for term in single.meta[root_name]:
+                terms = single.meta[root_name]
+                if not isinstance(terms, list):
+                    terms = [terms]
+                for term in terms:
                     short_id = PurePath('/taxonomy', root_name, term)
                     if short_id not in self.long_ids:
                         logging.warning(f'{root_name}: {term} is not found ({single})')
