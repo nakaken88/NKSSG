@@ -120,7 +120,7 @@ class Archives(Pages):
                         continue
 
                     archive_id = self.long_ids[short_id]
-                    archive = self.create_archive(archive_id)
+                    archive = self.archives[archive_id]
                     if single not in archive.singles:
                         archive.singles.append(single)
                         single.archive_list.append(archive)
@@ -133,8 +133,8 @@ class Archives(Pages):
             archive.singles_all = archive.singles[:]
             current_id = archive.id
             while len(current_id.parts) > 3:
-                current = self.create_archive(current_id)
-                parent = self.create_archive(current_id.parent)
+                current = self.archives[current_id]
+                parent = self.archives[current_id.parent]
 
                 for single in parent.singles:
                     if single not in parent.singles_all:
