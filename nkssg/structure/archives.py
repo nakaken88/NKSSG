@@ -235,8 +235,8 @@ class Archive(Page):
         self.parent: 'Archive | None' = parent
         self.children: dict[str, 'Archive'] = {}
 
-        self.singles = []
-        self.singles_all = []
+        self.singles: list[Single] = []
+        self.singles_all: list[Single] = []
         self.single: Single | None = None
 
     def __str__(self):
@@ -264,7 +264,7 @@ class Archive(Page):
     def singles_all_count(self):
         return len(self.singles_all)
 
-    def get_archive_pages(self, config: Config, themes: Themes):
+    def get_archive_pages(self, config: Config, themes: Themes) -> list[Page]:
 
         if not self.shouldUpdateHtml or self.singles_all_count == 0:
             return []
@@ -338,7 +338,7 @@ class Archive(Page):
 
         return pages
 
-    def lookup_template(self, themes: Themes):
+    def lookup_template(self, themes: Themes) -> str | None:
         prefix = f'archive-{self.archive_type}'
 
         search_list = [
