@@ -40,8 +40,6 @@ class Archives(Pages):
         archive = Archive(parent, archive_id.name)
 
         parent.children[archive_id.name] = archive
-        archive.parent = parent
-
         self.archives[archive.id] = archive
         return archive
 
@@ -234,7 +232,7 @@ class Archive(Page):
 
         self.page_type = 'archive'
 
-        self.parent: 'Archive | None' = None
+        self.parent: 'Archive | None' = parent
         self.parents: list['Archive'] = []
         self.children: dict[str, 'Archive'] = {}
 
