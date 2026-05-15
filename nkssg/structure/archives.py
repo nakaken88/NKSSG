@@ -343,6 +343,7 @@ class Archive(Page):
         prefix = f'archive-{self.archive_type}'
 
         search_list = [
+            f'{prefix}-{self.root_name}-{self.slug}.html',
             f'{prefix}-{self.slug}.html',
             f'{prefix}-{self.name}.html',
             f'{prefix}-{self.root_name}.html',
