@@ -166,35 +166,35 @@ class Archives(Pages):
 
     def update_urls(self):
         for archive_id, archive in self.archives.items():
+            # skip virtual root archives (/, /section, /taxonomy, etc.)
             if len(archive_id.parts) < 3:
                 continue
 
-            parent = self.create_archive(archive_id.parent)
+            parent = self.archives[archive_id.parent]
 
+            # get config for this archive type
             if archive.archive_type == 'taxonomy':
                 root_config = self.config.taxonomy[archive.root_name]
             else:
                 root_config = self.config.post_type[archive.root_name]
 
+            # determine root dest path (e.g. /posts/ or /blog/)
             add_prefix_to_url = root_config.get('add_prefix_to_url', True)
-
             if add_prefix_to_url:
                 slug = Page.to_slug(root_config.slug or archive.root_name)
                 root_dest = Path(slug, 'index.html')
             else:
                 root_dest = Path('index.html')
 
+            # set dest_path: root archives use root_dest, nested use parent or flat base
             if len(archive_id.parts) == 3:
                 archive.dest_path = root_dest
             else:
-                flat_url = root_config.get('flat-url', False)
-                if flat_url:
-                    base_path = root_dest.parent
-                else:
-                    base_path = parent.dest_path.parent
-
+                flat_url = root_config.get('flat_url', False)
+                base_path = root_dest.parent if flat_url else parent.dest_path.parent
                 archive.dest_path = base_path / archive.slug / 'index.html'
 
+            # section archives with index.md use the single's path
             if archive.single:
                 archive.dest_path = archive.single.dest_path
                 archive.dest_dir = archive.single.dest_dir

@@ -210,3 +210,45 @@ class TestArchives:
         cat2_id = PurePath('/taxonomy', 'category', 'cat1', 'cat2')
         assert cat1_id in archives.archives
         assert cat2_id in archives.archives
+
+
+class TestUpdateUrls:
+    def _make_archives(self, tax_config):
+        config = Config()
+        config.taxonomy = TaxonomyConfigManager()
+        config.taxonomy['tag'] = tax_config
+
+        archives = Archives(config, MagicMock(spec=Plugins))
+        archives.setup_taxonomy_archives(
+            MagicMock(spec=Singles, __iter__=lambda _: iter([])))
+        archives.update_urls()
+        return archives
+
+    def test_update_urls_nested_taxonomy_default(self):
+        tax_config = TaxonomyConfig(name='tag', slug='tag')
+        tax_config.terms['parent'] = TermConfig(name='parent', slug='parent')
+        tax_config.terms['child'] = TermConfig(name='child', slug='child', parent='parent')
+
+        archives = self._make_archives(tax_config)
+
+        parent_archive = archives.archives[PurePath('/taxonomy', 'tag', 'parent')]
+        child_archive = archives.archives[PurePath('/taxonomy', 'tag', 'parent', 'child')]
+
+        # default: child is nested under parent
+        assert parent_archive.dest_path.parts == ('tag', 'parent', 'index.html')
+        assert child_archive.dest_path.parts == ('tag', 'parent', 'child', 'index.html')
+
+    def test_update_urls_nested_taxonomy_flat_url(self):
+        tax_config = TaxonomyConfig(name='tag', slug='tag')
+        tax_config.update({'flat_url': True})
+        tax_config.terms['parent'] = TermConfig(name='parent', slug='parent')
+        tax_config.terms['child'] = TermConfig(name='child', slug='child', parent='parent')
+
+        archives = self._make_archives(tax_config)
+
+        parent_archive = archives.archives[PurePath('/taxonomy', 'tag', 'parent')]
+        child_archive = archives.archives[PurePath('/taxonomy', 'tag', 'parent', 'child')]
+
+        # flat_url: child is at the same level as parent
+        assert parent_archive.dest_path.parts == ('tag', 'parent', 'index.html')
+        assert child_archive.dest_path.parts == ('tag', 'child', 'index.html')
