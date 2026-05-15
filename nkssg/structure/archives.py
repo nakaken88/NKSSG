@@ -247,8 +247,9 @@ class Archive(Page):
         result = []
         current = self.parent
         while current is not None and current.id != PurePath('/'):
-            result.insert(0, current)
+            result.append(current)
             current = current.parent
+        result.reverse()
         return result
 
     @property
