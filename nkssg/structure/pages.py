@@ -53,8 +53,8 @@ class Page:
         self.page_type = ''
         self.archive_list = []
 
-        self.shouldUpdateHtml = True
-        self.shouldOutput = True
+        self.should_update_html = True
+        self.should_output = True
 
     @property
     def archive_type(self):
@@ -80,7 +80,7 @@ class Page:
         return suffix if suffix else dirty_name
 
     def output(self, config: Config):
-        if not self.shouldOutput:
+        if not self.should_output:
             return
 
         output_path = config.public_dir / self.dest_path

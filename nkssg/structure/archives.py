@@ -150,7 +150,7 @@ class Archives(Pages):
         attrs = [
             'file_id', 'meta', 'title', 'name', 'slug', 'content',
             'summary', 'image', 'archive_list',
-            'shouldUpdateHtml', 'shouldOutput'
+            'should_update_html', 'should_output'
         ]
         for single in singles:
             archive_type = single.archive_type
@@ -267,7 +267,7 @@ class Archive(Page):
 
     def get_archive_pages(self, config: Config, themes: Themes) -> list[Page]:
 
-        if not self.shouldUpdateHtml or self.singles_all_count == 0:
+        if not self.should_update_html or self.singles_all_count == 0:
             return []
 
         if self.archive_type == 'date':

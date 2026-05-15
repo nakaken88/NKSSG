@@ -613,7 +613,7 @@ class Single(Page):
 
     def update_html(self, singles: Singles, archives, themes: Themes):
 
-        if not self.shouldUpdateHtml:
+        if not self.should_update_html:
             return
 
         config = singles.config
