@@ -96,7 +96,7 @@ class Page:
 
             if old_path and new_path:
                 new_path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(str(old_path), str(new_path))
+                shutil.copyfile(old_path, new_path)
 
         if self.meta.get('aliases'):
             self.output_aliases(config)
