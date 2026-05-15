@@ -29,13 +29,13 @@ class Page:
         self.id: PurePath = PurePath('')
         self.file_id = ''
 
-        self.meta = {}
+        self.meta: dict = {}
         self.title = ''
         self.name = ''
         self.slug = ''
         self.content: str = ''
         self.summary = ''
-        self.image = {}
+        self.image: dict = {}
 
         self.status = 'public'
         self.is_draft = False
@@ -48,10 +48,10 @@ class Page:
         self.rel_url = ''
         self.dest_path: Path = Path('index.html')
         self.dest_dir = ''
-        self.aliases = []
+        self.aliases: list = []
 
         self.page_type = ''
-        self.archive_list = []
+        self.archive_list: list = []
 
         self.should_update_html = True
         self.should_output = True
@@ -101,7 +101,7 @@ class Page:
         if self.meta.get('aliases'):
             self.output_aliases(config)
 
-    def _get_url_from_dest(self, dest_path=''):
+    def _get_url_from_dest(self, dest_path: Path | str = '') -> str:
 
         dest_path = dest_path or self.dest_path
         if not dest_path:
