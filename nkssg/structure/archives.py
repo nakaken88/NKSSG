@@ -221,7 +221,7 @@ class Archives(Pages):
 
 class Archive(Page):
 
-    def __init__(self, parent: 'Archive', name):
+    def __init__(self, parent: 'Archive | None', name):
         super().__init__()
 
         self.id = PurePath(parent.id if parent else '', name)
@@ -233,7 +233,6 @@ class Archive(Page):
         self.page_type = 'archive'
 
         self.parent: 'Archive | None' = parent
-        self.parents: list['Archive'] = []
         self.children: dict[str, 'Archive'] = {}
 
         self.singles = []
@@ -242,6 +241,15 @@ class Archive(Page):
 
     def __str__(self):
         return f"Archive(id='{self.id}')"
+
+    @property
+    def parents(self) -> list['Archive']:
+        result = []
+        current = self.parent
+        while current is not None and current.id != PurePath('/'):
+            result.insert(0, current)
+            current = current.parent
+        return result
 
     @property
     def is_root(self):
