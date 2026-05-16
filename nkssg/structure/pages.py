@@ -50,19 +50,15 @@ class Page:
         return dirty_slug.replace(' ', '-').lower()
 
     @staticmethod
-    def clean_name(dirty_name: str):
-        if not dirty_name.startswith('_'):
-            return dirty_name
+    def clean_name(dirty_name: str) -> str:
         if dirty_name.startswith('__'):
             return dirty_name[1:]
-
-        parts = dirty_name.split('_')
-        if len(parts) <= 2:
+        if not dirty_name.startswith('_'):
             return dirty_name
-
-        prefix = f'_{parts[1]}_'
-        suffix = dirty_name[len(prefix):]
-        return suffix if suffix else dirty_name
+        second = dirty_name.find('_', 1)
+        if second == -1 or second == len(dirty_name) - 1:
+            return dirty_name
+        return dirty_name[second + 1:]
 
     def output(self, config: Config):
         if not self.should_output:
