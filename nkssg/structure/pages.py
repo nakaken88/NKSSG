@@ -86,11 +86,9 @@ class Page:
             raise ValueError(f'Destination path error on {self.id}')
 
         parts = Path(dest_path).parts
-
-        if len(parts) == 1 and parts[-1] == 'index.html':
-            url = '/'
-        elif parts[-1] == 'index.html':
-            url = '/' + '/'.join(parts[:-1]) + '/'
+        if parts[-1] == 'index.html':
+            inner = '/'.join(parts[:-1])
+            url = f'/{inner}/' if inner else '/'
         elif '.' in parts[-1]:
             url = '/' + '/'.join(parts)
         else:
