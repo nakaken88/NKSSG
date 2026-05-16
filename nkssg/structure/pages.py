@@ -65,15 +65,12 @@ class Page:
             return
 
         output_path = config.public_dir / self.dest_path
-        output_dir = output_path.parent
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        with open(output_path, 'w', encoding='UTF-8') as f:
-            f.write(self.html)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(self.html, encoding='utf-8')
 
         if self.image:
-            old_path: Path = self.image.get('old_path')
-            new_path: Path = self.image.get('new_path')
+            old_path: Path | None = self.image.get('old_path')
+            new_path: Path | None = self.image.get('new_path')
 
             if old_path and new_path:
                 new_path.parent.mkdir(parents=True, exist_ok=True)
