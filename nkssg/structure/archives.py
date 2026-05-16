@@ -4,12 +4,12 @@ from pathlib import Path, PurePath
 
 from nkssg.structure.config import Config, TermConfig
 from nkssg.structure.plugins import Plugins
-from nkssg.structure.pages import Pages, Page
+from nkssg.structure.pages import Page
 from nkssg.structure.singles import Singles, Single
 from nkssg.structure.themes import Themes
 
 
-class Archives(Pages):
+class Archives:
     def __init__(self, config: Config, plugins: Plugins):
         self.config = config
         self.plugins = plugins
@@ -22,6 +22,10 @@ class Archives(Pages):
 
     def __iter__(self):
         return iter(self.archives.values())
+
+    def output(self):
+        for page in self.pages:
+            page.output(self.config)
 
     def setup(self, singles):
 

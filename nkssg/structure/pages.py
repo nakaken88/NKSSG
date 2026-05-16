@@ -5,25 +5,6 @@ from urllib.parse import quote, unquote
 from nkssg.structure.config import Config
 
 
-class Pages:
-    def __init__(self):
-        self.config: Config | None = None
-        self.pages: list[Page] = []
-
-    def __iter__(self):
-        return iter(self.pages)
-
-    def setup(self):
-        pass
-
-    def update(self):
-        pass
-
-    def output(self):
-        for page in self.pages:
-            page.output(self.config)
-
-
 class Page:
     def __init__(self):
         self.id: PurePath = PurePath('')

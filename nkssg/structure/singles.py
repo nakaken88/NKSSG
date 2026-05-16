@@ -13,13 +13,13 @@ from ruamel.yaml import YAML, YAMLError
 
 from nkssg.structure.config import Config
 from nkssg.structure.plugins import Plugins
-from nkssg.structure.pages import Pages, Page
+from nkssg.structure.pages import Page
 from nkssg.structure.themes import Themes
 
 _EPOCH = datetime.datetime(1970, 1, 1)
 
 
-class Singles(Pages):
+class Singles:
     def __init__(self, config: Config, plugins: Plugins):
         self.config = config
         self.plugins = plugins
@@ -27,6 +27,13 @@ class Singles(Pages):
         self.file_ids = {}
         self.dest_paths = {}
         self.plugins.do_action('after_initialize_singles', target=self)
+
+    def __iter__(self):
+        return iter(self.pages)
+
+    def output(self):
+        for page in self.pages:
+            page.output(self.config)
 
     def get_pages_from_docs_directory(self):
         if self.config['mode'] == 'draft':
