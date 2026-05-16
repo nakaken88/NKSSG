@@ -1,8 +1,12 @@
 from pathlib import Path, PurePath
 import shutil
+from typing import TYPE_CHECKING
 from urllib.parse import quote, unquote
 
 from nkssg.structure.config import Config
+
+if TYPE_CHECKING:
+    from nkssg.structure.archives import Archive
 
 
 class Page:
@@ -29,10 +33,10 @@ class Page:
         self.rel_url = ''
         self.dest_path: Path = Path('index.html')
         self.dest_dir = ''
-        self.aliases: list = []
+        self.aliases: list[str] = []
 
         self.page_type = ''
-        self.archive_list: list = []
+        self.archive_list: list['Archive'] = []
 
         self.should_update_html = True
         self.should_output = True
