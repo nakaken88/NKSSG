@@ -113,18 +113,14 @@ class Page:
         self.url = self.abs_url if config.use_abs_url else self.rel_url
 
     def output_aliases(self, config: Config):
-        for url in self.meta['aliases']:
-            url = '/' + url.strip('/')
-            if '.htm' not in url:
-                url += '/'
+        for alias in self.meta['aliases']:
+            alias_url = '/' + alias.strip('/')
+            if not alias_url.endswith(('.htm', '.html')):
+                alias_url += '/'
 
-            output_path = self._get_dest_from_url(url)
-            output_path = config.public_dir / output_path
+            output_path = config.public_dir / self._get_dest_from_url(alias_url)
             output_path.parent.mkdir(parents=True, exist_ok=True)
-
-            with open(output_path, 'w', encoding='UTF-8') as f:
-                content = f'''
-<!DOCTYPE html>
+            output_path.write_text(f'''<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -138,5 +134,4 @@ Click <a href="{self.url}">here</a> to go to the new page.
 </p>
 </body>
 </html>
-'''
-                f.write(content)
+''', encoding='utf-8')
