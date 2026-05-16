@@ -15,7 +15,7 @@ class Archives:
         self.plugins = plugins
         self.archives: dict[PurePath, Archive] = {}
         self.long_ids: dict[PurePath, PurePath] = {}  # for taxonomy
-        self.pages = []
+        self.rendered_pages: list[Page] = []
 
         global_root_archive = Archive(None, '/')
         self.archives[global_root_archive.id] = global_root_archive
@@ -24,7 +24,7 @@ class Archives:
         return iter(self.archives.values())
 
     def output(self):
-        for page in self.pages:
+        for page in self.rendered_pages:
             page.output(self.config)
 
     def setup(self, singles):
@@ -218,7 +218,7 @@ class Archives:
         with ThreadPoolExecutor() as executor:
             results = executor.map(get_pages, self.archives.values())
             for pages in results:
-                self.pages.extend(pages)
+                self.rendered_pages.extend(pages)
 
         self.plugins.do_action('after_update_archives_html', target=self)
 
