@@ -42,11 +42,11 @@ class Page:
         self.should_output = True
 
     @property
-    def archive_type(self):
+    def archive_type(self) -> str:
         return self.id.parts[1] if len(self.id.parts) >= 2 else ''
 
     @staticmethod
-    def to_slug(dirty_slug: str):
+    def to_slug(dirty_slug: str) -> str:
         return dirty_slug.replace(' ', '-').lower()
 
     @staticmethod
@@ -60,7 +60,7 @@ class Page:
             return dirty_name
         return dirty_name[second + 1:]
 
-    def output(self, config: Config):
+    def output(self, config: Config) -> None:
         if not self.should_output:
             return
 
@@ -95,14 +95,14 @@ class Page:
             url = '/' + '/'.join(parts) + '/'
         return quote(url).lower()
 
-    def _get_dest_from_url(self, url: str):
+    def _get_dest_from_url(self, url: str) -> Path:
         url = url.strip('/')
         parts = unquote(url).split('/')
         if '.' not in parts[-1]:
             parts.append('index.html')
         return Path(*parts)
 
-    def _url_setup(self, config: Config):
+    def _url_setup(self, config: Config) -> None:
         if not self.rel_url:
             return
 
@@ -112,7 +112,7 @@ class Page:
 
         self.url = self.abs_url if config.use_abs_url else self.rel_url
 
-    def output_aliases(self, config: Config):
+    def output_aliases(self, config: Config) -> None:
         for alias in self.meta['aliases']:
             alias_url = '/' + alias.strip('/')
             if not alias_url.endswith(('.htm', '.html')):
