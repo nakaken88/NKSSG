@@ -175,7 +175,7 @@ class Single(Page):
         self.post_type_index = list(config.post_type).index(self.post_type)
         self.archive_type = config.post_type[self.post_type].archive_type
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Single(src='{self.id}')"
 
     def __lt__(self, other: 'Single') -> bool:
@@ -224,12 +224,12 @@ class Single(Page):
         self.file_id = self._get_file_id()
 
     @property
-    def is_root(self):
+    def is_root(self) -> bool:
         # /docs/{post_type}/index.md
         return len(self.id.parts) == 4
 
     @staticmethod
-    def parse_front_matter(path: Path):
+    def parse_front_matter(path: Path) -> tuple[dict, str]:
         try:
             doc = path.read_text(encoding='utf-8')
         except FileNotFoundError:
