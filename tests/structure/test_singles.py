@@ -670,7 +670,7 @@ class TestSinglesDuplicateDetection:
         singles.pages = [s1, s2]
 
         with pytest.raises(ValueError, match="Duplicate Dest Path"):
-            singles.setup_dest_path()
+            singles._setup_dest_path()
 
     def test_singles_draft_mode_initialization(self, tmp_path):
         config = Config(base_dir=tmp_path)

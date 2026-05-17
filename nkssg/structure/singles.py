@@ -121,7 +121,7 @@ class Singles:
 
         self.plugins.do_action('after_update_singles_url', target=self)
 
-        self.setup_dest_path()
+        self._setup_dest_path()
 
     def update_htmls(self, archives: 'Archives', themes: Themes) -> None:
         self.plugins.do_action('before_update_singles_html', target=self)
@@ -136,7 +136,7 @@ class Singles:
 
         self.plugins.do_action('after_update_singles_html', target=self)
 
-    def setup_dest_path(self):
+    def _setup_dest_path(self):
         for page in self.pages:
             dest_path = str(page.dest_path)
             if dest_path in self.dest_paths:
