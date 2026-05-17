@@ -260,10 +260,9 @@ class Single(Page):
         except Exception:
             return _EPOCH, _EPOCH
 
-    def _get_date(self):
+    def _get_date(self) -> tuple[datetime.datetime, datetime.datetime]:
         try:
-            temp_filename = self.filename.replace('-', '')
-            cdate = datetime.datetime.strptime(temp_filename, '%Y%m%d')
+            cdate = datetime.datetime.strptime(self.filename.replace('-', '')[:8], '%Y%m%d')
         except ValueError:
             cdate = self.date
 
@@ -276,7 +275,7 @@ class Single(Page):
 
         return cdate, mdate
 
-    def _get_clean_date(self, dirty_date):
+    def _get_clean_date(self, dirty_date) -> datetime.datetime:
 
         if isinstance(dirty_date, datetime.datetime):  # yyyy-mm-dd HH:MM:SS
             return dirty_date
