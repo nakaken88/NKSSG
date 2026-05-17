@@ -74,16 +74,14 @@ class Singles:
         return f.is_file() and has_valid_ext and not is_excluded
 
     def _setup_draft_mode(self):
-        page = self.pages[0]
-        new_page = page.setup(self.config, self.plugins)
-        self.pages = [new_page]
+        self.pages[0].setup(self.config, self.plugins)
 
     def _setup_normal_mode(self):
         new_pages = []
         for page in self.pages:
-            new_page = page.setup(self.config, self.plugins)
-            if self.config.get('serve_all') or not new_page.is_draft:
-                new_pages.append(new_page)
+            page.setup(self.config, self.plugins)
+            if self.config.get('serve_all') or not page.is_draft:
+                new_pages.append(page)
         self.pages = new_pages
 
     def _setup_prev_next_page(self):
@@ -204,12 +202,12 @@ class Single(Page):
 
         return (s_order, self.src_path) < (o_order, other.src_path)
 
-    def setup(self, config: Config, plugins: Plugins):
+    def setup(self, config: Config, plugins: Plugins) -> None:
 
         self.meta, doc = self.parse_front_matter(self.abs_src_path)
 
         self.date, self.modified = self._get_date()
-        self.status = self._get_status()
+        self.status = self.meta.get('status', 'publish')
         self.is_expired = self._is_expired(config.now)
         self.is_future = self._is_future(config.now)
         self.is_draft = self._is_draft()
@@ -217,16 +215,13 @@ class Single(Page):
         self.title = self._get_title()
         self.name = self._get_name()
 
-        post_type_slug = config.post_type[self.post_type].slug
-        post_type_slug = post_type_slug or self.post_type
+        post_type_slug = config.post_type[self.post_type].slug or self.post_type
         self.slug = self._get_slug(post_type_slug)
 
         self.content = self._get_content(doc, config, plugins)
         self.image = self._get_image(config)
 
         self.file_id = self._get_file_id()
-
-        return self
 
     @property
     def is_root(self):
@@ -311,9 +306,6 @@ class Single(Page):
                 logging.warning(f'{dirty_date} is not valid date value in {self.id}')
 
         return _EPOCH
-
-    def _get_status(self):
-        return self.meta.get('status', 'publish')
 
     def _is_expired(self, now):
         expire = self.meta.get('expire')
