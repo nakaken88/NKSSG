@@ -36,17 +36,17 @@ class Singles:
         for page in self.pages:
             page.output(self.config)
 
-    def get_pages_from_docs_directory(self):
+    def get_pages_from_docs_directory(self) -> list['Single']:
         if self.config['mode'] == 'draft':
             return self._handle_draft_mode()
 
         return self._handle_normal_mode()
 
-    def _handle_draft_mode(self):
+    def _handle_draft_mode(self) -> list['Single']:
         draft_path = self.config['draft_path']
         return [Single(draft_path, self.config)]
 
-    def _handle_normal_mode(self):
+    def _handle_normal_mode(self) -> list['Single']:
         return [
             Single(f, self.config)
             for post_type in self.config.post_type
@@ -54,15 +54,15 @@ class Singles:
             if self._is_valid_file(f)
         ]
 
-    def _is_valid_file(self, f: Path):
+    def _is_valid_file(self, f: Path) -> bool:
         docs_dir = self.config.docs_dir
         ext = f.suffix[1:]
         is_file = f.is_file()
         has_valid_extension = ext in self.config.doc_ext
-        not_excluded = not self.is_exclude(f.relative_to(docs_dir))
+        not_excluded = not self._is_exclude(f.relative_to(docs_dir))
         return is_file and has_valid_extension and not_excluded
 
-    def is_exclude(self, target):
+    def _is_exclude(self, target) -> bool:
         return any(fnmatch(target, item) for item in self.config.exclude)
 
     def setup(self):
