@@ -175,11 +175,7 @@ class Single(Page):
         self.date, self.modified = self._get_file_dates()
 
         self.post_type_index = list(config.post_type).index(self.post_type)
-        self._archive_type = config.post_type[self.post_type].archive_type
-
-    @property
-    def archive_type(self):
-        return self._archive_type
+        self.archive_type = config.post_type[self.post_type].archive_type
 
     def __str__(self):
         return f"Single(src='{self.id}')"

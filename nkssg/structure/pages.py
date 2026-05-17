@@ -36,14 +36,11 @@ class Page:
         self.aliases: list[str] = []
 
         self.page_type = ''
+        self.archive_type = ''
         self.archive_list: list['Archive'] = []
 
         self.should_update_html = True
         self.should_output = True
-
-    @property
-    def archive_type(self) -> str:
-        return self.id.parts[1] if len(self.id.parts) >= 2 else ''
 
     @staticmethod
     def to_slug(dirty_slug: str) -> str:

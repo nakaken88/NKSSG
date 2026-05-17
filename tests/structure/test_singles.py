@@ -344,7 +344,7 @@ def create_single(tmp_path):
         if date:
             s.date = date
 
-        s._archive_type = cfg.post_type.get(post_type, {}).get('archive_type', 'section')
+        s.archive_type = cfg.post_type.get(post_type, {}).get('archive_type', 'section')
 
         return s
 

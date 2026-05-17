@@ -235,6 +235,7 @@ class Archive(Page):
         self.slug = Page.to_slug(self.name)
 
         self.page_type = 'archive'
+        self.archive_type = self.id.parts[1] if len(self.id.parts) >= 2 else ''
 
         self.parent: 'Archive | None' = parent
         self.children: dict[str, 'Archive'] = {}
