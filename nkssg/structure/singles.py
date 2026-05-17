@@ -37,15 +37,8 @@ class Singles:
 
     def get_pages_from_docs_directory(self) -> list['Single']:
         if self.config['mode'] == 'draft':
-            return self._handle_draft_mode()
+            return [Single(self.config['draft_path'], self.config)]
 
-        return self._handle_normal_mode()
-
-    def _handle_draft_mode(self) -> list['Single']:
-        draft_path = self.config['draft_path']
-        return [Single(draft_path, self.config)]
-
-    def _handle_normal_mode(self) -> list['Single']:
         return [
             Single(f, self.config)
             for post_type in self.config.post_type
