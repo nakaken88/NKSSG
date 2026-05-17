@@ -729,7 +729,6 @@ class TestSingleImageProcessing:
 
         single = Single(docs_dir / 'post' / 'test-image.md', cfg)
         single.date = datetime.datetime(2023, 10, 26, 10, 30)
-        single.abs_src_path = docs_dir / 'post' / 'test-image.md'
 
         return single, cfg, public_dir
 
@@ -783,7 +782,10 @@ class TestSingleImageProcessing:
 
     def test_get_image_relative_local_path_exists(self, image_test_single):
         single, config, public_dir = image_test_single
-        single.abs_src_path = config.docs_dir / 'post' / 'some-post.md'
+        some_post = config.docs_dir / 'post' / 'some-post.md'
+        some_post.touch()
+        single = Single(some_post, config)
+        single.date = datetime.datetime(2023, 10, 26, 10, 30)
         src = '../../images/local-img.jpg'
         single.meta = {'image': {'src': src, 'caption': 'A caption'}}
 
@@ -896,37 +898,8 @@ class TestSingleInitializationAndPathParsing:
         assert single.ext == 'md'
         assert single.archive_type == 'section'
 
-    def test_abs_src_path_setter_success(self, mock_config_for_single_init):
+    def test_init_raises_for_path_not_under_docs_dir(self, mock_config_for_single_init, tmp_path):
         config = mock_config_for_single_init
-
-        (config.docs_dir / 'page').mkdir()
-        src_file = config.docs_dir / 'page' / 'about.html'
-        src_file.touch()
-
-        single = Single(src_file, config)
-
-        new_src_file = config.docs_dir / 'article' / 'another-post.md'
-        new_src_file.parent.mkdir(exist_ok=True)
-        new_src_file.touch()
-
-        single.abs_src_path = new_src_file
-
-        assert single.abs_src_path == new_src_file
-        assert single.src_path == Path('article/another-post.md')
-        assert single.id == PurePath('/docs/article/another-post.md')
-        assert single.post_type == 'article'
-        assert single.src_dir == Path('article')
-        assert single.filename == 'another-post'
-        assert single.ext == 'md'
-
-    def test_abs_src_path_setter_not_descendant_raises_value_error(self, mock_config_for_single_init, tmp_path):
-        config = mock_config_for_single_init
-
-        src_file = config.docs_dir / 'page' / 'about.html'
-        src_file.parent.mkdir(exist_ok=True)
-        src_file.touch()
-
-        single = Single(src_file, config)
 
         outside_path = tmp_path / 'outside' / 'file.txt'
         outside_path.parent.mkdir(exist_ok=True)
@@ -934,7 +907,7 @@ class TestSingleInitializationAndPathParsing:
 
         expected_error_msg = f"The path '{outside_path}' must be a descendant of the docs dir '{config.docs_dir}'."
         with pytest.raises(ValueError, match=re.escape(expected_error_msg)):
-            single.abs_src_path = outside_path
+            Single(outside_path, config)
 
     def test_single_init_from_root_index_file(self, mock_config_for_single_init):
         config = mock_config_for_single_init

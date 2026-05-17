@@ -155,38 +155,27 @@ class Single(Page):
     def __init__(self, abs_src_path: Path, config: Config):
         super().__init__()
 
-        if not config.docs_dir:
+        docs_dir = config.docs_dir
+        if not docs_dir:
             raise ValueError("docs_dir must not be empty.")
-        self.docs_dir = config.docs_dir
+        if docs_dir not in abs_src_path.parents:
+            raise ValueError(
+                f"The path '{abs_src_path}' must be a descendant "
+                f"of the docs dir '{docs_dir}'.")
 
         self.abs_src_path = abs_src_path
+        self.src_path = abs_src_path.relative_to(docs_dir)
+        self.id = PurePath('/docs', self.src_path)
+        self.post_type = self.id.parts[2]
+        self.src_dir = self.src_path.parent
+        self.filename = self.src_path.stem
+        self.ext = self.src_path.suffix[1:]
 
         self.page_type = 'single'
         self.date, self.modified = self._get_file_dates()
 
         self.post_type_index = list(config.post_type).index(self.post_type)
         self._archive_type = config.post_type[self.post_type].archive_type
-
-    @property
-    def abs_src_path(self):
-        return self._abs_src_path
-
-    @abs_src_path.setter
-    def abs_src_path(self, abs_src_path: Path):
-
-        if self.docs_dir not in abs_src_path.parents:
-            raise ValueError(
-                f"The path '{abs_src_path}' must be a descendant "
-                f"of the docs dir '{self.docs_dir}'.")
-
-        self._abs_src_path = abs_src_path
-        self.src_path = abs_src_path.relative_to(self.docs_dir)
-
-        self.id = PurePath('/docs', self.src_path)
-        self.post_type = self.id.parts[2]
-        self.src_dir = self.src_path.parent
-        self.filename = self.src_path.stem
-        self.ext = self.src_path.suffix[1:]
 
     @property
     def archive_type(self):
