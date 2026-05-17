@@ -162,8 +162,7 @@ class Single(Page):
         self.abs_src_path = abs_src_path
 
         self.page_type = 'single'
-        self.date = self._get_created_date()
-        self.modified = self._get_modified_date()
+        self.date, self.modified = self._get_file_dates()
 
         self.post_type_index = list(config.post_type).index(self.post_type)
         self._archive_type = config.post_type[self.post_type].archive_type
@@ -283,23 +282,16 @@ class Single(Page):
             raise Exception(
                 f"An error occurred while reading {path}: {str(e)}")
 
-    def _get_created_date(self):
+    def _get_file_dates(self) -> tuple[datetime.datetime, datetime.datetime]:
         try:
-            stat_info = self.abs_src_path.stat()
-            created_time = getattr(stat_info, 'st_birthtime', None)
-            if created_time is None:
-                created_time = getattr(stat_info, 'st_ctime', 0)
+            stat = self.abs_src_path.stat()
+            created = getattr(stat, 'st_birthtime', stat.st_mtime)
+            return (
+                datetime.datetime.fromtimestamp(created),
+                datetime.datetime.fromtimestamp(stat.st_mtime),
+            )
         except Exception:
-            created_time = 0
-        return datetime.datetime.fromtimestamp(created_time)
-
-    def _get_modified_date(self):
-        try:
-            stat_info = self.abs_src_path.stat()
-            modified_time = getattr(stat_info, 'st_mtime', 0)
-        except Exception:
-            modified_time = 0
-        return datetime.datetime.fromtimestamp(modified_time)
+            return _EPOCH, _EPOCH
 
     def _get_date(self):
         try:
