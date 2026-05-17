@@ -24,8 +24,9 @@ class Singles:
         self.config = config
         self.plugins = plugins
         self.pages: list[Single] = self.get_pages_from_docs_directory()
-        self.file_ids = {}
-        self.dest_paths = {}
+        self.file_ids: dict[str, Single] = {}
+        self.src_paths: dict[str, Single] = {}
+        self.dest_paths: dict[str, Single] = {}
         self.plugins.do_action('after_initialize_singles', target=self)
 
     def __iter__(self):
