@@ -269,18 +269,17 @@ def test_singles_initialization_and_collection(site_fixture):
         mock_plugins = MagicMock()
 
         singles = Singles(config, mock_plugins)
+        pages = singles.get_pages_from_docs_directory()
 
-        assert len(singles.pages) == 3, "Should collect 3 valid pages"
+        assert len(pages) == 3, "Should collect 3 valid pages"
 
-        collected_paths = {str(p.src_path) for p in singles.pages}
+        collected_paths = {str(p.src_path) for p in pages}
         expected_paths = {
             str(Path("post") / "my-test-post.md"),
             str(Path("post") / "first-post.md"),
             str(Path("page") / "about.html")
         }
         assert collected_paths == expected_paths
-
-        mock_plugins.do_action.assert_called_with('after_initialize_singles', target=singles)
     finally:
         Single.docs_dir = original_docs_dir
 
@@ -743,11 +742,10 @@ class TestSinglesDuplicateDetection:
 
             mock_plugins = MagicMock()
             singles = Singles(config, mock_plugins)
+            pages = singles.get_pages_from_docs_directory()
 
-            assert len(singles.pages) == 1
-            assert singles.pages[0].abs_src_path == dummy_draft_file
-
-            mock_plugins.do_action.assert_called_with('after_initialize_singles', target=singles)
+            assert len(pages) == 1
+            assert pages[0].abs_src_path == dummy_draft_file
         finally:
             Single.docs_dir = original_docs_dir
 

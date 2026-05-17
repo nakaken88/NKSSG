@@ -23,11 +23,10 @@ class Singles:
     def __init__(self, config: Config, plugins: Plugins):
         self.config = config
         self.plugins = plugins
-        self.pages: list[Single] = self.get_pages_from_docs_directory()
+        self.pages: list[Single] = []
         self.file_ids: dict[str, Single] = {}
         self.src_paths: dict[str, Single] = {}
         self.dest_paths: dict[str, Single] = {}
-        self.plugins.do_action('after_initialize_singles', target=self)
 
     def __iter__(self):
         return iter(self.pages)
@@ -66,6 +65,9 @@ class Singles:
         return any(fnmatch(target, item) for item in self.config.exclude)
 
     def setup(self):
+        self.pages = self.get_pages_from_docs_directory()
+        self.plugins.do_action('after_initialize_singles', target=self)
+
         if self.config['mode'] == 'draft':
             self._setup_draft_mode()
             self.plugins.do_action('after_setup_draft_singles', target=self)
