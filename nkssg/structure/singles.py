@@ -180,13 +180,14 @@ class Single(Page):
     def __str__(self):
         return f"Single(src='{self.id}')"
 
-    def __lt__(self, other: 'Single'):
+    def __lt__(self, other: 'Single') -> bool:
         if self.post_type != other.post_type:
             return self.post_type_index < other.post_type_index
 
         s_order = self.meta.get('order', 0)
         o_order = other.meta.get('order', 0)
 
+        # negative order pins items at the top regardless of directory or date
         if s_order < 0 or o_order < 0:
             return (s_order, self.src_path) < (o_order, other.src_path)
 
