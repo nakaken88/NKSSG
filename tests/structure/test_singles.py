@@ -238,13 +238,15 @@ def test_is_draft(tmp_path, config, front_matter_content, is_future, is_expired,
     shutil.copy(file_path, final_file_path)
 
     single = Single(final_file_path, config)
-
     single.meta, _ = Single.parse_front_matter(final_file_path)
     single.status = single.meta.get('status', 'publish')
-    single.is_future = is_future
-    single.is_expired = is_expired
 
-    result = single._is_draft()
+    now = datetime.datetime(2024, 1, 1)
+    single.date = datetime.datetime(2024, 1, 2) if is_future else datetime.datetime(2023, 1, 1)
+    if is_expired:
+        single.meta['expire'] = datetime.datetime(2023, 6, 1)
+
+    result = single._is_draft(now)
 
     assert result == expected_is_draft
 

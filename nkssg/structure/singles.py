@@ -210,7 +210,7 @@ class Single(Page):
         self.status = self.meta.get('status', 'publish')
         self.is_expired = self._is_expired(config.now)
         self.is_future = self._is_future(config.now)
-        self.is_draft = self._is_draft()
+        self.is_draft = self._is_draft(config.now)
 
         self.title = self._get_title()
         self.name = self._get_name()
@@ -292,7 +292,7 @@ class Single(Page):
 
         return _EPOCH
 
-    def _is_expired(self, now):
+    def _is_expired(self, now: datetime.datetime) -> bool:
         expire = self.meta.get('expire')
         if expire is None:
             return False
@@ -300,10 +300,10 @@ class Single(Page):
         expire = self._get_clean_date(expire)
         return expire <= now
 
-    def _is_future(self, now):
+    def _is_future(self, now: datetime.datetime) -> bool:
         return self.date > now
 
-    def _is_draft(self):
+    def _is_draft(self, now: datetime.datetime) -> bool:
         draft = self.meta.get('draft')
         if draft is not None:
             return False if str(draft).lower() == 'false' else bool(draft)
@@ -311,7 +311,7 @@ class Single(Page):
         status_list = ['auto-draft', 'draft', 'future', 'inherit',
                        'pending', 'private', 'trash']
 
-        res = self.is_expired or self.is_future
+        res = self._is_expired(now) or self._is_future(now)
         res = res or (self.post_type in status_list)
         res = res or (self.status in status_list)
         return res
