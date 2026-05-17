@@ -229,39 +229,25 @@ class Single(Page):
         return len(self.id.parts) == 4
 
     @staticmethod
-    def parse_front_matter(path):
+    def parse_front_matter(path: Path):
         try:
-            doc = Single.read_document(path)
-            parts = doc.split('---')
-            if len(parts) < 3 or parts[0].strip() != '':
-                return {}, doc
-
-            try:
-                front_matter = YAML(typ='safe').load(parts[1]) or {}
-            except YAMLError as e:
-                raise ValueError(f"YAML parsing error in {path}: {str(e)}")
-
-            doc = '---'.join(parts[2:])
-            return front_matter, doc
-
-        except FileNotFoundError:
-            raise FileNotFoundError(f"File not found: {path}")
-        except ValueError:
-            raise
-        except Exception as e:
-            raise Exception(
-                f"front matter parse error in {path}: {str(e)}")
-
-    @staticmethod
-    def read_document(path):
-        try:
-            with open(path, 'r', encoding='UTF-8') as f:
-                return f.read()
+            doc = path.read_text(encoding='utf-8')
         except FileNotFoundError:
             raise FileNotFoundError(f"File not found: {path}")
         except Exception as e:
-            raise Exception(
-                f"An error occurred while reading {path}: {str(e)}")
+            raise Exception(f"Failed to read file '{path}': {str(e)}")
+
+        parts = doc.split('---')
+        if len(parts) < 3 or parts[0].strip() != '':
+            return {}, doc
+
+        try:
+            front_matter = YAML(typ='safe').load(parts[1]) or {}
+        except YAMLError as e:
+            raise ValueError(f"YAML parsing error in {path}: {str(e)}")
+
+        doc = '---'.join(parts[2:])
+        return front_matter, doc
 
     def _get_file_dates(self) -> tuple[datetime.datetime, datetime.datetime]:
         try:
