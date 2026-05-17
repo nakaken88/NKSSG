@@ -11,10 +11,15 @@ from urllib.parse import quote
 
 from ruamel.yaml import YAML, YAMLError
 
+from typing import TYPE_CHECKING
+
 from nkssg.structure.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.pages import Page
 from nkssg.structure.themes import Themes
+
+if TYPE_CHECKING:
+    from nkssg.structure.archives import Archives
 
 _EPOCH = datetime.datetime(1970, 1, 1)
 
@@ -54,7 +59,7 @@ class Singles:
         not_excluded = not self._is_exclude(f.relative_to(docs_dir))
         return is_file and has_valid_extension and not_excluded
 
-    def _is_exclude(self, target) -> bool:
+    def _is_exclude(self, target: Path) -> bool:
         return any(fnmatch(target, item) for item in self.config.exclude)
 
     def setup(self):
@@ -118,7 +123,7 @@ class Singles:
 
         self.setup_dest_path()
 
-    def update_htmls(self, archives, themes: Themes):
+    def update_htmls(self, archives: 'Archives', themes: Themes) -> None:
         self.plugins.do_action('before_update_singles_html', target=self)
 
         with ThreadPoolExecutor() as executor:
