@@ -36,28 +36,6 @@ class Singles:
     def __iter__(self):
         return iter(self.pages)
 
-    def output(self):
-        for page in self.pages:
-            page.output(self.config)
-
-    def get_pages_from_docs_directory(self) -> list['Single']:
-        if self.config['mode'] == 'draft':
-            return [Single(self.config['draft_path'], self.config)]
-
-        return [
-            Single(f, self.config)
-            for post_type in self.config.post_type
-            for f in sorted((self.config.docs_dir / post_type).glob('**/*'))
-            if self._is_valid_file(f)
-        ]
-
-    def _is_valid_file(self, f: Path) -> bool:
-        ext = f.suffix[1:]
-        has_valid_ext = ext in self.config.doc_ext
-        rel = f.relative_to(self.config.docs_dir)
-        is_excluded = any(fnmatch(rel, item) for item in self.config.exclude)
-        return f.is_file() and has_valid_ext and not is_excluded
-
     def setup(self):
         self.pages = self.get_pages_from_docs_directory()
         self.plugins.do_action('after_initialize_singles', target=self)
@@ -76,6 +54,24 @@ class Singles:
         self._setup_prev_next_page()
         self._setup_file_ids()
         self._setup_src_paths()
+
+    def get_pages_from_docs_directory(self) -> list['Single']:
+        if self.config['mode'] == 'draft':
+            return [Single(self.config['draft_path'], self.config)]
+
+        return [
+            Single(f, self.config)
+            for post_type in self.config.post_type
+            for f in sorted((self.config.docs_dir / post_type).glob('**/*'))
+            if self._is_valid_file(f)
+        ]
+
+    def _is_valid_file(self, f: Path) -> bool:
+        ext = f.suffix[1:]
+        has_valid_ext = ext in self.config.doc_ext
+        rel = f.relative_to(self.config.docs_dir)
+        is_excluded = any(fnmatch(rel, item) for item in self.config.exclude)
+        return f.is_file() and has_valid_ext and not is_excluded
 
     def _setup_draft_mode(self):
         page = self.pages[0]
@@ -119,6 +115,17 @@ class Singles:
 
         self._setup_dest_path()
 
+    def _setup_dest_path(self):
+        for page in self.pages:
+            dest_path = str(page.dest_path)
+            if dest_path in self.dest_paths:
+                error_message = f"Duplicate Dest Path: {dest_path}.\n"
+                error_message += f"Page: {page} \n"
+                error_message += f"Page: {self.dest_paths[dest_path]}"
+                raise ValueError(error_message)
+            else:
+                self.dest_paths[dest_path] = page
+
     def update_htmls(self, archives: 'Archives', themes: Themes) -> None:
         self.plugins.do_action('before_update_singles_html', target=self)
 
@@ -132,16 +139,9 @@ class Singles:
 
         self.plugins.do_action('after_update_singles_html', target=self)
 
-    def _setup_dest_path(self):
+    def output(self):
         for page in self.pages:
-            dest_path = str(page.dest_path)
-            if dest_path in self.dest_paths:
-                error_message = f"Duplicate Dest Path: {dest_path}.\n"
-                error_message += f"Page: {page} \n"
-                error_message += f"Page: {self.dest_paths[dest_path]}"
-                raise ValueError(error_message)
-            else:
-                self.dest_paths[dest_path] = page
+            page.output(self.config)
 
     def get_single_by_file_id(self, file_id):
         single = self.file_ids.get(file_id)
