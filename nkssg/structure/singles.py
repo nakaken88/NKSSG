@@ -158,15 +158,12 @@ class Singles:
 
 class Single(Page):
 
-    docs_dir = ''
-
     def __init__(self, abs_src_path: Path, config: Config):
         super().__init__()
 
-        if not Single.docs_dir:
-            if not config.docs_dir:
-                raise ValueError("docs_dir must not be empty.")
-            Single.docs_dir = config.docs_dir
+        if not config.docs_dir:
+            raise ValueError("docs_dir must not be empty.")
+        self.docs_dir = config.docs_dir
 
         self.abs_src_path = abs_src_path
 
@@ -184,13 +181,13 @@ class Single(Page):
     @abs_src_path.setter
     def abs_src_path(self, abs_src_path: Path):
 
-        if Single.docs_dir not in abs_src_path.parents:
+        if self.docs_dir not in abs_src_path.parents:
             raise ValueError(
                 f"The path '{abs_src_path}' must be a descendant "
-                f"of the docs dir '{Single.docs_dir}'.")
+                f"of the docs dir '{self.docs_dir}'.")
 
         self._abs_src_path = abs_src_path
-        self.src_path = abs_src_path.relative_to(Single.docs_dir)
+        self.src_path = abs_src_path.relative_to(self.docs_dir)
 
         self.id = PurePath('/docs', self.src_path)
         self.post_type = self.id.parts[2]

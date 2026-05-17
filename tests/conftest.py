@@ -3,7 +3,6 @@ import shutil
 import pytest
 
 from nkssg.structure.config import Config
-from nkssg.structure.singles import Single
 
 
 @pytest.fixture
@@ -65,29 +64,21 @@ This is the **content** of my test post.
 </html>"""
     )
 
-    # Temporarily set Single.docs_dir for correct path resolution in Single.__init__
-    original_single_docs_dir = Single.docs_dir
-    Single.docs_dir = site_dir / 'docs'
+    config = Config.from_file(
+        yaml_file_path=site_dir / 'nkssg.yml',
+        mode='build',
+        base_dir=site_dir
+    )
 
-    try:
-        config = Config.from_file(
-            yaml_file_path=site_dir / 'nkssg.yml',
-            mode='build',
-            base_dir=site_dir
-        )
+    config.set_directory_path({
+        'docs': 'docs',
+        'public': 'public',
+        'static': 'static',
+        'themes': 'themes'
+    })
 
-        config.set_directory_path({
-            'docs': 'docs',
-            'public': 'public',
-            'static': 'static',
-            'themes': 'themes'
-        })
+    config.doc_ext = ['md', 'html']
+    config.exclude = ['**/_*']
+    config.post_type.update({'post': {}, 'page': {}})
 
-        config.doc_ext = ['md', 'html']
-        config.exclude = ['**/_*']
-        config.post_type.update({'post': {}, 'page': {}})
-
-        yield config
-
-    finally:
-        Single.docs_dir = original_single_docs_dir
+    yield config

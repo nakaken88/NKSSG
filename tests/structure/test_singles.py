@@ -15,16 +15,10 @@ from nkssg.structure.themes import Themes
 
 @pytest.fixture
 def config():
-    original_docs_dir = Single.docs_dir
-    Single.docs_dir = Path('docs')
-
     cfg = Config()
-    cfg.docs_dir = Single.docs_dir
+    cfg.docs_dir = Path('docs')
     cfg.update({'post_type': {'sample': {}}})
-
-    yield cfg
-
-    Single.docs_dir = original_docs_dir
+    return cfg
 
 
 @pytest.fixture
@@ -237,9 +231,7 @@ def test_is_draft(tmp_path, config, front_matter_content, is_future, is_expired,
     file_path = tmp_path / "test_post.md"
     file_path.write_text(content, encoding="utf-8")
 
-    original_docs_dir = Single.docs_dir
-    Single.docs_dir = tmp_path
-
+    config.docs_dir = tmp_path
     dummy_post_type_dir = tmp_path / "sample"
     dummy_post_type_dir.mkdir(exist_ok=True)
     final_file_path = dummy_post_type_dir / file_path.name
@@ -256,32 +248,23 @@ def test_is_draft(tmp_path, config, front_matter_content, is_future, is_expired,
 
     assert result == expected_is_draft
 
-    Single.docs_dir = original_docs_dir
-
 
 def test_singles_initialization_and_collection(site_fixture):
     config = site_fixture
+    mock_plugins = MagicMock()
 
-    original_docs_dir = Single.docs_dir
-    Single.docs_dir = config.docs_dir
+    singles = Singles(config, mock_plugins)
+    pages = singles.get_pages_from_docs_directory()
 
-    try:
-        mock_plugins = MagicMock()
+    assert len(pages) == 3, "Should collect 3 valid pages"
 
-        singles = Singles(config, mock_plugins)
-        pages = singles.get_pages_from_docs_directory()
-
-        assert len(pages) == 3, "Should collect 3 valid pages"
-
-        collected_paths = {str(p.src_path) for p in pages}
-        expected_paths = {
-            str(Path("post") / "my-test-post.md"),
-            str(Path("post") / "first-post.md"),
-            str(Path("page") / "about.html")
-        }
-        assert collected_paths == expected_paths
-    finally:
-        Single.docs_dir = original_docs_dir
+    collected_paths = {str(p.src_path) for p in pages}
+    expected_paths = {
+        str(Path("post") / "my-test-post.md"),
+        str(Path("post") / "first-post.md"),
+        str(Path("page") / "about.html")
+    }
+    assert collected_paths == expected_paths
 
 
 @pytest.mark.parametrize("filename, meta_title, expected_title", [
@@ -291,14 +274,12 @@ def test_singles_initialization_and_collection(site_fixture):
     ('_10_my-post.md', None, 'my-post'),
 ])
 def test_title_and_name_logic(config, tmp_path, filename, meta_title, expected_title):
-    original_docs_dir = Single.docs_dir
     docs_dir = tmp_path / 'docs'
     post_type_dir = docs_dir / 'sample'
     post_type_dir.mkdir(parents=True, exist_ok=True)
     file_path = post_type_dir / filename
     file_path.touch()
 
-    Single.docs_dir = docs_dir
     config.docs_dir = docs_dir
 
     single = Single(file_path, config)
@@ -311,8 +292,6 @@ def test_title_and_name_logic(config, tmp_path, filename, meta_title, expected_t
     single.title = title
     assert single._get_name() == expected_title
 
-    Single.docs_dir = original_docs_dir
-
 
 @pytest.mark.parametrize("name, meta_slug, expected_slug", [
     ('A Sample Post', None, 'a-sample-post'),
@@ -321,14 +300,12 @@ def test_title_and_name_logic(config, tmp_path, filename, meta_title, expected_t
     ('日本語のタイトル', 'nihongo-no-taitoru', 'nihongo-no-taitoru'),
 ])
 def test_get_slug_logic(config, tmp_path, name, meta_slug, expected_slug):
-    original_docs_dir = Single.docs_dir
     docs_dir = tmp_path / 'docs'
     post_type_dir = docs_dir / 'sample'
     post_type_dir.mkdir(parents=True, exist_ok=True)
     dummy_path = post_type_dir / 'dummy.md'
     dummy_path.touch()
 
-    Single.docs_dir = docs_dir
     config.docs_dir = docs_dir
 
     single = Single(dummy_path, config)
@@ -338,8 +315,6 @@ def test_get_slug_logic(config, tmp_path, name, meta_slug, expected_slug):
 
     assert single._get_slug('sample') == expected_slug
 
-    Single.docs_dir = original_docs_dir
-
 
 # --- Tests for __lt__ (sorting) method ---
 
@@ -347,9 +322,6 @@ def test_get_slug_logic(config, tmp_path, name, meta_slug, expected_slug):
 def create_single(tmp_path):
     docs_dir = tmp_path / 'docs'
     docs_dir.mkdir()
-
-    original_docs_dir = Single.docs_dir
-    Single.docs_dir = docs_dir
 
     cfg = Config()
     cfg.docs_dir = docs_dir
@@ -376,9 +348,7 @@ def create_single(tmp_path):
 
         return s
 
-    yield _maker
-
-    Single.docs_dir = original_docs_dir
+    return _maker
 
 
 def test_single_lt_by_post_type_index(create_single):
@@ -452,9 +422,6 @@ def test_single_lt_by_filename_for_section_archive(create_single):
 def url_test_single(tmp_path):
     docs_dir = tmp_path / 'docs'
 
-    original_docs_dir = Single.docs_dir
-    Single.docs_dir = docs_dir
-
     cfg = Config()
     cfg.docs_dir = docs_dir
     cfg.public_dir = tmp_path / 'public'
@@ -482,9 +449,7 @@ def url_test_single(tmp_path):
 
         return s, cfg
 
-    yield _maker
-
-    Single.docs_dir = original_docs_dir
+    return _maker
 
 
 def test_update_url_with_meta_url(url_test_single):
@@ -550,9 +515,6 @@ class TestGetDate:
         docs_dir = tmp_path / "docs"
         docs_dir.mkdir()
 
-        original_docs_dir = Single.docs_dir
-        Single.docs_dir = docs_dir
-
         cfg = Config()
         cfg.docs_dir = docs_dir
         cfg.post_type.update({'post': {}})
@@ -576,9 +538,7 @@ class TestGetDate:
             s.meta, _ = Single.parse_front_matter(file_path)
             return s
 
-        yield _maker
-
-        Single.docs_dir = original_docs_dir
+        return _maker
 
     @pytest.mark.parametrize("filename", ["20231026.md", "2023-10-26.md"])
     def test_date_from_filename(self, get_date_single, filename):
@@ -620,9 +580,7 @@ class TestSingleTemplateLookup:
         docs_dir = tmp_path / "docs"
         docs_dir.mkdir()
 
-        original_docs_dir = Single.docs_dir
-        Single.docs_dir = docs_dir
-
+        config.docs_dir = docs_dir
         config.post_type.update({'post': {}})
 
         post_dir = docs_dir / "post"
@@ -636,9 +594,7 @@ class TestSingleTemplateLookup:
 
         mock_themes = MagicMock(spec=Themes)
 
-        yield single, config, mock_themes
-
-        Single.docs_dir = original_docs_dir
+        return single, config, mock_themes
 
     @pytest.mark.parametrize("config_mode, meta_template, available_templates, expected_template", [
         # Draft mode takes precedence
@@ -736,18 +692,12 @@ class TestSinglesDuplicateDetection:
         (config.docs_dir / 'page').mkdir()
         (config.docs_dir / 'page' / 'about.md').touch()
 
-        original_docs_dir = Single.docs_dir
-        try:
-            Single.docs_dir = ''
+        mock_plugins = MagicMock()
+        singles = Singles(config, mock_plugins)
+        pages = singles.get_pages_from_docs_directory()
 
-            mock_plugins = MagicMock()
-            singles = Singles(config, mock_plugins)
-            pages = singles.get_pages_from_docs_directory()
-
-            assert len(pages) == 1
-            assert pages[0].abs_src_path == dummy_draft_file
-        finally:
-            Single.docs_dir = original_docs_dir
+        assert len(pages) == 1
+        assert pages[0].abs_src_path == dummy_draft_file
 
 
 class TestSingleImageProcessing:
@@ -759,9 +709,6 @@ class TestSingleImageProcessing:
 
         public_dir = base_dir / 'public'
         public_dir.mkdir()
-
-        original_docs_dir = Single.docs_dir
-        Single.docs_dir = docs_dir
 
         cfg = Config(base_dir=base_dir)
         cfg.docs_dir = docs_dir
@@ -784,9 +731,7 @@ class TestSingleImageProcessing:
         single.date = datetime.datetime(2023, 10, 26, 10, 30)
         single.abs_src_path = docs_dir / 'post' / 'test-image.md'
 
-        yield single, cfg, public_dir
-
-        Single.docs_dir = original_docs_dir
+        return single, cfg, public_dir
 
     def test_get_image_no_image_meta(self, image_test_single):
         single, config, _ = image_test_single
@@ -923,12 +868,8 @@ class TestSingleImageProcessing:
 class TestSingleInitializationAndPathParsing:
 
     @pytest.fixture(autouse=True)
-    def setup_single_docs_dir(self, tmp_path):
-        original_docs_dir = Single.docs_dir
-        Single.docs_dir = tmp_path / "docs"
-        Single.docs_dir.mkdir(exist_ok=True)
-        yield
-        Single.docs_dir = original_docs_dir
+    def setup_docs_dir(self, tmp_path):
+        (tmp_path / "docs").mkdir(exist_ok=True)
 
     @pytest.fixture
     def mock_config_for_single_init(self, tmp_path):
@@ -991,7 +932,7 @@ class TestSingleInitializationAndPathParsing:
         outside_path.parent.mkdir(exist_ok=True)
         outside_path.touch()
 
-        expected_error_msg = f"The path '{outside_path}' must be a descendant of the docs dir '{Single.docs_dir}'."
+        expected_error_msg = f"The path '{outside_path}' must be a descendant of the docs dir '{config.docs_dir}'."
         with pytest.raises(ValueError, match=re.escape(expected_error_msg)):
             single.abs_src_path = outside_path
 
@@ -1038,9 +979,6 @@ class TestJinja2ShortcodesInContent:
         docs_dir = tmp_path / "docs"
         docs_dir.mkdir()
 
-        original_docs_dir = Single.docs_dir
-        Single.docs_dir = docs_dir
-
         cfg = Config()
         cfg.docs_dir = docs_dir
         cfg.post_type.update({'post': {}})
@@ -1065,9 +1003,7 @@ Hello, {{ mypage.title }}! The year is {{ config.now.year }}.
         single.date = datetime.datetime(2023, 1, 1)
         cfg.now = datetime.datetime(2023, 5, 15)
 
-        yield single, cfg
-
-        Single.docs_dir = original_docs_dir
+        return single, cfg
 
     def test_jinja2_shortcode_in_content_rendering(self, single_with_jinja_content, mocker):
         single, config = single_with_jinja_content

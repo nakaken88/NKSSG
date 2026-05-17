@@ -12,11 +12,8 @@ def plugin():
 
 @pytest.fixture
 def singles_with_pages():
-    # Patch the method that reads from the filesystem during initialization
-    with patch.object(Singles, 'get_pages_from_docs_directory', return_value=[]):
-        mock_plugins = MagicMock(spec=Plugins)
-        singles = Singles(Config(), mock_plugins)
-
+    mock_plugins = MagicMock(spec=Plugins)
+    singles = Singles(Config(), mock_plugins)
     singles.pages = [MagicMock(spec=Single) for _ in range(10)]
     return singles
 
