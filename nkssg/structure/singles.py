@@ -52,15 +52,11 @@ class Singles:
         ]
 
     def _is_valid_file(self, f: Path) -> bool:
-        docs_dir = self.config.docs_dir
         ext = f.suffix[1:]
-        is_file = f.is_file()
-        has_valid_extension = ext in self.config.doc_ext
-        not_excluded = not self._is_exclude(f.relative_to(docs_dir))
-        return is_file and has_valid_extension and not_excluded
-
-    def _is_exclude(self, target: Path) -> bool:
-        return any(fnmatch(target, item) for item in self.config.exclude)
+        has_valid_ext = ext in self.config.doc_ext
+        rel = f.relative_to(self.config.docs_dir)
+        is_excluded = any(fnmatch(rel, item) for item in self.config.exclude)
+        return f.is_file() and has_valid_ext and not is_excluded
 
     def setup(self):
         self.pages = self.get_pages_from_docs_directory()
