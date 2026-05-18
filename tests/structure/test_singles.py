@@ -76,7 +76,7 @@ def test_get_url_from_permalink_section_normal(config, permalink, expected):
     dummy_path = Path(config.docs_dir, *path_parts, 'sample post.md')
     single = Single(dummy_path, config)
     single.title = single._get_title()
-    single.name = single._get_name()
+    single.name = single.title
     single.slug = single._get_slug('sample')
 
     single = create_mock_archives(single, path_parts)
@@ -93,7 +93,7 @@ def test_get_url_from_permalink_section_index(config, permalink, expected):
     dummy_path = Path(config.docs_dir, *path_parts, 'index.md')
     single = Single(dummy_path, config)
     single.title = single._get_title()
-    single.name = single._get_name()
+    single.name = single.title
     single.slug = single._get_slug('sample')
 
     single = create_mock_archives(single, path_parts)
@@ -110,7 +110,7 @@ def test_get_url_from_permalink_section_top(config, permalink, expected):
     dummy_path = Path(config.docs_dir, 'sample', 'index.md')
     single = Single(dummy_path, config)
     single.title = single._get_title()
-    single.name = single._get_name()
+    single.name = single.title
     single.slug = single._get_slug('sample')
 
     single = create_mock_archives(single, ['sample'])
@@ -292,7 +292,6 @@ def test_title_and_name_logic(config, tmp_path, filename, meta_title, expected_t
     assert title == expected_title
 
     single.title = title
-    assert single._get_name() == expected_title
 
 
 @pytest.mark.parametrize("name, meta_slug, expected_slug", [
