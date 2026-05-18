@@ -170,6 +170,7 @@ class Single(Page):
         self.ext = self.src_path.suffix[1:]
 
         self.page_type = 'single'
+        self.content_updated = False
         self.date, self.modified = self._get_file_dates()
 
         self.post_type_index = list(config.post_type).index(self.post_type)
@@ -332,27 +333,24 @@ class Single(Page):
                 slug = self.name
         return Page.to_slug(slug)
 
-    def _get_content(self, doc, config: Config, plugins: Plugins):
+    def _get_content(self, doc: str, config: Config, plugins: Plugins) -> str:
         if not doc:
             return ''
 
-        content = doc
-        self.content_updated = False
         content = plugins.do_action(
-            'on_get_content', target=content, config=config, single=self)
+            'on_get_content', target=doc, config=config, single=self)
 
         if self.content_updated:
             return content
 
         if self.ext in ['md', 'markdown']:
             md_config: dict = config.markdown
-
             return markdown.markdown(
                 content,
                 extensions=md_config.keys(),
                 extension_configs=md_config)
-        else:
-            return content
+
+        return content
 
     class _SummaryTextExtractor(HTMLParser):
         _SKIP_TAGS = {'script', 'style'}
