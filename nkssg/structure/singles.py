@@ -213,7 +213,7 @@ class Single(Page):
         self.is_draft = self._is_draft(config.now)
 
         self.title = self._get_title()
-        self.name = self._get_name()
+        self.name = self.title
 
         post_type_slug = config.post_type[self.post_type].slug or self.post_type
         self.slug = self._get_slug(post_type_slug)
@@ -316,16 +316,13 @@ class Single(Page):
         res = res or (self.status in status_list)
         return res
 
-    def _get_title(self):
+    def _get_title(self) -> str:
         title = self.meta.get('title') or Page.clean_name(self.filename)
         if self.filename == 'index' and title == 'index':
             title = Page.clean_name(self.src_dir.parts[-1])
         return title
 
-    def _get_name(self):
-        return self.title
-
-    def _get_slug(self, post_type_slug):
+    def _get_slug(self, post_type_slug: str) -> str:
         slug = self.meta.get('slug')
         if slug is None:
             # set top index slug to post type slug instead of dir name
