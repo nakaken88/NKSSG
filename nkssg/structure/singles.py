@@ -382,7 +382,7 @@ class Single(Page):
         summary = parser.get_text()[:160]
         return html.escape(summary)
 
-    def _get_image(self, config: Config):
+    def _get_image(self, config: Config) -> dict:
         image: dict = self.meta.get('image', {})
         src: str = image.get('src', '')
 
@@ -393,28 +393,25 @@ class Single(Page):
             return image
 
         image = self._process_image_src(image, src, config)
-        image = self._set_image_url(image, src, config)
+        if not image:
+            return {}
+        return self._set_image_url(image, src, config)
 
-        return image
-
-    def _process_image_src(self, image: dict, src: str, config: Config):
+    def _process_image_src(self, image: dict, src: str, config: Config) -> dict:
 
         if src.startswith('/'):
             image_path = config.base_dir / src.strip('/')
         else:
             image_path = self.abs_src_path.parent / src
 
-        if image_path.exists():
-            image['old_path'] = image_path
-        else:
-            image = {}
+        if not image_path.exists():
             logging.warning(f"Image path '{image_path}' for post '{self.id}' does not exist.")
+            return {}
+
+        image['old_path'] = image_path
         return image
 
-    def _set_image_url(self, image: dict, src: str, config: Config):
-
-        if not image or not src:
-            return {}
+    def _set_image_url(self, image: dict, src: str, config: Config) -> dict:
 
         static_rel_path = config.static_dir.relative_to(config.base_dir).as_posix()
         if src.startswith(f'/{static_rel_path}/'):
