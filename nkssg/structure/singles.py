@@ -227,7 +227,7 @@ class Single(Page):
     @property
     def is_root(self) -> bool:
         # /docs/{post_type}/index.md
-        return len(self.id.parts) == 4
+        return len(self.id.parts) == 4 and self.filename == 'index'
 
     @staticmethod
     def parse_front_matter(path: Path) -> tuple[dict, str]:
@@ -327,7 +327,7 @@ class Single(Page):
         slug = self.meta.get('slug')
         if slug is None:
             # set top index slug to post type slug instead of dir name
-            if self.filename == 'index' and self.is_root:
+            if self.is_root:
                 slug = post_type_slug
             else:
                 slug = self.name
@@ -431,16 +431,16 @@ class Single(Page):
         image['src'] = image['url']
         return image
 
-    def _get_file_id(self):
+    def _get_file_id(self) -> str:
         return self.meta.get('file_id', str(self.src_path))
 
-    def update_url(self, config):
+    def update_url(self, config: Config) -> None:
         self.rel_url = self._get_rel_url(config)
         self.dest_path = self._get_dest_from_url(self.rel_url)
         self.dest_dir = self.dest_path.parent
         self._url_setup(config)
 
-    def _get_rel_url(self, config: Config):
+    def _get_rel_url(self, config: Config) -> str:
 
         # convert to relative url
         url: str = self.meta.get('url', '')
@@ -448,14 +448,13 @@ class Single(Page):
         url = url.replace(config.site.site_url_original, '')
 
         if not url:
-            post_type = self.post_type
-            post_type_config = config.post_type[post_type]
+            post_type_config = config.post_type[self.post_type]
             permalink = post_type_config.permalink
 
             if not permalink:
-                raise ValueError(f"Permalink of '{post_type}' is not set.")
+                raise ValueError(f"Permalink of '{self.post_type}' is not set.")
 
-            post_type_slug = post_type_config.slug or post_type
+            post_type_slug = post_type_config.slug or self.post_type
             post_type_slug = Page.to_slug(post_type_slug)
 
             add_prefix_to_url = post_type_config.add_prefix_to_url
@@ -474,7 +473,7 @@ class Single(Page):
 
         url = self.date.strftime(permalink)
 
-        if self.filename == 'index' and len(self.src_dir.parts) == 1:
+        if self.is_root:
             url = url.replace('/{slug}/', '/')
             url = url.replace('/{filename}/', '/')
         else:
