@@ -494,42 +494,46 @@ class Single(Page):
 
         return Page.to_slug(Page.clean_name(filename_slug))
 
-    def _replace_dynamic_parts_in_url(self, url: str):
-        dynamic_parts = re.findall(r'\{.*?\}', url)
-        for original_part in dynamic_parts:
+    def _replace_dynamic_parts_in_url(self, url: str) -> str:
+        for original_part in re.findall(r'\{.*?\}', url):
             part = original_part[1:-1]
 
-            part_type, part = self._extract_part_type(part)
-            slugs = self._get_target_archive_slugs(part)
+            part_type = 'all'
+            for suffix in ['top', 'last', 'all']:
+                if part.endswith('_' + suffix):
+                    part_type = suffix
+                    part = part[:-(len(suffix) + 1)]
+                    break
 
-            new_part = self._get_dynamic_part_replacement(slugs, part_type)
-            url = url.replace(original_part, '/'.join(new_part))
+            slugs = self._get_target_archive_slugs(part)
+            if part_type == 'top':
+                replacement = slugs[:1]
+            elif part_type == 'last':
+                replacement = slugs[-1:]
+            else:
+                replacement = slugs
+
+            url = url.replace(original_part, '/'.join(replacement))
             url = url.replace('//', '/')
 
+        # For a section archive index page (e.g. sports/index.md), {slug} and
+        # the last archive segment both resolve to the parent directory name,
+        # producing a duplicate (e.g. /sports/sports/). Drop the duplicate when
+        # the last two segments are identical.
         url_parts = url.split('/')
-        if len(url_parts) >= 3 and url_parts[-2] == url_parts[-3]:
+        if self.filename.lower() == 'index' and len(url_parts) >= 3 and url_parts[-2] == url_parts[-3]:
             url = '/'.join(url_parts[:-2]) + '/'
         else:
             url = '/'.join(url_parts) + '/'
-        url = url.replace('//', '/')
-        return url
+        return url.replace('//', '/')
 
-    def _extract_part_type(self, part):
-        for part_type in ['top', 'last', 'all']:
-            if part.endswith('_' + part_type):
-                return part_type, part[:-(len(part_type) + 1)]
-        return 'all', part
-
-    def _get_target_archive_slugs(self, part):
-        slugs = []
-        archive_list = self.archive_list
-
-        for archive in archive_list:
+    def _get_target_archive_slugs(self, part: str) -> list[str]:
+        for archive in self.archive_list:
             if archive.root_name == part:
                 if archive.is_root:
                     return []
 
-                slugs.append(archive.slug)
+                slugs = [archive.slug]
                 current = archive
                 for _ in range(len(archive.id.parts)):
                     parent = current.parent
@@ -538,18 +542,6 @@ class Single(Page):
                     slugs.append(parent.slug)
                     current = parent
                 return slugs[::-1]
-        return slugs
-
-    def _get_dynamic_part_replacement(self, slugs, part_type):
-        if not slugs:
-            return []
-
-        if part_type == 'all':
-            return slugs
-        elif part_type == 'top':
-            return [slugs[0]]
-        elif part_type == 'last':
-            return [slugs[-1]]
         return []
 
     def _format_url(self, url: str):
