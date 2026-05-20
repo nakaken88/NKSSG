@@ -535,12 +535,9 @@ class Single(Page):
 
                 slugs = [archive.slug]
                 current = archive
-                for _ in range(len(archive.id.parts)):
-                    parent = current.parent
-                    if parent.is_root:
-                        break
-                    slugs.append(parent.slug)
-                    current = parent
+                while not current.parent.is_root:
+                    current = current.parent
+                    slugs.append(current.slug)
                 return slugs[::-1]
         return []
 
