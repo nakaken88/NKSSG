@@ -547,7 +547,7 @@ class Single(Page):
             url += '/'
         return url.lower()
 
-    def update_html(self, singles: Singles, archives, themes: Themes):
+    def update_html(self, singles: Singles, archives: 'Archives', themes: Themes) -> None:
 
         if not self.should_update_html:
             return
@@ -559,7 +559,8 @@ class Single(Page):
             raise ValueError(f"No template found for '{self.id}'.")
         template = config.env.get_template(template_file)
 
-        if any(x in self.content for x in ['{{', '{#', '{%']):
+        has_shortcodes = any(x in self.content for x in ['{{', '{#', '{%'])
+        if has_shortcodes:
             self.content = themes.shortcode_import_statement + self.content
             self.content = config.env.from_string(self.content).render({
                 'mypage': self, 'meta': self.meta})
@@ -581,7 +582,7 @@ class Single(Page):
         self.html = plugins.do_action(
             'after_render_html', target=self.html, **context)
 
-    def lookup_template(self, config: Config, themes: Themes):
+    def lookup_template(self, config: Config, themes: Themes) -> str:
 
         search_list = []
 
