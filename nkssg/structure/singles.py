@@ -541,8 +541,9 @@ class Single(Page):
                 return slugs[::-1]
         return []
 
-    def _format_url(self, url: str):
-        if not url.endswith('/') and '.htm' not in url.split('/')[-1]:
+    def _format_url(self, url: str) -> str:
+        is_html_file = url.split('/')[-1].endswith(('.htm', '.html'))
+        if not url.endswith('/') and not is_html_file:
             url += '/'
         return url.lower()
 
