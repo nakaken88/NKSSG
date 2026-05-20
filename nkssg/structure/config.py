@@ -111,54 +111,25 @@ class TaxonomyConfig(BaseConfig):
                 super().update({k: v})
 
     def update_terms(self, term_config_list, parent=''):
-        """
-        Orchestrates the processing of a list of term configurations.
-        """
         for raw_entry in term_config_list:
-            normalized_entry = self._normalize_term_entry(raw_entry)
-            if not normalized_entry:
+            if isinstance(raw_entry, dict):
+                if 'name' not in raw_entry:
+                    raise ValueError(f"Term dictionary must have a 'name' key: {raw_entry}")
+                term_dict = {**raw_entry, 'name': str(raw_entry['name'])}
+            else:
+                term_dict = {'name': str(raw_entry)}
+
+            if not term_dict['name'].strip():
                 continue
 
-            self._process_normalized_term(normalized_entry, parent)
+            term_name = term_dict['name']
+            effective_parent = term_dict.get('parent', parent)
+            term_obj = self.terms.get(term_name, TermConfig(name=term_name, parent=effective_parent))
+            self.terms[term_name] = term_obj
+            term_obj.update({k: v for k, v in term_dict.items() if k != 'term'})
 
-    def _normalize_term_entry(self, raw_entry: Any) -> dict | None:
-        """
-        Converts a raw term entry (string, dict, etc.) into a standardized dictionary.
-        """
-        name_str = ""
-        term_dict = {}
-
-        if isinstance(raw_entry, dict):
-            if 'name' not in raw_entry:
-                raise ValueError(f"Term dictionary must have a 'name' key: {raw_entry}")
-            name_str = str(raw_entry['name'])
-            raw_entry['name'] = name_str
-            term_dict = raw_entry
-        else:
-            name_str = str(raw_entry)
-            term_dict = {'name': name_str}
-
-        if not name_str.strip():
-            return None
-
-        return term_dict
-
-    def _process_normalized_term(self, term_dict: dict, parent_name: str):
-        """
-        Processes a single, normalized term dictionary.
-        """
-        term_name = term_dict['name']
-        effective_parent = term_dict.get('parent', parent_name)
-        
-        term_obj = self.terms.get(term_name, TermConfig(name=term_name, parent=effective_parent))
-
-        self.terms[term_name] = term_obj
-
-        properties_to_update = {k: v for k, v in term_dict.items() if k != 'term'}
-        term_obj.update(properties_to_update)
-        
-        if 'term' in term_dict:
-            self.update_terms(term_dict['term'], parent=term_name)
+            if 'term' in term_dict:
+                self.update_terms(term_dict['term'], parent=term_name)
 
 
 class TaxonomyConfigManager(dict[str, TaxonomyConfig]):
