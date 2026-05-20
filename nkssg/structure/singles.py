@@ -227,7 +227,7 @@ class Single(Page):
     @property
     def is_root(self) -> bool:
         # /docs/{post_type}/index.md
-        return len(self.id.parts) == 4 and self.filename == 'index'
+        return len(self.id.parts) == 4 and self.filename.lower() == 'index'
 
     @staticmethod
     def parse_front_matter(path: Path) -> tuple[dict, str]:
@@ -319,7 +319,7 @@ class Single(Page):
 
     def _get_title(self) -> str:
         title = self.meta.get('title') or Page.clean_name(self.filename)
-        if self.filename == 'index' and title == 'index':
+        if self.filename.lower() == 'index' and title == 'index':
             title = Page.clean_name(self.src_dir.parts[-1])
         return title
 
