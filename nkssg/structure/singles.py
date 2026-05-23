@@ -260,7 +260,8 @@ class Single(Page):
                 datetime.datetime.fromtimestamp(created),
                 datetime.datetime.fromtimestamp(stat.st_mtime),
             )
-        except Exception:
+        except Exception as e:
+            logging.warning(f"Failed to get file dates for '{self.abs_src_path}': {e}")
             return _EPOCH, _EPOCH
 
     def _get_date(self) -> tuple[datetime.datetime, datetime.datetime]:
@@ -584,7 +585,7 @@ class Single(Page):
         self.html = plugins.do_action(
             'after_render_html', target=self.html, **context)
 
-    def lookup_template(self, config: Config, themes: Themes) -> str:
+    def lookup_template(self, config: Config, themes: Themes) -> str | None:
 
         search_list = []
 
