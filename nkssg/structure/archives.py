@@ -156,7 +156,7 @@ class Archives:
         ]
         for single in singles:
             archive_type = single.archive_type
-            if single.filename == 'index' and archive_type == 'section':
+            if single.is_index and archive_type == 'section':
                 temp_id = self.modified_id(single.id.parent, 1, 'section')
                 if temp_id in self.archives:
                     archive = self.archives[temp_id]
