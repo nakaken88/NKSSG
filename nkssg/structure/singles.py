@@ -97,8 +97,7 @@ class Singles:
                 raise ValueError(
                     f"Duplicate file ID detected: '{page_id}' "
                     f"for pages {page} and {self.file_ids[page_id]}")
-            else:
-                self.file_ids[page_id] = page
+            self.file_ids[page_id] = page
 
     def _setup_src_paths(self):
         self.src_paths = {
@@ -117,12 +116,11 @@ class Singles:
         for page in self.pages:
             dest_path = str(page.dest_path)
             if dest_path in self.dest_paths:
-                error_message = f"Duplicate Dest Path: {dest_path}.\n"
-                error_message += f"Page: {page} \n"
-                error_message += f"Page: {self.dest_paths[dest_path]}"
-                raise ValueError(error_message)
-            else:
-                self.dest_paths[dest_path] = page
+                raise ValueError(
+                    f"Duplicate Dest Path: {dest_path}.\n"
+                    f"Page: {page}\n"
+                    f"Page: {self.dest_paths[dest_path]}")
+            self.dest_paths[dest_path] = page
 
     def update_htmls(self, archives: 'Archives', themes: Themes) -> None:
         self.plugins.do_action('before_update_singles_html', target=self)
@@ -198,8 +196,8 @@ class Single(Page):
         if self.src_dir != other.src_dir:
             return self.src_dir < other.src_dir
 
-        if self.filename == 'index' or other.filename == 'index':
-            return self.filename == 'index'
+        if self.is_index or other.is_index:
+            return self.is_index
 
         return (s_order, self.src_path) < (o_order, other.src_path)
 
@@ -225,9 +223,13 @@ class Single(Page):
         self.file_id = self._get_file_id()
 
     @property
+    def is_index(self) -> bool:
+        return self.filename.lower() == 'index'
+
+    @property
     def is_root(self) -> bool:
         # /docs/{post_type}/index.md
-        return len(self.id.parts) == 4 and self.filename.lower() == 'index'
+        return len(self.id.parts) == 4 and self.is_index
 
     @staticmethod
     def parse_front_matter(path: Path) -> tuple[dict, str]:
@@ -319,7 +321,7 @@ class Single(Page):
 
     def _get_title(self) -> str:
         title = self.meta.get('title') or Page.clean_name(self.filename)
-        if self.filename.lower() == 'index' and title == 'index':
+        if self.is_index and title == 'index':
             title = Page.clean_name(self.src_dir.parts[-1])
         return title
 
@@ -487,7 +489,7 @@ class Single(Page):
     def _get_filename_slug(self, post_type_slug: str) -> str:
         if self.is_root:
             filename_slug = post_type_slug
-        elif self.filename.lower() == 'index':
+        elif self.is_index:
             filename_slug = self.src_dir.parts[-1]
         else:
             filename_slug = self.filename
@@ -521,7 +523,7 @@ class Single(Page):
         # producing a duplicate (e.g. /sports/sports/). Drop the duplicate when
         # the last two segments are identical.
         url_parts = url.split('/')
-        if self.filename.lower() == 'index' and len(url_parts) >= 3 and url_parts[-2] == url_parts[-3]:
+        if self.is_index and len(url_parts) >= 3 and url_parts[-2] == url_parts[-3]:
             url = '/'.join(url_parts[:-2]) + '/'
         else:
             url = '/'.join(url_parts) + '/'
