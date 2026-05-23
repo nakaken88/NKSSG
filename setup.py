@@ -9,7 +9,6 @@ setup(
     include_package_data=True,
     python_requires='>=3.9',
     install_requires=[
-        'beautifulsoup4',
         'click',
         'Jinja2',
         'livereload',
