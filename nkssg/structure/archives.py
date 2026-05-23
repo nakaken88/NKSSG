@@ -14,7 +14,6 @@ class Archives:
         self.config = config
         self.plugins = plugins
         self.archives: dict[PurePath, Archive] = {}
-        self.long_ids: dict[PurePath, PurePath] = {}  # for taxonomy
         self.rendered_pages: list[Page] = []
 
         global_root_archive = Archive(None, '/')
@@ -22,10 +21,6 @@ class Archives:
 
     def __iter__(self):
         return iter(self.archives.values())
-
-    def output(self):
-        for page in self.rendered_pages:
-            page.output(self.config)
 
     def setup(self, singles):
 
@@ -78,14 +73,16 @@ class Archives:
             single.archive_list.append(archive)
 
     def setup_taxonomy_archives(self, singles):
+        long_ids: dict[PurePath, PurePath] = {}
 
         for tax_name, tax_config in self.config.taxonomy.items():
-            self.initialize_taxonomy_archives(tax_name, tax_config.terms)
+            self.initialize_taxonomy_archives(tax_name, tax_config.terms, long_ids)
 
-        self.add_singles_to_taxonomy_archives(singles)
+        self.add_singles_to_taxonomy_archives(singles, long_ids)
 
     def initialize_taxonomy_archives(
-            self, tax_name, terms: dict[str, TermConfig]):
+            self, tax_name, terms: dict[str, TermConfig],
+            long_ids: dict[PurePath, PurePath]):
 
         base_id = PurePath('/taxonomy', tax_name)
         term_paths: dict[str, PurePath] = {}
@@ -104,9 +101,10 @@ class Archives:
         for term_name in terms:
             archive_id = get_path(term_name)
             self.create_archive(archive_id)
-            self.long_ids[PurePath('/taxonomy', tax_name, term_name)] = archive_id
+            long_ids[PurePath('/taxonomy', tax_name, term_name)] = archive_id
 
-    def add_singles_to_taxonomy_archives(self, singles: Singles):
+    def add_singles_to_taxonomy_archives(
+            self, singles: Singles, long_ids: dict[PurePath, PurePath]):
         taxonomy_root_archive = self.create_archive(PurePath('/taxonomy'))
         for root_name in taxonomy_root_archive.children:
             for single in singles:
@@ -117,11 +115,11 @@ class Archives:
                     terms = [terms]
                 for term in terms:
                     short_id = PurePath('/taxonomy', root_name, term)
-                    if short_id not in self.long_ids:
+                    if short_id not in long_ids:
                         logging.warning(f'{root_name}: {term} is not found ({single})')
                         continue
 
-                    archive_id = self.long_ids[short_id]
+                    archive_id = long_ids[short_id]
                     archive = self.archives[archive_id]
                     if single not in archive.singles:
                         archive.singles.append(single)
@@ -221,6 +219,10 @@ class Archives:
                 self.rendered_pages.extend(pages)
 
         self.plugins.do_action('after_update_archives_html', target=self)
+
+    def output(self):
+        for page in self.rendered_pages:
+            page.output(self.config)
 
 
 class Archive(Page):

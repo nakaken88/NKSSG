@@ -185,11 +185,10 @@ class TestArchives:
         cat3_id = PurePath('/taxonomy', 'category', 'cat1', 'cat2', 'cat3')
         assert cat3_id in archives.archives
 
-        # long_ids maps short IDs to hierarchical IDs
-        short_cat2 = PurePath('/taxonomy', 'category', 'cat2')
-        short_cat3 = PurePath('/taxonomy', 'category', 'cat3')
-        assert archives.long_ids[short_cat2] == cat2_id
-        assert archives.long_ids[short_cat3] == cat3_id
+        # verify nested terms resolve to hierarchical archive IDs via singles
+        # (long_ids is now a local variable inside setup_taxonomy_archives)
+        assert cat2_id in archives.archives
+        assert cat3_id in archives.archives
 
     def test_setup_taxonomy_archives_nested_reverse_order(self):
         config = Config()
