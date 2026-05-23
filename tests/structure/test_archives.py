@@ -211,6 +211,22 @@ class TestArchives:
         assert cat2_id in archives.archives
 
 
+    def test_setup_taxonomy_archives_circular_reference(self):
+        config = Config()
+        config.taxonomy = TaxonomyConfigManager()
+
+        cat_tax_config = TaxonomyConfig(name='category', slug='categories')
+        cat_tax_config.terms['A'] = TermConfig(name='A', parent='B')
+        cat_tax_config.terms['B'] = TermConfig(name='B', parent='A')
+        config.taxonomy['category'] = cat_tax_config
+
+        mock_plugins = MagicMock(spec=Plugins)
+        archives = Archives(config, mock_plugins)
+        with pytest.raises(ValueError, match="Circular parent reference"):
+            archives.setup_taxonomy_archives(
+                MagicMock(spec=Singles, __iter__=lambda _: iter([])))
+
+
 class TestUpdateUrls:
     def _make_archives(self, tax_config):
         config = Config()

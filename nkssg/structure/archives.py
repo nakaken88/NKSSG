@@ -87,14 +87,17 @@ class Archives:
         base_id = PurePath('/taxonomy', tax_name)
         term_paths: dict[str, PurePath] = {}
 
-        def get_path(term_name: str) -> PurePath:
+        def get_path(term_name: str, visiting: frozenset = frozenset()) -> PurePath:
             if term_name in term_paths:
                 return term_paths[term_name]
+            if term_name in visiting:
+                raise ValueError(
+                    f"Circular parent reference in taxonomy '{tax_name}': '{term_name}'")
             parent_name = terms[term_name].parent
             if parent_name in ('', tax_name):
                 path = base_id / term_name
             else:
-                path = get_path(parent_name) / term_name
+                path = get_path(parent_name, visiting | {term_name}) / term_name
             term_paths[term_name] = path
             return path
 
