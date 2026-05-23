@@ -101,24 +101,26 @@ class Site:
         self.plugins.do_action('on_end', target=self)
 
     def copy_static_files(self):
-        def copy_file_if_newer(src: Path, dest: Path):
-            if dest.exists() and src.stat().st_mtime <= dest.stat().st_mtime:
-                return
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(src, dest)
-
         for f in self.config.static_dir.glob('**/*'):
-            if f.is_file():
-                rel_path = f.relative_to(self.config.static_dir)
-                to_path = self.config.public_dir / rel_path
-                copy_file_if_newer(f, to_path)
+            if not f.is_file():
+                continue
+            rel_path = f.relative_to(self.config.static_dir)
+            self._copy_file_if_newer(f, self.config.public_dir / rel_path)
 
         for d in self.themes.dirs:
             for f in d.glob('**/*'):
-                if f.is_file() and self.is_target(f.relative_to(d.parent)):
-                    rel_path = f.relative_to(d.parent)
-                    to_path = self.config.public_dir / 'themes' / rel_path
-                    copy_file_if_newer(f, to_path)
+                if not f.is_file():
+                    continue
+                rel_path = f.relative_to(d.parent)
+                if not self.is_target(rel_path):
+                    continue
+                self._copy_file_if_newer(f, self.config.public_dir / 'themes' / rel_path)
+
+    def _copy_file_if_newer(self, src: Path, dest: Path):
+        if dest.exists() and src.stat().st_mtime <= dest.stat().st_mtime:
+            return
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dest)
 
     def is_target(self, rel_path):
         for pattern in self.themes.cnf.get('static_exclude', []):
@@ -155,6 +157,4 @@ class Site:
 
         output_path = self.config.public_dir / output_path
         output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with open(output_path, 'w', encoding='UTF-8') as f:
-            f.write(html)
+        output_path.write_text(html, encoding='utf-8')
