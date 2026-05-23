@@ -158,6 +158,32 @@ class TestArchives:
         assert single1 in cat2_archive.singles
         assert single2 not in cat2_archive.singles
 
+    def test_setup_taxonomy_archives_duplicate_terms(self):
+        config = Config()
+        config.taxonomy = TaxonomyConfigManager()
+
+        cat_tax_config = TaxonomyConfig(name='category', slug='categories')
+        cat_tax_config.terms['cat1'] = TermConfig(name='cat1', slug='cat1')
+        config.taxonomy['category'] = cat_tax_config
+
+        mock_plugins = MagicMock(spec=Plugins)
+
+        single = MagicMock(
+            spec=Single,
+            post_type='post',
+            archive_list=[],
+            id=PurePath('/docs/post-1'),
+            meta={'category': ['cat1', 'cat1']}
+        )
+        singles = MagicMock(spec=Singles)
+        singles.__iter__.return_value = iter([single])
+
+        archives = Archives(config, mock_plugins)
+        archives.setup_taxonomy_archives(singles)
+
+        cat1_id = PurePath('/taxonomy', 'category', 'cat1')
+        assert len(archives.archives[cat1_id].singles) == 1
+
     def test_setup_taxonomy_archives_nested(self):
         config = Config()
 

@@ -116,7 +116,7 @@ class Archives:
                 terms = single.meta[root_name]
                 if not isinstance(terms, list):
                     terms = [terms]
-                for term in terms:
+                for term in set(terms):
                     short_id = PurePath('/taxonomy', root_name, term)
                     if short_id not in long_ids:
                         logging.warning(f'{root_name}: {term} is not found ({single})')
@@ -124,9 +124,8 @@ class Archives:
 
                     archive_id = long_ids[short_id]
                     archive = self.archives[archive_id]
-                    if single not in archive.singles:
-                        archive.singles.append(single)
-                        single.archive_list.append(archive)
+                    archive.singles.append(single)
+                    single.archive_list.append(archive)
 
     def update_singles_all(self):
         seen: dict['Archive', set] = {}
