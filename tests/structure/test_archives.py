@@ -253,6 +253,70 @@ class TestArchives:
                 MagicMock(spec=Singles, __iter__=lambda _: iter([])))
 
 
+class TestArchiveDepth:
+    def _make_chain(self, *names):
+        archive = Archive(None, '/')
+        for name in names:
+            archive = Archive(archive, name)
+        return archive
+
+    def test_depth_root(self):
+        archive = self._make_chain('taxonomy', 'category')
+        assert archive.depth == 0
+
+    def test_depth_one_level(self):
+        archive = self._make_chain('taxonomy', 'category', 'cat1')
+        assert archive.depth == 1
+
+    def test_depth_two_levels(self):
+        archive = self._make_chain('taxonomy', 'category', 'cat1', 'cat2')
+        assert archive.depth == 2
+
+    def test_depth_date_year(self):
+        archive = self._make_chain('date', 'post', '2023')
+        assert archive.depth == 1
+
+    def test_depth_date_month(self):
+        archive = self._make_chain('date', 'post', '2023', '01')
+        assert archive.depth == 2
+
+
+class TestArchiveLookup:
+    def _make_archives(self):
+        config = Config()
+        config.taxonomy = TaxonomyConfigManager()
+        cat_config = TaxonomyConfig(name='category', slug='category')
+        cat_config.terms['cat1'] = TermConfig(name='cat1', slug='cat1')
+        cat_config.terms['cat2'] = TermConfig(name='cat2', slug='cat2', parent='cat1')
+        config.taxonomy['category'] = cat_config
+        archives = Archives(config, MagicMock(spec=Plugins))
+        archives.setup_taxonomy_archives(
+            MagicMock(spec=Singles, __iter__=lambda _: iter([])))
+        return archives
+
+    def test_get_root_archive_exists(self):
+        archives = self._make_archives()
+        root = archives.get_root_archive('taxonomy', 'category')
+        assert root is not None
+        assert root.is_root
+        assert root.root_name == 'category'
+
+    def test_get_root_archive_not_found(self):
+        archives = self._make_archives()
+        assert archives.get_root_archive('taxonomy', 'nonexistent') is None
+
+    def test_get_terms_returns_all_terms(self):
+        archives = self._make_archives()
+        terms = archives.get_terms('category')
+        assert len(terms) == 2
+        assert all(t.root_name == 'category' for t in terms)
+        assert all(not t.is_root for t in terms)
+
+    def test_get_terms_empty_for_unknown_taxonomy(self):
+        archives = self._make_archives()
+        assert archives.get_terms('nonexistent') == []
+
+
 class TestUpdateUrls:
     def _make_archives(self, tax_config):
         config = Config()

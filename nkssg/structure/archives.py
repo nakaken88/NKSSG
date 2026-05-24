@@ -229,6 +229,16 @@ class Archives:
         for page in self.rendered_pages:
             page.output(self.config)
 
+    def get_root_archive(self, archive_type: str, root_name: str) -> 'Archive | None':
+        archive_id = PurePath('/', archive_type, root_name)
+        return self.archives.get(archive_id)
+
+    def get_terms(self, tax_name: str) -> list['Archive']:
+        return [
+            a for a in self.archives.values()
+            if a.archive_type == 'taxonomy' and a.root_name == tax_name and not a.is_root
+        ]
+
 
 class Archive(Page):
 
@@ -272,6 +282,11 @@ class Archive(Page):
     @property
     def root_name(self):
         return self.id.parts[2] if len(self.id.parts) >= 3 else ''
+
+    @property
+    def depth(self) -> int:
+        # root archive = 0, one level below root = 1, etc.
+        return len(self.id.parts) - 3
 
     @property
     def singles_all_count(self):
