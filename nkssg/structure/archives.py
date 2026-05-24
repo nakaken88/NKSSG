@@ -1,4 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from pathlib import Path, PurePath
 
@@ -216,9 +216,12 @@ class Archives:
             return archive.get_archive_pages(self.config, themes)
 
         with ThreadPoolExecutor() as executor:
-            results = executor.map(get_pages, self.archives.values())
-            for pages in results:
-                self.rendered_pages.extend(pages)
+            futures = [
+                executor.submit(get_pages, archive)
+                for archive in self.archives.values()
+            ]
+            for future in as_completed(futures):
+                self.rendered_pages.extend(future.result())
 
         self.plugins.do_action('after_update_archives_html', target=self)
 
