@@ -52,68 +52,8 @@ This is a sample post.
 
     site_name = project_dir.name
 
-    config_content = '''\
-site:
-  site_name: "{site_name}"
-  site_url: ""
-  site_desc: ""
-  site_image: ""
-  language: "en"
-
-post_type:
-  post:
-    permalink: /%Y/%m/%d/%H%M%S/
-    archive_type: "date"
-  page:
-    permalink: /{slug}/
-    archive_type: "none"
-  section:
-    archive_type: "section"
-
-markdown:
-  fenced_code: {}
-  toc:
-    marker: "[toc]"
-
-plugins:
-  autop: {}
-  awesome-img-link: {}
-  awesome-page-link:
-    strip_paths:
-      - /docs
-  select-pages:
-    start: 0
-    step: 1
-
-theme:
-  name: default
-  child: child
-
-taxonomy:
-  tag:
-    label: Tag
-    term:
-      - tag1
-      - name: tag2
-        slug: tag_two
-      - tag3
-
-  category:
-    label: Category
-    term:
-      - cat1
-      - name: cat11
-        parent: cat1
-      - name: cat12
-        parent: cat1
-      - name: cat2
-        term:
-          - name: cat21
-          - cat22
-          - cat23
-'''
-    config_content = config_content.replace('"{site_name}"', f'"{site_name}"')
-    
+    template_path = Path(nkssg.__file__).parent / 'command' / 'default_config.yml'
+    config_content = template_path.read_text(encoding='utf-8').replace('{site_name}', site_name)
     config_path.write_text(config_content, encoding='utf-8')
 
 
@@ -171,7 +111,6 @@ def page(name, path, config: Config):
 
     to_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(to_path, mode='w', encoding='utf-8') as f:
-        f.write('\n'.join(new_lines))
+    to_path.write_text('\n'.join(new_lines), encoding='utf-8')
 
-    print(f'{to_path} is created!')
+    click.echo(f'{to_path} is created!')

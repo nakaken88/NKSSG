@@ -1,0 +1,58 @@
+site:
+  site_name: "{site_name}"
+  site_url: ""
+  site_desc: ""
+  site_image: ""
+  language: "en"
+
+post_type:
+  post:
+    permalink: /%Y/%m/%d/%H%M%S/
+    archive_type: "date"
+  page:
+    permalink: /{slug}/
+    archive_type: "none"
+  section:
+    archive_type: "section"
+
+markdown:
+  fenced_code: {}
+  toc:
+    marker: "[toc]"
+
+plugins:
+  autop: {}
+  awesome-img-link: {}
+  awesome-page-link:
+    strip_paths:
+      - /docs
+  select-pages:
+    start: 0
+    step: 1
+
+theme:
+  name: default
+  child: child
+
+taxonomy:
+  tag:
+    label: Tag
+    term:
+      - tag1
+      - name: tag2
+        slug: tag_two
+      - tag3
+
+  category:
+    label: Category
+    term:
+      - cat1
+      - name: cat11
+        parent: cat1
+      - name: cat12
+        parent: cat1
+      - name: cat2
+        term:
+          - name: cat21
+          - cat22
+          - cat23
