@@ -41,6 +41,7 @@ class Page:
 
         self.should_update_html = True
         self.should_output = True
+        self.page_number = 0
 
     @staticmethod
     def to_slug(dirty_slug: str) -> str:
