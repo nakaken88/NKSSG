@@ -307,11 +307,11 @@ class Archive(Page):
         paginator['total_elements'] = total_elements
 
         # 1. compute slices
-        slices = []
-        start, end = 0, min(first_limit, total_elements)
-        while not slices or start < end:
+        slices = [(0, min(first_limit, total_elements))]
+        while slices[-1][1] < total_elements:
+            start = slices[-1][1]
+            end = min(start + limit, total_elements)
             slices.append((start, end))
-            start, end = end, min(end + limit, total_elements)
 
         # 2. create page objects
         pages: list[Page] = []
