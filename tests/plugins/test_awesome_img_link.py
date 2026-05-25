@@ -1,4 +1,5 @@
 import pytest
+from pathlib import Path
 from unittest.mock import MagicMock
 
 from nkssg.structure.config import Config
@@ -56,7 +57,7 @@ def test_image_with_keyword_is_processed_and_copied(mock_config, mock_singles, c
 
     assert page.html == '<p>Some text</p><img src="./dummy.png"><p>More text</p>'
     assert len(page.imgs) == 1
-    assert page.imgs[0]['old_path'] == mock_config.docs_dir / "images" / "dummy.png"
+    assert page.imgs[0]['old_path'] == Path("images") / "dummy.png"
     assert page.imgs[0]['new_path'] == page.dest_dir / "dummy.png"
 
     # 2. Test after_output_singles
@@ -125,7 +126,7 @@ def test_relative_path_image_is_processed(mock_config, mock_singles, create_mock
     assert (page.dest_dir / "sample.png").exists()
 
 
-def test_non_existent_source_image_is_handled(mock_config, mock_singles, create_mock_page, capsys):
+def test_non_existent_source_image_is_handled(mock_config, mock_singles, create_mock_page, caplog):
     html_content = '<img src="/non_existent_images/notfound.gif?">'
     page = create_mock_page(html_content)
     mock_singles.__iter__.return_value = [page]
@@ -141,10 +142,11 @@ def test_non_existent_source_image_is_handled(mock_config, mock_singles, create_
     site.config = mock_config
     site.singles = mock_singles
 
-    plugin.after_output_singles(site)
+    import logging
+    with caplog.at_level(logging.WARNING):
+        plugin.after_output_singles(site)
 
-    captured = capsys.readouterr()
-    assert "is not found" in captured.out
+    assert "is not found" in caplog.text
 
     assert not (page.dest_dir / "notfound.gif").exists()
 

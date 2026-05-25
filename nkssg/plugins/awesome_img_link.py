@@ -33,7 +33,6 @@ class AwesomeImgLinkPlugin(BasePlugin):
         return singles
 
     def update_img_link(self, page: Single):
-        docs_dir = self.site_config.docs_dir
         keyword = self.keyword
 
         if not any(keyword + quote in page.html for quote in ['"', "'"]):
@@ -53,18 +52,18 @@ class AwesomeImgLinkPlugin(BasePlugin):
 
             old_link = src
             if old_link.startswith('/'):
-                old_path = Path(docs_dir, old_link[1:])
+                old_path_rel = Path(old_link[1:])
             else:
-                old_path = Path(docs_dir, page.src_path.parent, old_link)
+                old_path_rel = page.src_path.parent / old_link
 
-            new_path = page.dest_dir / old_path.name
-            new_src = './' + old_path.name
+            new_path_rel = page.dest_dir / old_path_rel.name
+            new_src = './' + old_path_rel.name
 
             old_text = tag.group(0)
             new_text = old_text.replace(tag.group(1), new_src)
             replacers.append([tag.start(), tag.end(), new_text])
 
-            page.imgs.append({'old_path': old_path, 'new_path': new_path})
+            page.imgs.append({'old_path': old_path_rel, 'new_path': new_path_rel})
 
         for s, e, new_html in replacers[::-1]:
             page.html = page.html[:s] + new_html + page.html[e:]
@@ -73,8 +72,8 @@ class AwesomeImgLinkPlugin(BasePlugin):
         config = site.config
         for page in site.singles:
             for img in getattr(page, 'imgs', []):
-                old_path = Path(config.docs_dir, img['old_path'])
-                new_path = Path(config.public_dir, img['new_path'])
+                old_path = config.docs_dir / img['old_path']
+                new_path = config.public_dir / img['new_path']
 
                 if not old_path.exists():
                     logging.warning(f'{old_path} is not found on {page}')
