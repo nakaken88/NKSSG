@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 import re
 import shutil
 
@@ -76,9 +77,9 @@ class AwesomeImgLinkPlugin(BasePlugin):
                 new_path = Path(config.public_dir, img['new_path'])
 
                 if not old_path.exists():
-                    print(str(old_path) + f' is not found on {page}')
+                    logging.warning(f'{old_path} is not found on {page}')
                     continue
                 if new_path.exists():
                     continue
 
-                shutil.copyfile(str(old_path), str(new_path))
+                shutil.copyfile(old_path, new_path)
