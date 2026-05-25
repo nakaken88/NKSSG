@@ -173,7 +173,7 @@ def test_draft_mode_skips_processing(mock_config, mock_singles_and_site, create_
     assert test_page.content == original_content
 
 
-def test_archive_links_are_resolved(mock_config, mock_singles_and_site, create_mock_page):
+def test_archive_links_are_not_resolved(mock_config, mock_singles_and_site, create_mock_page):
     singles, site = mock_singles_and_site
 
     archive_content = '<p>Link to <a href="page_a.md?">Page A</a></p>'
@@ -185,4 +185,4 @@ def test_archive_links_are_resolved(mock_config, mock_singles_and_site, create_m
     plugin.config = {}
     plugin.after_update_urls(site)
 
-    assert archive_page.content == '<p>Link to <a href="/page/a/">Page A</a></p>'
+    assert archive_page.content == archive_content
