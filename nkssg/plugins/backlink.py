@@ -24,7 +24,7 @@ class BacklinkPlugin(BasePlugin):
     def clean_url(href: str, config: Config):
         href = href.lower()
 
-        if 'http' in href:
+        if href.startswith('http'):
             if config.site.site_url in href:
                 href = href.replace(config.site.site_url, '')
             elif config.site.site_url_original in href:
@@ -47,7 +47,7 @@ class BacklinkPlugin(BasePlugin):
                 if cleaned_href:
                     page.to_links_text.add(cleaned_href)
 
-        urls = {str(page.rel_url).lower(): page for page in site.singles}
+        urls = {page.rel_url: page for page in site.singles}
         for page in site.singles:
             for link in page.to_links_text:
                 to_page = urls.get(quote(link))
