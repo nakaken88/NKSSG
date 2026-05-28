@@ -72,13 +72,13 @@ class AwesomeImgLinkPlugin(BasePlugin):
         config = site.config
         for page in site.singles:
             for img in getattr(page, 'imgs', []):
-                old_path = config.docs_dir / img['old_path']
-                new_path = config.public_dir / img['new_path']
+                old_path: Path = config.docs_dir / img['old_path']
+                new_path: Path = config.public_dir / img['new_path']
 
                 if not old_path.exists():
                     logging.warning(f'{old_path} is not found on {page}')
                     continue
-                if new_path.exists():
+                if new_path.exists() and old_path.stat().st_mtime <= new_path.stat().st_mtime:
                     continue
 
                 shutil.copyfile(old_path, new_path)
