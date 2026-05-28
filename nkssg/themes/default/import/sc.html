@@ -17,6 +17,11 @@
 {%- endmacro %}
 
 
+{% macro body_class() -%}
+global
+{%- if mypage %} {{ mypage.page_type }} {{ mypage.post_type or mypage.archive_type }}{% endif %}
+{%- endmacro %}
+
 
 {% macro get_thumb(page) -%}
   {% if page.image and page.image.src -%}
