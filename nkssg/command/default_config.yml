@@ -33,6 +33,7 @@ plugins:
 theme:
   name: default
   child: child
+  version: "1.0.0"
 
 taxonomy:
   tag:

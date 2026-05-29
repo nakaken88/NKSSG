@@ -1,5 +1,5 @@
 {% if mypage -%}
-  <meta property="og:type" content="article" />
+  <meta property="og:type" content="{{ 'article' if mypage.page_type == 'single' else 'website' }}" />
   <meta property="og:site_name" content="{{ config.site.site_name }}">
   <meta property="og:title" content="{{ sc.title_tag() }}" />
   <meta property="og:url" content="{{ mypage.abs_url }}" />
@@ -9,10 +9,10 @@
   {%- elif config.site.site_desc -%}
     <meta property="og:description" content="{{ config.site.site_desc }}" />
   {%- endif %}
-  
+
   {% if mypage.image and mypage.image.abs_url -%}
     <meta property="og:image" content="{{ mypage.image.abs_url }}" />
-  {%- elif config and config.site and config.site.site_image -%}
+  {%- elif config.site.site_image -%}
     <meta property="og:image" content="{{ config.site.site_url }}{{ config.site.site_image }}" />
   {%- endif %}
 {%- endif %}
