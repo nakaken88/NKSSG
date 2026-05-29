@@ -104,7 +104,7 @@ class Page:
         if not self.rel_url:
             return
 
-        site_url = (config.site.site_url or '/').rstrip('/')
+        site_url = config.site.site_url.rstrip('/')
         rel_url = self.rel_url.lstrip('/')
         self.abs_url = f'{site_url}/{rel_url}'
 

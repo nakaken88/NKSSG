@@ -51,14 +51,11 @@ def test_get_url_from_dest(dest_path, expected):
     assert page._get_url_from_dest(dest_path) == expected
 
 
-@pytest.mark.parametrize("dest_path", [
-    (''),  # empty string
-])
-def test_get_url_from_dest_error(dest_path):
+def test_get_url_from_dest_error():
     page = Page()
     page.dest_path = ''
     with pytest.raises(ValueError):
-        page._get_url_from_dest(dest_path)
+        page._get_url_from_dest('')
 
 
 @pytest.mark.parametrize("url, expected", [
@@ -103,3 +100,13 @@ def test_url_setup(
 
     assert page.abs_url == expected_abs_url
     assert page.url == expected_url
+
+
+def test_url_setup_skips_when_rel_url_is_empty():
+    config = Config()
+    page = Page()
+    page.rel_url = ''
+    page._url_setup(config)
+
+    assert page.abs_url == ''
+    assert page.url == '/'
