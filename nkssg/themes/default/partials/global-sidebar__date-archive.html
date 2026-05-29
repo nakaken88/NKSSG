@@ -1,16 +1,15 @@
-{% for archive in archives if archive.root_name == "post" and not archive.is_root and archive.name | length == 4 -%}
-  {%- if loop.first %}
+{% set root = archives.get_root_archive('date', 'post') %}
+{% if root and root.children %}
 <div class="widget">
   <div class="widget__title">Archive</div>
-  <div class="widget__body ">
+  <div class="widget__body">
     <ul>
-  {%- endif %}
+    {% for archive in root.children.values() | sort(attribute='name', reverse=True) %}
       <li>
         <a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})
       </li>
-  {%- if loop.last %}
+    {% endfor %}
     </ul>
   </div>
 </div>
-  {%- endif %}
-{%- endfor %}
+{% endif %}

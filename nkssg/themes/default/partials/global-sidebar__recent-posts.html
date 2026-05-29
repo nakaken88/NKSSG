@@ -1,11 +1,10 @@
-{% for archive in archives if archive.root_name == "post" and archive.is_root -%}
-  {%- for page in archive.singles_all[:10] -%}
-    {%- if loop.first %}
+{% set root = archives.get_root_archive('date', 'post') %}
+{% if root and root.singles_all %}
 <div class="widget">
   <div class="widget__title">Recent Posts</div>
-  <div class="widget__body ">
+  <div class="widget__body">
     <ul>
-    {%- endif %}
+    {% for page in root.singles_all[:10] %}
       <li class="card">
         <a href="{{ page.url }}" class="card__link">
           <div class="card__body">
@@ -18,10 +17,8 @@
           </div>
         </a>
       </li>
-    {%- if loop.last %}
+    {% endfor %}
     </ul>
   </div>
 </div>
-    {%- endif %}
-  {%- endfor -%}
-{%- endfor %}
+{% endif %}
