@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import click
 
 from nkssg.command import build, new
