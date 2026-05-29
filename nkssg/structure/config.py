@@ -33,8 +33,8 @@ class BaseConfig:
         else:
             self.extras[k] = v
 
-    def update(self, myDict: dict):
-        for k, v in myDict.items():
+    def update(self, data: dict):
+        for k, v in data.items():
             self.__setitem__(k, v)
 
 
@@ -49,8 +49,8 @@ class SiteConfig(BaseConfig):
 
     site_url_original: str = ''
 
-    def update(self, myDict: dict):
-        super().update(myDict)
+    def update(self, data: dict):
+        super().update(data)
 
         self.site_url_original = self.site_url
         self.site_url = self.site_url.rstrip('/')
@@ -69,8 +69,8 @@ class PostTypeConfig(BaseConfig):
 
 class PostTypeConfigManager(dict[str, PostTypeConfig]):
 
-    def update(self, d: dict):
-        for k, v in d.items():
+    def update(self, data: dict):
+        for k, v in data.items():
             if k not in self:
                 self[k] = PostTypeConfig()
 
@@ -103,8 +103,8 @@ class TaxonomyConfig(BaseConfig):
     limit: int = 0
     terms: dict[str, TermConfig] = field(default_factory=dict)
 
-    def update(self, d: dict):
-        for k, v in d.items():
+    def update(self, data: dict):
+        for k, v in data.items():
             if k == 'term':
                 self.update_terms(v)
             else:
@@ -134,8 +134,8 @@ class TaxonomyConfig(BaseConfig):
 
 class TaxonomyConfigManager(dict[str, TaxonomyConfig]):
 
-    def update(self, d: dict):
-        for k, v in d.items():
+    def update(self, data: dict):
+        for k, v in data.items():
             if k not in self:
                 self[k] = TaxonomyConfig()
 
@@ -210,12 +210,8 @@ class Config(BaseConfig):
             raise ValueError(f"The YAML format is incorrect: {e}")
 
     def _update_from_yaml_file(self, yaml_file_path: Path):
-        try:
-            yaml_content = yaml_file_path.read_text(encoding='utf-8')
-            self._update_from_yaml_string(yaml_content)
-        except FileNotFoundError:
-            msg = f"The YAML file was not found: {yaml_file_path}"
-            raise FileNotFoundError(msg)
+        yaml_content = yaml_file_path.read_text(encoding='utf-8')
+        self._update_from_yaml_string(yaml_content)
 
     @classmethod
     def from_file(cls, yaml_file_path: Path = Path('nkssg.yml'), mode: str | None = None, base_dir: Path | None = None):

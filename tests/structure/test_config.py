@@ -236,7 +236,6 @@ def test_from_file_with_base_dir(tmp_path: Path):
 
 
 def test_from_file_ignores_mode_key(tmp_path: Path):
-    """mode in YAML is ignored so the CLI-specified mode takes precedence."""
     config_content = """
     mode: serve
     site:
