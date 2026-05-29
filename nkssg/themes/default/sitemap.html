@@ -1,10 +1,8 @@
 {% extends "main.html" %}
 
-
 {% block title_tag -%}
 <title>Sitemap | {{ config.site.site_name }}</title>
 {%- endblock %}
-
 
 {% block entry %}
 <h1>Sitemap</h1>
@@ -16,17 +14,15 @@
   {%- endif -%}
 
   {%- if page.archive_type == "date" -%}
-    {%- if loop.first or page.post_type != page.prev_page.post_type -%}
-    <h3>Year: {{ page.date.strftime('%Y') }}</h3>
-    {%- elif page.date.strftime('%Y') != page.prev_page.date.strftime('%Y') -%}
+    {%- if loop.first or page.post_type != page.prev_page.post_type
+        or page.date.strftime('%Y') != page.prev_page.date.strftime('%Y') -%}
     <h3>Year: {{ page.date.strftime('%Y') }}</h3>
     {%- endif -%}
   {%- endif -%}
 
   {%- if page.archive_type == "section" -%}
-    {%- if loop.first or page.post_type != page.prev_page.post_type -%}
-    <h3>{{ page.archive_list[0].name }}</h3>
-    {%- elif page.archive_list[0].name != page.prev_page.archive_list[0].name -%}
+    {%- if loop.first or page.post_type != page.prev_page.post_type
+        or page.archive_list[0].name != page.prev_page.archive_list[0].name -%}
     <h3>{{ page.archive_list[0].name }}</h3>
     {%- endif -%}
   {%- endif -%}
@@ -37,8 +33,6 @@
   <div><a href="{{ page.url }}">{{ page.date.strftime('%Y/%m/%d %H:%M') }}</a></div>
   {%- endif -%}
 {%- endfor -%}
-
 </div>
 
 {% endblock %}
-
