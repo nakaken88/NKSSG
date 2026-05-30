@@ -1,3 +1,4 @@
+import logging
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -142,7 +143,6 @@ def test_non_existent_source_image_is_handled(mock_config, mock_singles, create_
     site.config = mock_config
     site.singles = mock_singles
 
-    import logging
     with caplog.at_level(logging.WARNING):
         plugin.after_output_singles(site)
 

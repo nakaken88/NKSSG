@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from nkssg.plugins.select_pages import SelectPagesPlugin
 from nkssg.structure.config import Config
@@ -10,12 +10,14 @@ from nkssg.structure.plugins import Plugins
 def plugin():
     return SelectPagesPlugin()
 
+
 @pytest.fixture
 def singles_with_pages():
     mock_plugins = MagicMock(spec=Plugins)
     singles = Singles(Config(), mock_plugins)
     singles.pages = [MagicMock(spec=Single) for _ in range(10)]
     return singles
+
 
 def test_not_serve_mode(plugin, singles_with_pages):
     singles_with_pages.config['mode'] = 'build'
