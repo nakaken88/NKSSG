@@ -1,5 +1,3 @@
-from pathlib import Path
-import shutil
 import pytest
 
 from nkssg.structure.config import Config

@@ -5,7 +5,6 @@ import pytest
 
 from nkssg.command import build
 from nkssg.structure.config import Config
-from nkssg.structure.singles import Single
 
 
 @pytest.fixture
