@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from unittest.mock import MagicMock, patch
 
-import nkssg
 from nkssg.structure.config import Config
 from nkssg.structure.site import Site
 
