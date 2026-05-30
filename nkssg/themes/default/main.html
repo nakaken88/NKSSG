@@ -1,7 +1,7 @@
 {%- import "import/sc.html" as sc with context -%}
 <!DOCTYPE html>
 <html lang="{{ config.site.language }}">
-<head prefix="og: https://ogp.me/ns#">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% block title_tag -%}
@@ -13,9 +13,9 @@
   {% include "partials/global-header.html" %}
   {% include "partials/global-nav.html" %}
   <main class="global-main">
-    <article class="entry">
+    <div class="entry">
       {% block entry %}{% endblock %}
-    </article>
+    </div>
     {% include "partials/global-sidebar.html" %}
   </main>
   {% include "partials/global-footer.html" %}

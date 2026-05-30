@@ -1,6 +1,7 @@
 {% extends "main.html" %}
 
 {% block entry %}
+<article>
   {% include "partials/entry__breadcrumb.html" %}
   {% include "partials/entry__date.html" %}
 
@@ -12,4 +13,5 @@
   {% include "partials/entry__taxonomy-list.html" %}
   {% include "partials/entry__next-prev.html" %}
   {% include "partials/entry__display-path.html" %}
+</article>
 {% endblock %}
