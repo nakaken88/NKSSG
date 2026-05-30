@@ -1,13 +1,15 @@
-{% for a in archives if a.is_root and a.archive_type in ['date', 'section', 'simple'] %}
-{%- if loop.first %}
+{% set nav_items = archives
+    | selectattr('is_root')
+    | selectattr('archive_type', 'in', ['date', 'section', 'simple'])
+    | list %}
+{% if nav_items %}
 <nav class="global-nav">
   <ul class="global-nav__list">
-{%- endif %}
+    {% for a in nav_items %}
     <li class="global-nav__item">
       <a href="{{ a.url }}" class="global-nav__link">{{ a.name }}</a>
     </li>
-{%- if loop.last %}
+    {% endfor %}
   </ul>
 </nav>
-{%- endif %}
-{% endfor %}
+{% endif %}
