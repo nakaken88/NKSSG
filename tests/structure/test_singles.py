@@ -147,6 +147,7 @@ def test_parse_front_matter_no_front_matter(tmp_path):
     assert meta == {}
     assert doc == "This is content without front matter."
 
+
 def test_parse_front_matter_empty_front_matter(tmp_path):
     content = """
 ---
@@ -161,6 +162,7 @@ This is the content.
     assert meta == {}
     assert doc == "\nThis is the content.\n"
 
+
 def test_parse_front_matter_invalid_yaml(tmp_path):
     content = """
 ---
@@ -174,9 +176,10 @@ This is the content.
     with pytest.raises(ValueError, match="YAML parsing error"):
         Single.parse_front_matter(file_path)
 
+
 def test_parse_front_matter_file_not_found():
     non_existent_path = Path("non_existent_file.md")
-    with pytest.raises(FileNotFoundError, match="File not found"):
+    with pytest.raises(FileNotFoundError):
         Single.parse_front_matter(non_existent_path)
 
 
@@ -497,6 +500,13 @@ class TestGetCleanDate:
         assert "2023-99-99 12:00" in call_args[0]
         assert str(single_obj.id) in call_args[0]
 
+    def test_get_clean_date_non_date_string_prints_warning(self, single_obj, mocker):
+        mock_logging = mocker.patch('nkssg.structure.singles.logging')
+        result = single_obj._get_clean_date("An invalid string")
+
+        assert result == datetime.datetime(1970, 1, 1)
+        mock_logging.warning.assert_called_once()
+
 
 class TestGetDate:
     @pytest.fixture
@@ -643,6 +653,16 @@ class TestSinglesDuplicateDetection:
 
         with pytest.raises(ValueError, match="Duplicate file ID detected"):
             singles._setup_file_ids()
+
+    def test_get_single_by_file_id_not_found_logs_warning(self, config, mocker):
+        mock_logging = mocker.patch('nkssg.structure.singles.logging')
+        mock_plugins = MagicMock()
+        singles = Singles(config, mock_plugins)
+
+        result = singles.get_single_by_file_id('non-existent-id')
+
+        assert result is None
+        mock_logging.warning.assert_called_once()
 
     def test_setup_dest_path_raises_on_duplicate(self, config):
         mock_plugins = MagicMock()

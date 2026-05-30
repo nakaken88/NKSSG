@@ -233,12 +233,7 @@ class Single(Page):
 
     @staticmethod
     def parse_front_matter(path: Path) -> tuple[dict, str]:
-        try:
-            doc = path.read_text(encoding='utf-8')
-        except FileNotFoundError:
-            raise FileNotFoundError(f"File not found: {path}")
-        except Exception as e:
-            raise Exception(f"Failed to read file '{path}': {str(e)}")
+        doc = path.read_text(encoding='utf-8')
 
         parts = doc.split('---')
         if len(parts) < 3 or parts[0].strip() != '':
@@ -287,8 +282,7 @@ class Single(Page):
         if isinstance(dirty_date, datetime.date):  # yyyy-mm-dd
             return datetime.datetime.combine(dirty_date, datetime.time.min)
 
-        if isinstance(dirty_date, str) and dirty_date.count(':') == 1:
-            # yyyy-mm-dd HH:MM
+        if isinstance(dirty_date, str):
             try:
                 return datetime.datetime.strptime(dirty_date, '%Y-%m-%d %H:%M')
             except ValueError:
@@ -429,7 +423,8 @@ class Single(Page):
             image['rel_url'] = '/' + '/'.join(thumb_path_parts)
 
         use_abs_url = config.use_abs_url
-        image['abs_url'] = config.site.site_url + image['rel_url']
+        rel_url = image['rel_url'].lstrip('/')
+        image['abs_url'] = f"{config.site.site_url}/{rel_url}"
         image['url'] = image['abs_url'] if use_abs_url else image['rel_url']
         image['src'] = image['url']
         return image
