@@ -29,7 +29,9 @@ class Plugins():
             method = getattr(plugin, action_name, None)
 
             if callable(method):
-                target = method(target, **kwargs) or target
+                result = method(target, **kwargs)
+                if result is not None:
+                    target = result
 
         return target
 

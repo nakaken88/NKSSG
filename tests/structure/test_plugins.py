@@ -18,9 +18,13 @@ class DummyPluginB(BasePlugin):
 
 
 class DummyPluginC(BasePlugin):
-    # This plugin doesn't return target
     def on_test_action(self, target, **kwargs):
         target['value'] += 10
+
+
+class DummyPluginE(BasePlugin):
+    def on_test_action(self, target, **kwargs):
+        return []
 
 
 class DummyPluginD(BasePlugin):
@@ -91,7 +95,7 @@ class TestPlugins:
 
         initial_target = {'value': 5}
         result = plugin_manager.do_action('on_test_action', target=initial_target)
-        # in-place changes are preserved even when the plugin returns None
+        # in-place changes are preserved when the plugin returns None (not replacing target)
         assert result['value'] == 15
         assert result is initial_target
 
@@ -127,3 +131,16 @@ class TestPlugins:
         result = plugin_manager.do_action('on_test_action', target=initial_target, extra_data='some_extra_info')
 
         assert result['extra'] == 'some_extra_info'
+
+    def test_do_action_falsy_return_is_used(self, mocker):
+        mock_entry_points = mocker.patch('nkssg.structure.plugins.entry_points')
+        mock_entry_points.return_value = [
+            _create_mock_entry_point('plugin_e', DummyPluginE),
+        ]
+        config = Config()
+        config.update({'plugins': {'plugin_e': {}}})
+        plugin_manager = Plugins(config)
+
+        initial_target = [1, 2, 3]
+        result = plugin_manager.do_action('on_test_action', target=initial_target)
+        assert result == []
