@@ -54,7 +54,8 @@ class SiteConfig(BaseConfig):
 
         self.site_url_original = self.site_url
         self.site_url = self.site_url.rstrip('/')
-        self.site_image = self.site_image.replace(self.site_url, '')
+        if self.site_image:
+            self.site_image = '/' + self.site_image.replace(self.site_url, '').lstrip('/')
 
 
 @dataclass
