@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, YAMLError
 import nkssg
 from nkssg.structure.config import Config
 
@@ -47,7 +47,9 @@ class Themes:
         try:
             cnf = YAML(typ='safe').load(cnf_path) or {}
             self.cnf = {**self.cnf, **cnf}
-        except Exception as e:
+        except FileNotFoundError:
+            pass
+        except YAMLError as e:
             logging.warning(f"Failed to load config for {theme_name}: {e}")
 
     def set_default_theme(self, config: Config):

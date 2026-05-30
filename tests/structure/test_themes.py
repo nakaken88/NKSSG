@@ -131,6 +131,16 @@ def test_load_theme_config_invalid_yaml(base_config, caplog, create_theme_struct
     assert "Failed to load config for bad_config_theme" in caplog.text
 
 
+def test_load_theme_config_missing_yaml_no_warning(base_config, caplog, create_theme_structure):
+    theme_name = "no_config_theme"
+    create_theme_structure(theme_name, templates={'index.html': 'content'})
+    base_config.theme['name'] = theme_name
+
+    Themes(base_config)
+
+    assert "no_config_theme" not in caplog.text
+
+
 def test_lookup_template_exists_in_single_theme(base_config, create_theme_structure):
     theme_name = "test_theme"
     create_theme_structure(
@@ -194,3 +204,24 @@ def test_lookup_template_full_path(base_config, create_theme_structure):
     found_path = themes.lookup_template(['home.html'], full_path=True)
     expected_path = str(theme_dir / 'pages' / 'home.html').replace('\\', '/')
     assert found_path == expected_path
+
+
+def test_build_shortcode_import_statement(base_config, create_theme_structure):
+    theme_name = "shortcode_theme"
+    create_theme_structure(
+        theme_name,
+        templates={
+            'import/card.html': 'card content',
+            'import/button.html': 'button content',
+            'import/my-invalid.html': 'invalid alias',  # not a valid identifier
+            'layout/base.html': 'base content',         # not in import/, excluded
+        }
+    )
+    base_config.theme['name'] = theme_name
+
+    themes = Themes(base_config)
+
+    assert '{% import "import/card.html" as card %}' in themes.shortcode_import_statement
+    assert '{% import "import/button.html" as button %}' in themes.shortcode_import_statement
+    assert 'my-invalid' not in themes.shortcode_import_statement
+    assert 'base' not in themes.shortcode_import_statement
