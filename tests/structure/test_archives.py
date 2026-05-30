@@ -481,3 +481,49 @@ class TestUpdateUrls:
         # flat_url: child is at the same level as parent
         assert parent_archive.dest_path.parts == ('tag', 'parent', 'index.html')
         assert child_archive.dest_path.parts == ('tag', 'child', 'index.html')
+
+
+class TestHasPage:
+    def _make_archive(self, url='/section/docs/'):
+        root = Archive(None, '/')
+        section = Archive(root, 'section')
+        archive = Archive(section, 'docs')
+        archive.url = url
+        return archive
+
+    def test_has_page_via_singles_all(self):
+        archive = self._make_archive()
+        page = MagicMock()
+        page.url = '/other/'
+        archive.singles_all = [page]
+        assert archive.has_page(page) is True
+
+    def test_has_page_via_url_match(self):
+        archive = self._make_archive(url='/section/docs/')
+        page = MagicMock()
+        page.url = '/section/docs/'
+        archive.singles_all = []
+        assert archive.has_page(page) is True
+
+    def test_has_page_via_parents(self):
+        archive = self._make_archive()
+        page = MagicMock()
+        page.url = '/other/'
+        page.parents = [archive]
+        archive.singles_all = []
+        assert archive.has_page(page) is True
+
+    def test_has_page_returns_false(self):
+        archive = self._make_archive(url='/section/docs/')
+        page = MagicMock()
+        page.url = '/other/'
+        page.parents = []
+        archive.singles_all = []
+        assert archive.has_page(page) is False
+
+    def test_has_page_no_parents_attribute(self):
+        archive = self._make_archive(url='/section/docs/')
+        page = MagicMock(spec=[])
+        page.url = '/other/'
+        archive.singles_all = []
+        assert archive.has_page(page) is False

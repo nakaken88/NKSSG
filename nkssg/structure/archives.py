@@ -274,6 +274,13 @@ class Archive(Page):
         result.reverse()
         return result
 
+    def has_page(self, page) -> bool:
+        return (
+            page in self.singles_all
+            or page.url == self.url
+            or self in getattr(page, 'parents', [])
+        )
+
     @property
     def is_root(self):
         # /{archive_type}/{root_name}/

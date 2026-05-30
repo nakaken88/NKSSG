@@ -1,28 +1,38 @@
+{% set section_roots = archives
+    | selectattr('archive_type', 'eq', 'section')
+    | selectattr('is_root')
+    | selectattr('singles_all_count', 'gt', 0)
+    | list %}
+{% if section_roots %}
 <div class="widget">
   <div class="widget__title">Section List</div>
   <div class="widget__body">
-    {%- for menu_item in archives if menu_item.archive_type == 'section' and menu_item.is_root and menu_item.singles_all | length > 0 %}
-    <details open>
-      <summary>
-        <a href="{{ menu_item.url }}"{% if mypage and mypage.url == menu_item.url %} class="current"{% endif %}>
-          {{ menu_item.title }}
-        </a>
-      </summary>
-      {% for menu_item in menu_item.children.values() if menu_item.singles_all | length > 0 %}
-        {% include "partials/menu_item.html" %}
-      {% endfor %}
-      {% if menu_item.singles %}
-      <ul>
-        {% for page in menu_item.singles if page.url != menu_item.url %}
-        <li>
-          <a href="{{ page.url }}"{% if mypage and mypage.url == page.url %} class="current"{% endif %}>
-            {{ page.title }}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
+    {% for item in section_roots recursive %}
+      {% if loop.depth == 1 or (mypage and item.has_page(mypage)) %}
+      <details open>
+      {% else %}
+      <details>
       {% endif %}
-    </details>
-    {%- endfor %}
+        <summary>
+          <a href="{{ item.url }}"{% if mypage and mypage.url == item.url %} class="current"{% endif %}>
+            {{ item.title }}
+          </a>
+        </summary>
+        {% set children = item.children.values() | selectattr('singles_all_count', 'gt', 0) | list %}
+        {% if children %}{{ loop(children) }}{% endif %}
+        {% if item.singles %}
+        <ul>
+          {% for page in item.singles if page.url != item.url %}
+          <li>
+            <a href="{{ page.url }}"{% if mypage and mypage.url == page.url %} class="current"{% endif %}>
+              {{ page.title }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </details>
+    {% endfor %}
   </div>
 </div>
+{% endif %}

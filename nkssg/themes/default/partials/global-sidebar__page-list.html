@@ -1,16 +1,15 @@
-{% for page in singles if page.post_type == "page" -%}
-  {%- if loop.first %}
+{% set page_items = singles | selectattr('post_type', 'eq', 'page') | list %}
+{% if page_items %}
 <div class="widget">
   <div class="widget__title">Page List</div>
   <div class="widget__body">
     <ul>
-  {%- endif %}
+      {% for page in page_items %}
       <li>
         <a href="{{ page.url }}">{{ page.title }}</a>
       </li>
-  {%- if loop.last %}
+      {% endfor %}
     </ul>
   </div>
 </div>
-  {%- endif %}
-{%- endfor %}
+{% endif %}

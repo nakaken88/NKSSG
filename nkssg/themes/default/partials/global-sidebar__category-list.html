@@ -1,16 +1,20 @@
-{% for archive in archives | sort(attribute='singles_all_count', reverse=True) if archive.root_name == "category" and not archive.is_root and archive.singles_all_count > 0 -%}
-  {%- if loop.first %}
+{% set cat_items = archives
+    | selectattr('root_name', 'eq', 'category')
+    | rejectattr('is_root')
+    | selectattr('singles_all_count', 'gt', 0)
+    | sort(attribute='singles_all_count', reverse=True)
+    | list %}
+{% if cat_items %}
 <div class="widget">
   <div class="widget__title">Category List</div>
   <div class="widget__body">
     <ul>
-  {%- endif %}
+      {% for archive in cat_items %}
       <li>
         <a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})
       </li>
-  {%- if loop.last %}
+      {% endfor %}
     </ul>
   </div>
 </div>
-  {%- endif %}
-{%- endfor %}
+{% endif %}
