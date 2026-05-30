@@ -108,6 +108,45 @@ class TestArchives:
         assert len(section2_archive.singles) == 1
         assert single2 in section2_archive.singles
 
+    def test_setup_post_type_archives_with_simple_type(self):
+        config = Config()
+
+        post_type_config = PostTypeConfig(archive_type='simple')
+        config.post_type = PostTypeConfigManager()
+        config.post_type['post'] = post_type_config
+
+        mock_plugins = MagicMock(spec=Plugins)
+
+        single1 = MagicMock(
+            spec=Single,
+            post_type='post',
+            archive_type='simple',
+            archive_list=[],
+            id=PurePath('/docs/post/post-1')
+        )
+        single2 = MagicMock(
+            spec=Single,
+            post_type='post',
+            archive_type='simple',
+            archive_list=[],
+            id=PurePath('/docs/post/subdir/post-2')
+        )
+        single_list = [single1, single2]
+        singles = MagicMock(spec=Singles)
+        singles.pages = single_list
+        singles.__iter__.return_value = iter(single_list)
+
+        archives = Archives(config, mock_plugins)
+        archives.setup_post_type_archives(singles)
+
+        # ID should be /simple/{post_type_name} — all singles share one archive
+        simple_id = PurePath('/simple', 'post')
+        assert simple_id in archives.archives
+        simple_archive = archives.archives[simple_id]
+        assert len(simple_archive.singles) == 2
+        assert single1 in simple_archive.singles
+        assert single2 in simple_archive.singles
+
 
     def test_setup_taxonomy_archives(self):
         config = Config()
@@ -211,11 +250,6 @@ class TestArchives:
         cat3_id = PurePath('/taxonomy', 'category', 'cat1', 'cat2', 'cat3')
         assert cat3_id in archives.archives
 
-        # verify nested terms resolve to hierarchical archive IDs via singles
-        # (long_ids is now a local variable inside setup_taxonomy_archives)
-        assert cat2_id in archives.archives
-        assert cat3_id in archives.archives
-
     def test_setup_taxonomy_archives_nested_reverse_order(self):
         config = Config()
 
@@ -251,6 +285,96 @@ class TestArchives:
         with pytest.raises(ValueError, match="Circular parent reference"):
             archives.setup_taxonomy_archives(
                 MagicMock(spec=Singles, __iter__=lambda _: iter([])))
+
+
+class TestUpdateSinglesAll:
+    def test_singles_propagate_to_parent_archives(self):
+        config = Config()
+        archives = Archives(config, MagicMock(spec=Plugins))
+
+        jan_archive = archives.create_archive(PurePath('/date/post/2023/01'))
+        feb_archive = archives.create_archive(PurePath('/date/post/2023/02'))
+
+        single1 = MagicMock(spec=Single)
+        single2 = MagicMock(spec=Single)
+        jan_archive.singles = [single1]
+        feb_archive.singles = [single2]
+
+        archives.update_singles_all()
+
+        year_archive = archives.archives[PurePath('/date/post/2023')]
+        root_archive = archives.archives[PurePath('/date/post')]
+
+        assert single1 in jan_archive.singles_all
+        assert single2 in feb_archive.singles_all
+        assert single1 in year_archive.singles_all
+        assert single2 in year_archive.singles_all
+        assert single1 in root_archive.singles_all
+        assert single2 in root_archive.singles_all
+
+    def test_duplicate_singles_not_added_twice(self):
+        config = Config()
+        archives = Archives(config, MagicMock(spec=Plugins))
+
+        jan_archive = archives.create_archive(PurePath('/date/post/2023/01'))
+        feb_archive = archives.create_archive(PurePath('/date/post/2023/02'))
+
+        single = MagicMock(spec=Single)
+        jan_archive.singles = [single]
+        feb_archive.singles = [single]  # same single in both months
+
+        archives.update_singles_all()
+
+        year_archive = archives.archives[PurePath('/date/post/2023')]
+        assert year_archive.singles_all.count(single) == 1
+
+
+class TestLinkSectionArchiveToSingle:
+    def test_index_single_is_linked_to_section_archive(self):
+        config = Config()
+        archives = Archives(config, MagicMock(spec=Plugins))
+
+        section_id = PurePath('/section/post/subdir')
+        archives.create_archive(section_id)
+
+        single = MagicMock()
+        single.is_index = True
+        single.archive_type = 'section'
+        single.id = PurePath('/docs/post/subdir/index.md')
+        single.title = 'Subdir Title'
+        single.meta = {'description': 'test'}
+        single.should_output = True
+
+        singles_mock = MagicMock(spec=Singles)
+        singles_mock.__iter__.return_value = iter([single])
+
+        archives.link_section_archive_to_single(singles_mock)
+
+        section_archive = archives.archives[section_id]
+        assert section_archive.single is single
+        assert section_archive.title == single.title
+        assert section_archive.meta == single.meta
+        assert section_archive.should_output == single.should_output
+
+    def test_non_index_single_is_not_linked(self):
+        config = Config()
+        archives = Archives(config, MagicMock(spec=Plugins))
+
+        section_id = PurePath('/section/post/subdir')
+        archives.create_archive(section_id)
+
+        single = MagicMock()
+        single.is_index = False
+        single.archive_type = 'section'
+        single.id = PurePath('/docs/post/subdir/post.md')
+
+        singles_mock = MagicMock(spec=Singles)
+        singles_mock.__iter__.return_value = iter([single])
+
+        archives.link_section_archive_to_single(singles_mock)
+
+        section_archive = archives.archives[section_id]
+        assert section_archive.single is None
 
 
 class TestArchiveDepth:
