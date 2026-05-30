@@ -76,8 +76,7 @@ def page(name, path, config: Config):
         log.warning(f'new_{name}.html is not found')
         return
 
-    with open(template_file, 'r', encoding='UTF-8') as f:
-        doc = f.read()
+    doc = Path(template_file).read_text(encoding='utf-8')
 
     old_lines = doc.split('\n')
     new_lines = []

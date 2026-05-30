@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 import shutil
 from click.testing import CliRunner
@@ -45,7 +44,6 @@ def test_new_page_success():
     with runner.isolated_filesystem() as temp_dir:
         shutil.copytree(FIXTURE_PATH, temp_dir, dirs_exist_ok=True)
 
-        os.chdir(temp_dir)
         result = runner.invoke(cli, ['new', 'post'])
 
         assert result.exit_code == 0
