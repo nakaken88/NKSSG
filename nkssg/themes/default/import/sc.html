@@ -1,18 +1,10 @@
 {# sc = shortcode: Jinja2 macros auto-imported into page content and templates. #}
 
 {% macro title_tag() -%}
-  {%- if mypage and mypage.page_type == "single" -%}
-    {{ mypage.title }} | {{ config.site.site_name }}
-
-  {%- elif mypage and mypage.page_type == "archive" and paginator.paged > 1 -%}
-    {{ mypage.title }} | Page {{ paginator.paged }} | {{ config.site.site_name }}
-
-  {%- elif mypage and mypage.page_type == "archive" -%}
-    {{ mypage.title }} | {{ config.site.site_name }}
-
+  {%- if mypage -%}
+    {{ mypage.title }}{%- if paginator and paginator.paged > 1 %} | Page {{ paginator.paged }}{%- endif %} | {{ config.site.site_name }}
   {%- else -%}
     {{ config.site.site_name }}
-
   {%- endif -%}
 {%- endmacro %}
 
@@ -38,6 +30,7 @@ global
 
 {% macro get_card(file_id) -%}
 {% set page = singles.get_single_by_file_id(file_id) %}
+{% if page %}
 <div class="card large-card">
   <a class="card" href="{{ page.url }}">
     <div class="card__body">
@@ -50,14 +43,13 @@ global
     </div>
   </a>
 </div>
+{% endif %}
 {%- endmacro %}
 
 
 {% macro get_link(file_id, text='') -%}
 {%- set page = singles.get_single_by_file_id(file_id) -%}
-{%- if text != '' -%}
-<a href="{{ page.url }}">{{text}}</a>
-{%- else -%}
-<a href="{{ page.url }}">{{page.title}}</a>
+{%- if page -%}
+<a href="{{ page.url }}">{{ text if text else page.title }}</a>
 {%- endif -%}
 {%- endmacro %}
