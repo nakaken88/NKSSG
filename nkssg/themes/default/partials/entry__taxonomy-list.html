@@ -1,10 +1,9 @@
-{% for archive in mypage.archive_list if archive.archive_type == "taxonomy" -%}
-  {%- if loop.first or archive.root_name != loop.previtem.root_name -%}
-  <div class="entry__taxonomy-list">
-    {{ archive.root_name.capitalize() }}: 
-  {%- endif -%}
-    <a href="{{ archive.url }}">{{ archive.name }}</a>
-  {%- if loop.last or archive.root_name != loop.nextitem.root_name -%}
-  </div>
-  {%- endif -%}
-{%- endfor %}
+{% set tax_items = mypage.archive_list | selectattr('archive_type', 'eq', 'taxonomy') | list %}
+{% for group in tax_items | groupby('root_name') %}
+<div class="entry__taxonomy-list">
+  {{ group.grouper.capitalize() }}:
+  {% for archive in group.list %}
+  <a href="{{ archive.url }}">{{ archive.name }}</a>
+  {% endfor %}
+</div>
+{% endfor %}

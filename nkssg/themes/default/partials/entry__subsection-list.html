@@ -1,16 +1,15 @@
-{% if mypage.children and mypage.archive_type=='section' %}
-  {%- for child in mypage.children.values() if child.singles_all | length > 0 %}
-    {%- if loop.first  %}
+{% if mypage.archive_type == 'section' %}
+{% set subsections = mypage.children.values() | selectattr('singles_all_count', 'gt', 0) | list %}
+{% if subsections %}
 <div class="entry__subsection-list">
   <h2>Sub section</h2>
   <ul>
-    {%- endif %}
+    {% for child in subsections %}
     <li>
       <a href="{{ child.url }}">{{ child.title }}</a>
     </li>
-    {%- if loop.last  %}
+    {% endfor %}
   </ul>
 </div>
-    {%- endif %}
-  {%- endfor %}
-{%- endif %}
+{% endif %}
+{% endif %}

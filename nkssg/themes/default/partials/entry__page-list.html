@@ -1,8 +1,8 @@
-{%- for page in pages if page.url != mypage.url %}
-  {%- if loop.first %}
+{% set page_items = pages | rejectattr('url', 'eq', mypage.url) | list %}
+{% if page_items %}
 <h2>Page list</h2>
-<div class="page-list item-count-{{ loop.length }}">
-  {%- endif %}
+<div class="page-list item-count-{{ page_items | length }}">
+  {% for page in page_items %}
   <div class="card">
     <a href="{{ page.url }}">
       <div class="card__image">
@@ -16,7 +16,6 @@
       <a href="{{ page.url }}">{{ page.title }}</a>
     </div>
   </div>
-  {%- if loop.last %}
+  {% endfor %}
 </div>
-  {%- endif %}
-{%- endfor %}
+{% endif %}

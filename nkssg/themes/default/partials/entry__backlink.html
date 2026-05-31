@@ -1,14 +1,12 @@
-{% for page in mypage.back_links | sort(attribute='modified', reverse = True) -%}
-  {%- if loop.first -%}
-  <div class="entry__backlink">
-    <h2>Backlink</h2>
-    <ul>
-  {%- endif %}
-      <li>
-        <a href="{{page.url}}">{{page.title}}</a>
-      </li>
-  {%- if loop.last %}
-    </ul>
-  </div>
-  {%- endif %}
-{%- endfor %}
+{% if mypage.back_links %}
+<div class="entry__backlink">
+  <h2>Backlink</h2>
+  <ul>
+    {% for page in mypage.back_links | sort(attribute='modified', reverse=True) %}
+    <li>
+      <a href="{{ page.url }}">{{ page.title }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
