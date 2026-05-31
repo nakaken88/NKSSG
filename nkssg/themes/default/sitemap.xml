@@ -3,9 +3,7 @@
 {% for page in singles -%}
 <url>
 <loc>{{ page.abs_url }}</loc>
-<lastmod>{{ page.date.strftime('%Y-%m-%d') }}</lastmod>
-<changefreq>monthly</changefreq>
-<priority>1.0</priority>
+<lastmod>{{ (page.modified or page.date).strftime('%Y-%m-%d') }}</lastmod>
 </url>
 {% endfor -%}
 </urlset>

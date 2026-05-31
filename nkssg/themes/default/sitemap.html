@@ -8,31 +8,30 @@
 <h1>Sitemap</h1>
 
 <div class="sitemap">
-{% for page in singles -%}
-  {%- if loop.first or page.post_type != page.prev_page.post_type -%}
+{% for page in singles %}
+  {% if loop.first or page.post_type != loop.previtem.post_type %}
   <h2>{{ page.post_type }}</h2>
-  {%- endif -%}
+  {% endif %}
 
-  {%- if page.archive_type == "date" -%}
-    {%- if loop.first or page.post_type != page.prev_page.post_type
-        or page.date.strftime('%Y') != page.prev_page.date.strftime('%Y') -%}
+  {% if page.archive_type == "date" %}
+    {% if loop.first or page.post_type != loop.previtem.post_type
+        or page.date.year != loop.previtem.date.year %}
     <h3>Year: {{ page.date.strftime('%Y') }}</h3>
-    {%- endif -%}
-  {%- endif -%}
+    {% endif %}
+  {% endif %}
 
-  {%- if page.archive_type == "section" -%}
-    {%- if loop.first or page.post_type != page.prev_page.post_type
-        or page.archive_list[0].name != page.prev_page.archive_list[0].name -%}
+  {% if page.archive_type == "section" %}
+    {% if loop.first or page.post_type != loop.previtem.post_type
+        or page.archive_list[0].name != loop.previtem.archive_list[0].name %}
     <h3>{{ page.archive_list[0].name }}</h3>
-    {%- endif -%}
-  {%- endif -%}
+    {% endif %}
+  {% endif %}
 
-  {%- if page.title -%}
-  <div>{{ page.date.strftime('%Y/%m/%d %H:%M') }}: <a href="{{ page.url }}">{{ page.title }}</a></div>
-  {%- else -%}
-  <div><a href="{{ page.url }}">{{ page.date.strftime('%Y/%m/%d %H:%M') }}</a></div>
-  {%- endif -%}
-{%- endfor -%}
+  <div>
+    {% if page.title %}{{ page.date.strftime('%Y/%m/%d %H:%M') }}: {% endif %}
+    <a href="{{ page.url }}">{{ page.title or page.date.strftime('%Y/%m/%d %H:%M') }}</a>
+  </div>
+{% endfor %}
 </div>
 
 {% endblock %}

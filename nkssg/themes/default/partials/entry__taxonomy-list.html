@@ -1,8 +1,8 @@
 {% set tax_items = mypage.archive_list | selectattr('archive_type', 'eq', 'taxonomy') | list %}
-{% for group in tax_items | groupby('root_name') %}
+{% for root_name in tax_items | map(attribute='root_name') | unique %}
 <div class="entry__taxonomy-list">
-  {{ group.grouper.capitalize() }}:
-  {% for archive in group.list %}
+  {{ root_name.capitalize() }}:
+  {% for archive in tax_items | selectattr('root_name', 'eq', root_name) %}
   <a href="{{ archive.url }}">{{ archive.name }}</a>
   {% endfor %}
 </div>
