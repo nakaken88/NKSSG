@@ -51,5 +51,20 @@ def test_new_page_success():
 
         output_lines = result.output.strip().split('\n')
         created_path_str = output_lines[-1].removesuffix(' is created!')
+        created_path = Path(created_path_str)
 
-        assert Path(created_path_str).is_file()
+        assert created_path.is_file()
+
+        content = created_path.read_text(encoding='utf-8')
+
+        # file: directive should be consumed, not appear in output
+        assert 'file:' not in content
+
+        # date should be formatted, not contain strftime patterns
+        assert '%Y' not in content
+        assert '%m' not in content
+
+        # date should be a real date value
+        assert 'date:' in content
+        import re
+        assert re.search(r'date: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', content)
