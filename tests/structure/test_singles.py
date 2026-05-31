@@ -1118,3 +1118,57 @@ class TestSinglesSetup:
 
         assert page1.prev_page is None
         assert page1.next_page is None
+
+
+class TestPrimaryArchiveAndBreadcrumbs:
+    def _make_archive(self, archive_type, depth=0):
+        root = Archive(None, '/')
+        a = Archive(root, archive_type)
+        a2 = Archive(a, 'root')
+        for i in range(depth):
+            a2 = Archive(a2, f'child{i}')
+        return a2
+
+    def _make_single_with_archives(self, archive_list):
+        single = MagicMock()
+        single.archive_list = archive_list
+        single.title = 'Test Page'
+        single.primary_archive = Single.primary_archive.fget(single)
+        return single
+
+    def test_primary_archive_prefers_section(self):
+        section = self._make_archive('section')
+        date = self._make_archive('date')
+        single = self._make_single_with_archives([date, section])
+        assert single.primary_archive == section
+
+    def test_primary_archive_falls_back_to_date(self):
+        date = self._make_archive('date')
+        single = self._make_single_with_archives([date])
+        assert single.primary_archive == date
+
+    def test_primary_archive_taxonomy_deepest(self):
+        shallow = self._make_archive('taxonomy', depth=0)
+        deep = self._make_archive('taxonomy', depth=1)
+        single = self._make_single_with_archives([shallow, deep])
+        assert single.primary_archive == deep
+
+    def test_primary_archive_none_when_no_archives(self):
+        single = self._make_single_with_archives([])
+        assert single.primary_archive is None
+
+    def test_breadcrumbs_with_primary_archive(self):
+        section = self._make_archive('section')
+        single = MagicMock()
+        single.archive_list = [section]
+        single.primary_archive = Single.primary_archive.fget(single)
+        crumbs = Single.breadcrumbs.fget(single)
+        assert crumbs[-1] is single
+        assert crumbs[:-1] == section.breadcrumbs
+
+    def test_breadcrumbs_without_primary_archive(self):
+        single = MagicMock()
+        single.archive_list = []
+        single.primary_archive = Single.primary_archive.fget(single)
+        crumbs = Single.breadcrumbs.fget(single)
+        assert crumbs == [single]

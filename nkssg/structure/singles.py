@@ -177,6 +177,26 @@ class Single(Page):
     def __str__(self) -> str:
         return f"Single(src='{self.id}')"
 
+    @property
+    def primary_archive(self):
+        section = next((a for a in self.archive_list if a.archive_type == 'section'), None)
+        if section:
+            return section
+        date = next((a for a in self.archive_list if a.archive_type == 'date'), None)
+        if date:
+            return date
+        taxonomy = [a for a in self.archive_list if a.archive_type == 'taxonomy']
+        if taxonomy:
+            return max(taxonomy, key=lambda a: len(a.id.parts))
+        return None
+
+    @property
+    def breadcrumbs(self) -> list:
+        archive = self.primary_archive
+        if archive is None:
+            return [self]
+        return archive.breadcrumbs + [self]
+
     def __lt__(self, other: 'Single') -> bool:
         if self.post_type != other.post_type:
             return self.post_type_index < other.post_type_index

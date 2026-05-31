@@ -274,6 +274,10 @@ class Archive(Page):
         result.reverse()
         return result
 
+    @property
+    def breadcrumbs(self) -> list['Archive']:
+        return self.parents[1:] + [self]
+
     def has_page(self, page) -> bool:
         return (
             page in self.singles_all

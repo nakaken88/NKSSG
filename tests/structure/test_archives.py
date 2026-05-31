@@ -483,6 +483,29 @@ class TestUpdateUrls:
         assert child_archive.dest_path.parts == ('tag', 'child', 'index.html')
 
 
+class TestBreadcrumbs:
+    def _make_chain(self, *names):
+        archive = Archive(None, '/')
+        for name in names:
+            archive = Archive(archive, name)
+        return archive
+
+    def test_root_archive_breadcrumbs(self):
+        archive = self._make_chain('section', 'docs')
+        assert archive.breadcrumbs == [archive]
+
+    def test_nested_archive_breadcrumbs(self):
+        root = self._make_chain('section', 'docs')
+        child = Archive(root, 'guide')
+        assert child.breadcrumbs == [root, child]
+
+    def test_deeply_nested_archive_breadcrumbs(self):
+        root = self._make_chain('section', 'docs')
+        child = Archive(root, 'guide')
+        grandchild = Archive(child, 'intro')
+        assert grandchild.breadcrumbs == [root, child, grandchild]
+
+
 class TestHasPage:
     def _make_archive(self, url='/section/docs/'):
         root = Archive(None, '/')
