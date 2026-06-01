@@ -77,11 +77,17 @@ class Singles:
         self.pages[0].setup(self.config, self.plugins)
 
     def _setup_normal_mode(self):
-        new_pages = []
-        for page in self.pages:
-            page.setup(self.config, self.plugins)
-            if self.config.get('serve_all') or not page.is_draft:
-                new_pages.append(page)
+        with ThreadPoolExecutor() as executor:
+            futures = {
+                executor.submit(page.setup, self.config, self.plugins): page
+                for page in self.pages
+            }
+            new_pages = []
+            for future in as_completed(futures):
+                future.result()
+                page = futures[future]
+                if self.config.get('serve_all') or not page.is_draft:
+                    new_pages.append(page)
         self.pages = new_pages
 
     def _setup_prev_next_page(self):
