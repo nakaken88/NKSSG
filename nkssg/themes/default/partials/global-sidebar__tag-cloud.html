@@ -1,6 +1,4 @@
-{% set tag_items = archives
-    | selectattr('root_name', 'eq', 'tag')
-    | rejectattr('is_root')
+{% set tag_items = archives.get_terms('tag')
     | selectattr('singles_all_count', 'gt', 0)
     | sort(attribute='singles_all_count', reverse=True)
     | list %}
