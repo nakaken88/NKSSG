@@ -1,25 +1,36 @@
 # NKSSG
-NakaKen Static Site Generator  
-(This is still alpha ver.)
+
+NakaKen Static Site Generator (alpha)
+
 [日本語のドキュメントはこちら](https://nkssg.nakaken88.com/ja/)
+
+
+## Requirements
+
+Python 3.10+
 
 
 ## Install
 
-Install using pip in terminal:
-
 ```
-pip install -U git+https://github.com/nakaken88/NKSSG
+uv tool install git+https://github.com/nakaken88/NKSSG
 ```
 
-## A Simple Example
+or using pip:
+
+```
+pip install git+https://github.com/nakaken88/NKSSG
+```
+
+
+## Quick Start
 
 ```
 nkssg new site
 nkssg build
 ```
 
-or
+or with a site name:
 
 ```
 nkssg new site {site-name}
@@ -27,12 +38,18 @@ cd {site-name}
 nkssg build
 ```
 
-{site-name} is your site name.
 
+## Commands
 
-## How to Use
+### Build
 
-### Local server
+```
+nkssg build
+```
+
+Output will be in the `public/` folder.
+
+### Local Server
 
 ```
 nkssg serve
@@ -44,16 +61,4 @@ nkssg serve
 nkssg new post
 ```
 
-The post template is under '/themes/default/new/new_post.html'. If you use markdown file, you can change the template file like below.
-
-```
-file: "post/%Y/%m/%Y%m%d-%H%M%S.md"
-```
-
-### Build Static Pages
-
-```
-nkssg build
-```
-
-Output will be in ./public/ folder.
+The post template is under `/themes/default/new/new_post.html`.
