@@ -1,0 +1,45 @@
+[project]
+name = "nkssg"
+version = "0.0.4-alpha"
+description = "NakaKen Static Site Generator"
+authors = [{ name = "nakaken88" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "click",
+    "jinja2",
+    "livereload",
+    "markdown",
+    "ruamel.yaml",
+    "setuptools",
+    "tornado",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-mock",
+    "tox",
+    "tox-uv",
+]
+
+[project.scripts]
+nkssg = "nkssg.__main__:cli"
+
+[project.entry-points."nkssg.plugins"]
+autop = "nkssg.plugins.auto_p:AutoPPlugin"
+awesome-page-link = "nkssg.plugins.awesome_page_link:AwesomePageLinkPlugin"
+awesome-img-link = "nkssg.plugins.awesome_img_link:AwesomeImgLinkPlugin"
+select-pages = "nkssg.plugins.select_pages:SelectPagesPlugin"
+backlink = "nkssg.plugins.backlink:BacklinkPlugin"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+"nkssg" = ["**/*.css", "**/*.html", "**/*.js", "**/*.xml", "**/*.yml"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
