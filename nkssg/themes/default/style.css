@@ -393,6 +393,7 @@ a:visited {
 /* pagination */
 .pagination {
   text-align: center;
+  margin: 4rem 0 2rem;
 }
 .pagination__number {
   display: inline-block;
