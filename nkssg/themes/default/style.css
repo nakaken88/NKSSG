@@ -325,17 +325,11 @@ a:visited {
 .widget__body li {
   list-style: none;
 }
-.widget__body li a {
-  color: var(--text-color);
-}
 
 .widget__body summary {
   background-color: var(--widget-bg-color);
   margin: 4px;
   padding: 0 4px;
-}
-.widget__body summary a {
-  color: var(--text-color);
 }
 .widget__body details {
   border-left: 1px solid var(--text-color);
