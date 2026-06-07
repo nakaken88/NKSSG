@@ -5,14 +5,10 @@
 {% if tag_items %}
 <div class="widget">
   <div class="widget__title">Tag List</div>
-  <div class="widget__body">
-    <ul>
-      {% for archive in tag_items %}
-      <li>
-        <a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})
-      </li>
-      {% endfor %}
-    </ul>
+  <div class="widget__body widget__body--tags">
+    {% for archive in tag_items %}
+    <span><a href="{{ archive.url }}">{{ archive.name }}</a> ({{ archive.singles_all_count }})</span>
+    {% endfor %}
   </div>
 </div>
 {% endif %}

@@ -343,6 +343,11 @@ a:visited {
 .widget__body .current {
   font-weight: bold;
 }
+.widget__body--tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
 
 
 /* footer */
