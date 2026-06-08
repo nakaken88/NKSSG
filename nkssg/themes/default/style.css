@@ -4,6 +4,8 @@
   --main-bg-color: #fffde7;
   --widget-bg-color: #e3f2fd;
   --widget-border-color: #bbdefb;
+  --subtle-bg-color: #eee;
+  --subtle-border-color: #ccc;
   --link-color: #2196f3;
   --link-hover-color: #1976d2;
   --link-visited-color: #673ab7;
@@ -183,11 +185,17 @@ a:visited {
 .entry__content table td {
   padding: 5px;
   border-right: 1px solid var(--widget-border-color);
+  background-color: #fff;
+}
+.entry__content table tr:nth-child(even) td {
+  background-color: var(--subtle-bg-color);
 }
 
 .entry__content blockquote {
+  margin-left: 0;
+  margin-right: 0;
   padding: 1rem;
-  background-color: var(--widget-bg-color);
+  background-color: var(--subtle-bg-color);
   border-left: 5px solid var(--widget-border-color);
 }
 .entry__content blockquote > * {
