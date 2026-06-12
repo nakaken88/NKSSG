@@ -69,6 +69,9 @@ class Archives:
 
             archive = self.create_archive(archive_id)
 
+            if archive_type == 'date':
+                archive.title = f"{yyyy}/{mm}"
+
             archive.singles.append(single)
             single.archive_list.append(archive)
 

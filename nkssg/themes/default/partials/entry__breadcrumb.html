@@ -4,6 +4,6 @@
   {%- for item in mypage.breadcrumbs[:-1] %}
    / <a href="{{ item.url }}">{{ item.name }}</a>
   {%- endfor %}
-   / {{ mypage.title }}
+   / {{ mypage.name }}
 </nav>
 {% endif %}
