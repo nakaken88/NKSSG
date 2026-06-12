@@ -3,7 +3,7 @@
 {% macro title_tag() -%}
   {%- if mypage -%}
     {%- if mypage.rel_url == "/" -%}
-      {{ config.site.site_name }}
+      {%- if paginator and paginator.paged > 1 %}Page {{ paginator.paged }} | {%- endif %}{{ config.site.site_name }}
     {%- else -%}
       {{ mypage.title }}{%- if paginator and paginator.paged > 1 %} | Page {{ paginator.paged }}{%- endif %} | {{ config.site.site_name }}
     {%- endif -%}
