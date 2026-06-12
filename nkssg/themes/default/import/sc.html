@@ -2,7 +2,11 @@
 
 {% macro title_tag() -%}
   {%- if mypage -%}
-    {{ mypage.title }}{%- if paginator and paginator.paged > 1 %} | Page {{ paginator.paged }}{%- endif %} | {{ config.site.site_name }}
+    {%- if mypage.rel_url == "/" -%}
+      {{ config.site.site_name }}
+    {%- else -%}
+      {{ mypage.title }}{%- if paginator and paginator.paged > 1 %} | Page {{ paginator.paged }}{%- endif %} | {{ config.site.site_name }}
+    {%- endif -%}
   {%- else -%}
     {{ config.site.site_name }}
   {%- endif -%}
