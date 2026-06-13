@@ -107,7 +107,7 @@ class Archives:
         for term_name in terms:
             archive_id = get_path(term_name)
             self.create_archive(archive_id)
-            long_ids[PurePath('/taxonomy', tax_name, term_name)] = archive_id
+            long_ids[PurePath('/taxonomy', tax_name, term_name.lower())] = archive_id
 
     def add_singles_to_taxonomy_archives(
             self, singles: Singles, long_ids: dict[PurePath, PurePath]):
@@ -120,7 +120,7 @@ class Archives:
                 if not isinstance(terms, list):
                     terms = [terms]
                 for term in set(terms):
-                    short_id = PurePath('/taxonomy', root_name, term)
+                    short_id = PurePath('/taxonomy', root_name, str(term).lower())
                     if short_id not in long_ids:
                         logging.warning(f'{root_name}: {term} is not found ({single})')
                         continue
