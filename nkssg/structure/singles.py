@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
 import html
 from html.parser import HTMLParser
+import json
 import logging
 from fnmatch import fnmatch
 import markdown
@@ -77,9 +78,12 @@ class Singles:
         self.pages[0].setup(self.config, self.plugins)
 
     def _setup_normal_mode(self):
+        content_cache = self._load_content_cache()
+        all_src_paths = {str(page.src_path) for page in self.pages}
+
         with ThreadPoolExecutor() as executor:
             futures = {
-                executor.submit(page.setup, self.config, self.plugins): page
+                executor.submit(page.setup, self.config, self.plugins, content_cache): page
                 for page in self.pages
             }
             new_pages = []
@@ -89,6 +93,25 @@ class Singles:
                 if self.config.get('serve_all') or not page.is_draft:
                     new_pages.append(page)
         self.pages = new_pages
+
+        self._save_content_cache(content_cache, all_src_paths)
+
+    def _load_content_cache(self) -> dict:
+        cache_path = self.config.base_dir / '.cache' / f'content_{self.config.mode}.json'
+        if cache_path.exists():
+            try:
+                with open(cache_path, encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception:
+                return {}
+        return {}
+
+    def _save_content_cache(self, cache: dict, valid_src_paths: set) -> None:
+        cache_path = self.config.base_dir / '.cache' / f'content_{self.config.mode}.json'
+        cache_path.parent.mkdir(exist_ok=True)
+        pruned = {k: v for k, v in cache.items() if k in valid_src_paths}
+        with open(cache_path, 'w', encoding='utf-8') as f:
+            json.dump(pruned, f, ensure_ascii=False)
 
     def _setup_prev_next_page(self):
         bookended = [None] + self.pages + [None]
@@ -227,7 +250,8 @@ class Single(Page):
 
         return (s_order, self.src_path) < (o_order, other.src_path)
 
-    def setup(self, config: Config, plugins: Plugins) -> None:
+    def setup(self, config: Config, plugins: Plugins,
+              content_cache: dict | None = None) -> None:
 
         self.meta, doc = self.parse_front_matter(self.abs_src_path)
 
@@ -243,7 +267,7 @@ class Single(Page):
         post_type_slug = config.post_type[self.post_type].slug or self.post_type
         self.slug = self._get_slug(post_type_slug)
 
-        self.content = self._get_content(doc, config, plugins)
+        self.content = self._get_content(doc, config, plugins, content_cache)
         self.image = self._get_image(config)
 
         self.file_id = self._get_file_id()
@@ -277,12 +301,14 @@ class Single(Page):
         try:
             stat = self.abs_src_path.stat()
             created = getattr(stat, 'st_birthtime', stat.st_mtime)
+            self._file_mtime: float = stat.st_mtime
             return (
                 datetime.datetime.fromtimestamp(created),
                 datetime.datetime.fromtimestamp(stat.st_mtime),
             )
         except Exception as e:
             logging.warning(f"Failed to get file dates for '{self.abs_src_path}': {e}")
+            self._file_mtime = 0.0
             return _EPOCH, _EPOCH
 
     def _get_date(self) -> tuple[datetime.datetime, datetime.datetime]:
@@ -356,24 +382,35 @@ class Single(Page):
                 slug = self.name
         return Page.to_slug(slug)
 
-    def _get_content(self, doc: str, config: Config, plugins: Plugins) -> str:
+    def _get_content(self, doc: str, config: Config, plugins: Plugins,
+                     content_cache: dict | None = None) -> str:
         if not doc:
             return ''
+
+        if content_cache is not None:
+            key = str(self.src_path)
+            cached = content_cache.get(key)
+            if cached and cached['mtime'] == self._file_mtime:
+                return cached['content']
 
         content = plugins.do_action(
             'on_get_content', target=doc, config=config, single=self)
 
         if self.content_updated:
-            return content
-
-        if self.ext in ['md', 'markdown']:
+            result = content
+        elif self.ext in ['md', 'markdown']:
             md_config: dict = config.markdown
-            return markdown.markdown(
+            result = markdown.markdown(
                 content,
                 extensions=md_config.keys(),
                 extension_configs=md_config)
+        else:
+            result = content
 
-        return content
+        if content_cache is not None:
+            content_cache[key] = {'mtime': self._file_mtime, 'content': result}
+
+        return result
 
     class _SummaryTextExtractor(HTMLParser):
         _SKIP_TAGS = {'script', 'style'}
