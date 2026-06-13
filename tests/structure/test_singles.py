@@ -1196,80 +1196,81 @@ class TestContentCache:
         cfg.post_type.update({'post': {}})
         return Single(md_file, cfg), cfg
 
-    # --- _load_content_cache ---
+    # --- _load_singles_cache ---
 
     def test_load_cache_missing_file_returns_empty(self, singles_obj):
         singles, _ = singles_obj
-        assert singles._load_content_cache() == {}
+        assert singles._load_singles_cache() == {}
 
     def test_load_cache_valid_file(self, singles_obj, tmp_path):
         singles, _ = singles_obj
         cache_dir = tmp_path / '.cache'
         cache_dir.mkdir()
-        data = {'post/file.md': {'mtime': 1234.5, 'content': '<p>hello</p>'}}
-        (cache_dir / 'content_build.json').write_text(
+        data = {'post/file.md': {'mtime': 1234.5, 'meta': {}, 'content': '<p>hello</p>'}}
+        (cache_dir / 'singles_build.json').write_text(
             json.dumps(data), encoding='utf-8')
-        assert singles._load_content_cache() == data
+        assert singles._load_singles_cache() == data
 
     def test_load_cache_corrupted_file_returns_empty(self, singles_obj, tmp_path):
         singles, _ = singles_obj
         cache_dir = tmp_path / '.cache'
         cache_dir.mkdir()
-        (cache_dir / 'content_build.json').write_text('not json', encoding='utf-8')
-        assert singles._load_content_cache() == {}
+        (cache_dir / 'singles_build.json').write_text('not json', encoding='utf-8')
+        assert singles._load_singles_cache() == {}
 
-    # --- _save_content_cache ---
+    # --- _save_singles_cache ---
 
     def test_save_cache_creates_file(self, singles_obj, tmp_path):
         singles, _ = singles_obj
-        cache = {'post/file.md': {'mtime': 1.0, 'content': '<p>test</p>'}}
-        singles._save_content_cache(cache, {'post/file.md'})
-        saved = json.loads((tmp_path / '.cache' / 'content_build.json').read_text())
+        cache = {'post/file.md': {'mtime': 1.0, 'meta': {}, 'content': '<p>test</p>'}}
+        singles._save_singles_cache(cache, {'post/file.md'})
+        saved = json.loads((tmp_path / '.cache' / 'singles_build.json').read_text())
         assert saved == cache
 
     def test_save_cache_prunes_stale_entries(self, singles_obj, tmp_path):
         singles, _ = singles_obj
         cache = {
-            'post/current.md': {'mtime': 1.0, 'content': '<p>current</p>'},
-            'post/deleted.md': {'mtime': 2.0, 'content': '<p>deleted</p>'},
+            'post/current.md': {'mtime': 1.0, 'meta': {}, 'content': '<p>current</p>'},
+            'post/deleted.md': {'mtime': 2.0, 'meta': {}, 'content': '<p>deleted</p>'},
         }
-        singles._save_content_cache(cache, {'post/current.md'})
-        saved = json.loads((tmp_path / '.cache' / 'content_build.json').read_text())
+        singles._save_singles_cache(cache, {'post/current.md'})
+        saved = json.loads((tmp_path / '.cache' / 'singles_build.json').read_text())
         assert 'post/current.md' in saved
         assert 'post/deleted.md' not in saved
 
-    # --- _get_content with cache ---
+    # --- setup() with singles_cache ---
 
-    def test_get_content_cache_miss_processes_and_stores(self, md_single):
+    def test_setup_cache_miss_populates_cache(self, md_single):
         single, cfg = md_single
         plugins = MagicMock()
         plugins.do_action.return_value = 'Hello **world**'
 
         cache = {}
-        result = single._get_content('Hello **world**', cfg, plugins, cache)
+        single.setup(cfg, plugins, singles_cache=cache)
 
-        assert result == '<p>Hello <strong>world</strong></p>'
         key = str(single.src_path)
         assert key in cache
-        assert cache[key]['content'] == result
+        assert cache[key]['content'] == '<p>Hello <strong>world</strong></p>'
         assert cache[key]['mtime'] == single._file_mtime
+        assert 'meta' in cache[key]
 
-    def test_get_content_cache_hit_skips_processing(self, md_single):
+    def test_setup_cache_hit_skips_processing(self, md_single):
         single, cfg = md_single
         plugins = MagicMock()
 
         cache = {
             str(single.src_path): {
                 'mtime': single._file_mtime,
+                'meta': {},
                 'content': '<p>cached</p>',
             }
         }
-        result = single._get_content('Hello **world**', cfg, plugins, cache)
+        single.setup(cfg, plugins, singles_cache=cache)
 
-        assert result == '<p>cached</p>'
+        assert single.content == '<p>cached</p>'
         plugins.do_action.assert_not_called()
 
-    def test_get_content_cache_mtime_mismatch_reprocesses(self, md_single):
+    def test_setup_cache_mtime_mismatch_reprocesses(self, md_single):
         single, cfg = md_single
         plugins = MagicMock()
         plugins.do_action.return_value = 'Hello **world**'
@@ -1277,10 +1278,11 @@ class TestContentCache:
         cache = {
             str(single.src_path): {
                 'mtime': 0.0,
+                'meta': {},
                 'content': '<p>stale</p>',
             }
         }
-        result = single._get_content('Hello **world**', cfg, plugins, cache)
+        single.setup(cfg, plugins, singles_cache=cache)
 
-        assert result == '<p>Hello <strong>world</strong></p>'
+        assert single.content == '<p>Hello <strong>world</strong></p>'
         assert cache[str(single.src_path)]['mtime'] == single._file_mtime

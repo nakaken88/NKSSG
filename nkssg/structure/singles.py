@@ -1,18 +1,17 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
+from fnmatch import fnmatch
 import html
 from html.parser import HTMLParser
 import json
 import logging
-from fnmatch import fnmatch
-import markdown
 from pathlib import Path, PurePath
 import re
+from typing import TYPE_CHECKING
 from urllib.parse import quote
 
+import markdown
 from ruamel.yaml import YAML, YAMLError
-
-from typing import TYPE_CHECKING
 
 from nkssg.structure.config import Config
 from nkssg.structure.plugins import Plugins
@@ -78,12 +77,12 @@ class Singles:
         self.pages[0].setup(self.config, self.plugins)
 
     def _setup_normal_mode(self):
-        content_cache = self._load_content_cache()
+        singles_cache = self._load_singles_cache()
         all_src_paths = {str(page.src_path) for page in self.pages}
 
         with ThreadPoolExecutor() as executor:
             futures = {
-                executor.submit(page.setup, self.config, self.plugins, content_cache): page
+                executor.submit(page.setup, self.config, self.plugins, singles_cache): page
                 for page in self.pages
             }
             new_pages = []
@@ -94,10 +93,18 @@ class Singles:
                     new_pages.append(page)
         self.pages = new_pages
 
-        self._save_content_cache(content_cache, all_src_paths)
+        self._save_singles_cache(singles_cache, all_src_paths)
 
-    def _load_content_cache(self) -> dict:
-        cache_path = self.config.base_dir / '.cache' / f'content_{self.config.mode}.json'
+    @staticmethod
+    def _meta_json_default(obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.strftime('%Y-%m-%d %H:%M:%S')
+        if isinstance(obj, datetime.date):
+            return datetime.datetime.combine(obj, datetime.time.min).strftime('%Y-%m-%d %H:%M:%S')
+        return str(obj)
+
+    def _load_singles_cache(self) -> dict:
+        cache_path = self.config.base_dir / '.cache' / f'singles_{self.config.mode}.json'
         if cache_path.exists():
             try:
                 with open(cache_path, encoding='utf-8') as f:
@@ -106,12 +113,12 @@ class Singles:
                 return {}
         return {}
 
-    def _save_content_cache(self, cache: dict, valid_src_paths: set) -> None:
-        cache_path = self.config.base_dir / '.cache' / f'content_{self.config.mode}.json'
+    def _save_singles_cache(self, cache: dict, valid_src_paths: set) -> None:
+        cache_path = self.config.base_dir / '.cache' / f'singles_{self.config.mode}.json'
         cache_path.parent.mkdir(exist_ok=True)
         pruned = {k: v for k, v in cache.items() if k in valid_src_paths}
         with open(cache_path, 'w', encoding='utf-8') as f:
-            json.dump(pruned, f, ensure_ascii=False)
+            json.dump(pruned, f, ensure_ascii=False, default=self._meta_json_default)
 
     def _setup_prev_next_page(self):
         bookended = [None] + self.pages + [None]
@@ -251,9 +258,19 @@ class Single(Page):
         return (s_order, self.src_path) < (o_order, other.src_path)
 
     def setup(self, config: Config, plugins: Plugins,
-              content_cache: dict | None = None) -> None:
+              singles_cache: dict | None = None) -> None:
 
-        self.meta, doc = self.parse_front_matter(self.abs_src_path)
+        key = str(self.src_path)
+        cache_hit = False
+        if singles_cache is not None:
+            cached = singles_cache.get(key)
+            if cached and cached['mtime'] == self._file_mtime:
+                self.meta = cached['meta']
+                self.content = cached['content']
+                cache_hit = True
+
+        if not cache_hit:
+            self.meta, doc = self.parse_front_matter(self.abs_src_path)
 
         self.date, self.modified = self._get_date()
         self.status = self.meta.get('status', 'publish')
@@ -267,9 +284,16 @@ class Single(Page):
         post_type_slug = config.post_type[self.post_type].slug or self.post_type
         self.slug = self._get_slug(post_type_slug)
 
-        self.content = self._get_content(doc, config, plugins, content_cache)
-        self.image = self._get_image(config)
+        if not cache_hit:
+            self.content = self._get_content(doc, config, plugins)
+            if singles_cache is not None:
+                singles_cache[key] = {
+                    'mtime': self._file_mtime,
+                    'meta': self.meta,
+                    'content': self.content,
+                }
 
+        self.image = self._get_image(config)
         self.file_id = self._get_file_id()
 
     @property
@@ -335,10 +359,12 @@ class Single(Page):
             return datetime.datetime.combine(dirty_date, datetime.time.min)
 
         if isinstance(dirty_date, str):
-            try:
-                return datetime.datetime.strptime(dirty_date, '%Y-%m-%d %H:%M')
-            except ValueError:
-                logging.warning(f'{dirty_date} is not valid date value in {self.id}')
+            for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M'):
+                try:
+                    return datetime.datetime.strptime(dirty_date, fmt)
+                except ValueError:
+                    pass
+            logging.warning(f'{dirty_date} is not valid date value in {self.id}')
 
         return _EPOCH
 
@@ -382,35 +408,24 @@ class Single(Page):
                 slug = self.name
         return Page.to_slug(slug)
 
-    def _get_content(self, doc: str, config: Config, plugins: Plugins,
-                     content_cache: dict | None = None) -> str:
+    def _get_content(self, doc: str, config: Config, plugins: Plugins) -> str:
         if not doc:
             return ''
-
-        if content_cache is not None:
-            key = str(self.src_path)
-            cached = content_cache.get(key)
-            if cached and cached['mtime'] == self._file_mtime:
-                return cached['content']
 
         content = plugins.do_action(
             'on_get_content', target=doc, config=config, single=self)
 
         if self.content_updated:
-            result = content
-        elif self.ext in ['md', 'markdown']:
+            return content
+
+        if self.ext in ['md', 'markdown']:
             md_config: dict = config.markdown
-            result = markdown.markdown(
+            return markdown.markdown(
                 content,
                 extensions=md_config.keys(),
                 extension_configs=md_config)
-        else:
-            result = content
 
-        if content_cache is not None:
-            content_cache[key] = {'mtime': self._file_mtime, 'content': result}
-
-        return result
+        return content
 
     class _SummaryTextExtractor(HTMLParser):
         _SKIP_TAGS = {'script', 'style'}
