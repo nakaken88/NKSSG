@@ -9,7 +9,7 @@ from nkssg.structure.archives import Archives
 from nkssg.structure.config import Config
 from nkssg.structure.plugins import Plugins
 from nkssg.structure.singles import Singles
-from nkssg.structure.themes import Themes
+from nkssg.structure.themes import FragmentCacheExtension, Themes
 
 
 class Site:
@@ -66,7 +66,8 @@ class Site:
 
     def update(self):
         self.config.env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(self.themes.dirs)
+            loader=jinja2.FileSystemLoader(self.themes.dirs),
+            extensions=[FragmentCacheExtension],
         )
         self.config.env.globals.update({
             'config': self.config,

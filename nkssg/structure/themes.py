@@ -1,6 +1,11 @@
 import logging
 from pathlib import Path
+import threading
+
+from jinja2 import nodes
+from jinja2.ext import Extension
 from ruamel.yaml import YAML, YAMLError
+
 import nkssg
 from nkssg.structure.config import Config
 
@@ -75,3 +80,35 @@ class Themes:
                 rel, abs_ = self._template_cache[search]
                 return abs_ if full_path else rel
         return None
+
+
+class FragmentCacheExtension(Extension):
+    """Jinja2 extension: {% cache "key" %}...{% endcache %}
+
+    The block is evaluated once per key per build; subsequent renders return
+    the cached HTML string. Safe for ThreadPoolExecutor via double-checked lock.
+    """
+
+    tags = {'cache'}
+
+    def __init__(self, environment):
+        super().__init__(environment)
+        environment.extend(fragment_cache={})
+        self._lock = threading.Lock()
+
+    def parse(self, parser):
+        lineno = next(parser.stream).lineno
+        key = parser.parse_expression()
+        body = parser.parse_statements(['name:endcache'], drop_needle=True)
+        return nodes.CallBlock(
+            self.call_method('_cache_support', [key]),
+            [], [], body,
+        ).set_lineno(lineno)
+
+    def _cache_support(self, key, caller):
+        cache = self.environment.fragment_cache
+        if key not in cache:
+            with self._lock:
+                if key not in cache:
+                    cache[key] = caller()
+        return cache[key]

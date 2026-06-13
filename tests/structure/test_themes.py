@@ -2,9 +2,10 @@ import pytest
 from unittest.mock import MagicMock
 from pathlib import Path
 
+import jinja2
 import nkssg  # Needed for default theme path
 from nkssg.structure.config import Config
-from nkssg.structure.themes import Themes
+from nkssg.structure.themes import FragmentCacheExtension, Themes
 
 
 @pytest.fixture
@@ -204,6 +205,36 @@ def test_lookup_template_full_path(base_config, create_theme_structure):
     found_path = themes.lookup_template(['home.html'], full_path=True)
     expected_path = str(theme_dir / 'pages' / 'home.html').replace('\\', '/')
     assert found_path == expected_path
+
+
+class TestFragmentCacheExtension:
+
+    @pytest.fixture
+    def env(self):
+        return jinja2.Environment(extensions=[FragmentCacheExtension])
+
+    def test_block_is_evaluated_and_returned(self, env):
+        template = env.from_string('{% cache "key" %}hello{% endcache %}')
+        assert template.render() == 'hello'
+
+    def test_block_evaluated_only_once(self, env):
+        calls = []
+        env.globals['record'] = lambda: calls.append(1) or ''
+        template = env.from_string(
+            '{% cache "key" %}{{ record() }}content{% endcache %}'
+        )
+        result1 = template.render()
+        result2 = template.render()
+        assert result1 == result2 == 'content'
+        assert len(calls) == 1
+
+    def test_different_keys_cached_separately(self, env):
+        template = env.from_string(
+            '{% cache "a" %}A{% endcache %}{% cache "b" %}B{% endcache %}'
+        )
+        assert template.render() == 'AB'
+        assert env.fragment_cache['a'] == 'A'
+        assert env.fragment_cache['b'] == 'B'
 
 
 def test_build_shortcode_import_statement(base_config, create_theme_structure):
