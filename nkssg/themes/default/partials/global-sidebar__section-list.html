@@ -6,28 +6,18 @@
 {% if section_roots %}
 <div class="widget">
   <div class="widget__title">Section List</div>
-  <div class="widget__body">
+  <div class="widget__body" data-section-list>
     {% for item in section_roots recursive %}
-      {% if loop.depth == 1 or (mypage and item.has_page(mypage)) %}
-      <details open>
-      {% else %}
       <details>
-      {% endif %}
         <summary>
-          <a href="{{ item.url }}"{% if mypage and mypage.url == item.url %} class="current"{% endif %}>
-            {{ item.title }}
-          </a>
+          <a href="{{ item.url }}">{{ item.title }}</a>
         </summary>
         {% set children = item.children.values() | selectattr('singles_all_count', 'gt', 0) | list %}
         {% if children %}{{ loop(children) }}{% endif %}
         {% if item.singles %}
         <ul>
           {% for page in item.singles if page.url != item.url %}
-          <li>
-            <a href="{{ page.url }}"{% if mypage and mypage.url == page.url %} class="current"{% endif %}>
-              {{ page.title }}
-            </a>
-          </li>
+          <li><a href="{{ page.url }}">{{ page.title }}</a></li>
           {% endfor %}
         </ul>
         {% endif %}
@@ -35,4 +25,23 @@
     {% endfor %}
   </div>
 </div>
+<script>
+(function () {
+  var nav = document.querySelector('[data-section-list]');
+  var current = window.location.pathname;
+  var links = nav.querySelectorAll('a');
+  for (var i = 0; i < links.length; i++) {
+    var link = links[i];
+    if (new URL(link.href).pathname === current) {
+      link.classList.add('current');
+      var el = link.parentElement;
+      while (el && el !== nav) {
+        if (el.tagName === 'DETAILS') el.open = true;
+        el = el.parentElement;
+      }
+      break;
+    }
+  }
+}());
+</script>
 {% endif %}
