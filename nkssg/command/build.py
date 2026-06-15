@@ -9,18 +9,27 @@ from nkssg.structure.config import Config
 from nkssg.structure.site import Site
 
 
-def build(config: Config, clean=False):
+def build(config: Config):
 
     site = Site(config)
     site.setup()
     site.update()
 
     public_dir = config.public_dir
-    if clean and public_dir.exists():
-        shutil.rmtree(public_dir)
-
     public_dir.mkdir(exist_ok=True)
     site.output()
+
+
+def clean(config: Config):
+    public_dir = config.public_dir
+    if public_dir.exists():
+        shutil.rmtree(public_dir)
+        logging.info(f'Removed: {public_dir}')
+
+    cache_dir = config.base_dir / '.cache'
+    if cache_dir.exists():
+        shutil.rmtree(cache_dir)
+        logging.info(f'Removed: {cache_dir}')
 
 
 def start_server(config: Config, watch_paths, port=5500):

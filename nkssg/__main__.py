@@ -10,11 +10,17 @@ def cli():
 
 
 @cli.command(name='build')
-@click.option('--clean', '-c', is_flag=True)
-def build_command(clean):
+def build_command():
 
     config = Config.from_file(mode='build')
-    build.build(config, clean)
+    build.build(config)
+
+
+@cli.command(name='clean')
+def clean_command():
+
+    config = Config.from_file(mode='build')
+    build.clean(config)
 
 
 @cli.command(name='serve')

@@ -29,7 +29,7 @@ def test_build_simple_site(simple_site):
         'themes': 'themes'
     })
 
-    build.build(config, clean=True)
+    build.build(config)
 
     public_dir = simple_site / "public"
 

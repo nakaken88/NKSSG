@@ -16,37 +16,22 @@ def test_cli_build_command(MockConfig, mock_build_module):
 
     assert result.exit_code == 0, result.output
     MockConfig.from_file.assert_called_once_with(mode='build')
-    mock_build_module.build.assert_called_once_with(mock_config_instance, False)
+    mock_build_module.build.assert_called_once_with(mock_config_instance)
 
 
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
-def test_cli_build_command_with_clean_flag(MockConfig, mock_build_module):
+def test_cli_clean_command(MockConfig, mock_build_module):
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
 
     runner = CliRunner()
 
-    result = runner.invoke(cli, ['build', '--clean'])
+    result = runner.invoke(cli, ['clean'])
 
     assert result.exit_code == 0, result.output
     MockConfig.from_file.assert_called_once_with(mode='build')
-    mock_build_module.build.assert_called_once_with(mock_config_instance, True)
-
-
-@patch('nkssg.__main__.build')
-@patch('nkssg.__main__.Config')
-def test_cli_build_command_with_short_clean_flag(MockConfig, mock_build_module):
-    mock_config_instance = MagicMock()
-    MockConfig.from_file.return_value = mock_config_instance
-
-    runner = CliRunner()
-
-    result = runner.invoke(cli, ['build', '-c'])
-
-    assert result.exit_code == 0, result.output
-    MockConfig.from_file.assert_called_once_with(mode='build')
-    mock_build_module.build.assert_called_once_with(mock_config_instance, True)
+    mock_build_module.clean.assert_called_once_with(mock_config_instance)
 
 
 @patch('nkssg.__main__.build')

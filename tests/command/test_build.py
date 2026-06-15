@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch, ANY
 from pathlib import Path
 
-from nkssg.command.build import build, draft, serve, prepare_temp_dir, start_server
+from nkssg.command.build import build, clean, draft, serve, prepare_temp_dir, start_server
 from nkssg.structure.config import Config
 
 
@@ -26,7 +26,7 @@ def test_build_function_calls_site_methods_and_creates_public_dir(
 ):
     mock_site_instance = MockSite.return_value
 
-    build(mock_config, clean=False)
+    build(mock_config)
 
     MockSite.assert_called_once_with(mock_config)
     mock_site_instance.setup.assert_called_once()
@@ -37,42 +37,30 @@ def test_build_function_calls_site_methods_and_creates_public_dir(
     mock_shutil.rmtree.assert_not_called()
 
 
-@patch('nkssg.command.build.Site')
 @patch('nkssg.command.build.shutil')
-def test_build_function_cleans_public_dir_when_clean_is_true(
-    mock_shutil, MockSite, mock_config
-):
+def test_clean_removes_public_and_cache_dirs_when_both_exist(mock_shutil, mock_config):
     mock_config.public_dir.exists.return_value = True
-    mock_site_instance = MockSite.return_value
+    mock_cache_dir = MagicMock(spec=Path)
+    mock_cache_dir.exists.return_value = True
+    mock_config.base_dir.__truediv__ = MagicMock(return_value=mock_cache_dir)
 
-    build(mock_config, clean=True)
+    clean(mock_config)
 
-    mock_shutil.rmtree.assert_called_once_with(mock_config.public_dir)
-    mock_config.public_dir.mkdir.assert_called_once_with(exist_ok=True)
-
-    MockSite.assert_called_once_with(mock_config)
-    mock_site_instance.setup.assert_called_once()
-    mock_site_instance.update.assert_called_once()
-    mock_site_instance.output.assert_called_once()
+    assert mock_shutil.rmtree.call_count == 2
+    mock_shutil.rmtree.assert_any_call(mock_config.public_dir)
+    mock_shutil.rmtree.assert_any_call(mock_cache_dir)
 
 
-@patch('nkssg.command.build.Site')
 @patch('nkssg.command.build.shutil')
-def test_build_function_does_not_remove_public_dir_if_not_exists_and_clean_is_true(
-    mock_shutil, MockSite, mock_config
-):
+def test_clean_skips_missing_dirs(mock_shutil, mock_config):
     mock_config.public_dir.exists.return_value = False
-    mock_site_instance = MockSite.return_value
+    mock_cache_dir = MagicMock(spec=Path)
+    mock_cache_dir.exists.return_value = False
+    mock_config.base_dir.__truediv__ = MagicMock(return_value=mock_cache_dir)
 
-    build(mock_config, clean=True)
+    clean(mock_config)
 
     mock_shutil.rmtree.assert_not_called()
-    mock_config.public_dir.mkdir.assert_called_once_with(exist_ok=True)
-
-    MockSite.assert_called_once_with(mock_config)
-    mock_site_instance.setup.assert_called_once()
-    mock_site_instance.update.assert_called_once()
-    mock_site_instance.output.assert_called_once()
 
 
 @patch('nkssg.command.build.start_server')
