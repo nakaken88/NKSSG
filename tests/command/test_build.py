@@ -21,7 +21,7 @@ def mock_config():
 
 @patch('nkssg.command.build.Site')
 @patch('nkssg.command.build.shutil')
-def test_build_function_calls_site_methods_and_creates_public_dir(
+def test_build_function_calls_site_methods(
     mock_shutil, MockSite, mock_config
 ):
     mock_site_instance = MockSite.return_value
@@ -32,8 +32,6 @@ def test_build_function_calls_site_methods_and_creates_public_dir(
     mock_site_instance.setup.assert_called_once()
     mock_site_instance.update.assert_called_once()
     mock_site_instance.output.assert_called_once()
-
-    mock_config.public_dir.mkdir.assert_called_once_with(exist_ok=True)
     mock_shutil.rmtree.assert_not_called()
 
 

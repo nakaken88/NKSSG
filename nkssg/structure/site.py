@@ -89,6 +89,7 @@ class Site:
         self.plugins.do_action('after_update_site', target=self)
 
     def output(self):
+        self.config.public_dir.mkdir(exist_ok=True)
         self.copy_static_files()
         self.singles.output()
         self.plugins.do_action('after_output_singles', target=self)

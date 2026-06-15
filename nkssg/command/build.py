@@ -14,9 +14,6 @@ def build(config: Config):
     site = Site(config)
     site.setup()
     site.update()
-
-    public_dir = config.public_dir
-    public_dir.mkdir(exist_ok=True)
     site.output()
 
 
