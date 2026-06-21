@@ -1286,3 +1286,29 @@ class TestContentCache:
 
         assert single.content == '<p>Hello <strong>world</strong></p>'
         assert cache[str(single.src_path)]['mtime'] == single._file_mtime
+
+    # --- _setup_normal_mode cache enable/disable ---
+
+    def test_setup_normal_mode_skips_cache_when_disabled(self, singles_obj, mocker):
+        singles, tmp_path = singles_obj
+        singles.pages = []
+        mock_load = mocker.patch.object(singles, '_load_singles_cache')
+        mock_save = mocker.patch.object(singles, '_save_singles_cache')
+
+        singles.config.cache = False
+        singles._setup_normal_mode()
+
+        mock_load.assert_not_called()
+        mock_save.assert_not_called()
+
+    def test_setup_normal_mode_uses_cache_when_enabled(self, singles_obj, mocker):
+        singles, tmp_path = singles_obj
+        singles.pages = []
+        mock_load = mocker.patch.object(singles, '_load_singles_cache', return_value={})
+        mock_save = mocker.patch.object(singles, '_save_singles_cache')
+
+        singles.config.cache = True
+        singles._setup_normal_mode()
+
+        mock_load.assert_called_once()
+        mock_save.assert_called_once()

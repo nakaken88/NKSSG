@@ -36,6 +36,21 @@ def test_cli_clean_command(MockConfig, mock_build_module):
 
 @patch('nkssg.__main__.build')
 @patch('nkssg.__main__.Config')
+def test_cli_build_command_with_no_cache_flag(MockConfig, mock_build_module):
+    mock_config_instance = MagicMock()
+    MockConfig.from_file.return_value = mock_config_instance
+
+    runner = CliRunner()
+
+    result = runner.invoke(cli, ['build', '--no-cache'])
+
+    assert result.exit_code == 0, result.output
+    assert mock_config_instance.cache == False
+    mock_build_module.build.assert_called_once_with(mock_config_instance)
+
+
+@patch('nkssg.__main__.build')
+@patch('nkssg.__main__.Config')
 def test_cli_serve_command_defaults(MockConfig, mock_build_module):
     mock_config_instance = MagicMock()
     MockConfig.from_file.return_value = mock_config_instance
@@ -77,6 +92,20 @@ def test_cli_serve_command_with_short_options(MockConfig, mock_build_module):
     MockConfig.from_file.assert_called_once_with(mode='serve')
     mock_build_module.serve.assert_called_once_with(mock_config_instance, True, 8000)
     mock_config_instance.__setitem__.assert_called_once_with('serve_all', True)
+
+
+@patch('nkssg.__main__.build')
+@patch('nkssg.__main__.Config')
+def test_cli_serve_command_with_no_cache_flag(MockConfig, mock_build_module):
+    mock_config_instance = MagicMock()
+    MockConfig.from_file.return_value = mock_config_instance
+    runner = CliRunner()
+
+    result = runner.invoke(cli, ['serve', '--no-cache'])
+
+    assert result.exit_code == 0, result.output
+    assert mock_config_instance.cache == False
+    mock_build_module.serve.assert_called_once_with(mock_config_instance, False, 5500)
 
 
 @patch('nkssg.__main__.build')

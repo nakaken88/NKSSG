@@ -10,9 +10,12 @@ def cli():
 
 
 @cli.command(name='build')
-def build_command():
+@click.option('--no-cache', 'no_cache', is_flag=True)
+def build_command(no_cache):
 
     config = Config.from_file(mode='build')
+    if no_cache:
+        config.cache = False
     build.build(config)
 
 
@@ -27,10 +30,13 @@ def clean_command():
 @click.option('--static', '-s', is_flag=True)
 @click.option('--all', '-a', 'serve_all', is_flag=True)
 @click.option('--port', '-p', default=5500)
-def build_serve(static, serve_all, port):
+@click.option('--no-cache', 'no_cache', is_flag=True)
+def build_serve(static, serve_all, port, no_cache):
 
     config = Config.from_file(mode='serve')
     config['serve_all'] = serve_all
+    if no_cache:
+        config.cache = False
     build.serve(config, static, port)
 
 

@@ -183,6 +183,7 @@ class Config(BaseConfig):
     taxonomy: TaxonomyConfigManager = field(default_factory=TaxonomyConfigManager)
 
     use_abs_url: bool = True
+    cache: bool = False
 
     now: datetime.datetime = field(default_factory=datetime.datetime.now)
 

@@ -77,7 +77,7 @@ class Singles:
         self.pages[0].setup(self.config, self.plugins)
 
     def _setup_normal_mode(self):
-        singles_cache = self._load_singles_cache()
+        singles_cache = self._load_singles_cache() if self.config.cache else {}
         all_src_paths = {str(page.src_path) for page in self.pages}
 
         with ThreadPoolExecutor() as executor:
@@ -93,7 +93,8 @@ class Singles:
                     new_pages.append(page)
         self.pages = new_pages
 
-        self._save_singles_cache(singles_cache, all_src_paths)
+        if self.config.cache:
+            self._save_singles_cache(singles_cache, all_src_paths)
 
     @staticmethod
     def _meta_json_default(obj):
