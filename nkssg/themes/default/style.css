@@ -84,11 +84,11 @@ a:visited {
   padding: 2rem 0 1rem;
   text-align: center;
 }
-.site-name {
+.global-header__site-name {
   color: var(--text-color);
   font-size: 2rem;
 }
-.site-name:hover {
+.global-header__site-name:hover {
   color: var(--link-color);
 }
 .global-header__description {
@@ -364,6 +364,13 @@ a:visited {
 .global-footer {
   margin: 2rem auto 6rem;
   text-align: center;
+}
+.global-footer__site-name {
+  color: var(--text-color);
+  font-size: 2rem;
+}
+.global-footer__site-name:hover {
+  color: var(--link-color);
 }
 
 .sticky-nav {
