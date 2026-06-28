@@ -85,18 +85,17 @@ img {
 
 
 /* header-nav */
-.global-nav {
-  text-align: center;
-}
 .global-nav__list {
+  display: flex;
+  justify-content: center;
   padding: 0;
   margin: 0;
+  list-style: none;
   overflow-x: auto;
-  white-space: nowrap;
 }
 .global-nav__item {
   margin: 0 10px;
-  display: inline-block;
+  flex-shrink: 0;
 }
 .global-nav__link {
   color: var(--color-text);
@@ -106,34 +105,22 @@ img {
 
 
 /* entry */
-.entry > article > *,
-.entry > section > * {
+.entry article > *,
+.entry section > * {
   margin-top: 0;
   margin-bottom: 1.5rem;
 }
 
-.entry__breadcrumb {
-  font-size: var(--font-size-sm);
-}
-.entry__date {
+.entry__breadcrumb
+, .entry__date {
   font-size: var(--font-size-sm);
 }
 .entry__title {
   font-size: 2rem;
 }
-
-.thumbnail {
-  display: grid;
-  place-items: center;
-}
-.thumbnail-emoji {
-  background-color: var(--color-accent-bg);
-}
-.entry__thumbnail .thumbnail {
-  min-height: 200px;
-}
-.entry__thumbnail .thumbnail-emoji {
-  font-size: 60px;
+.entry__thumbnail {
+  --thumbnail-height: 200px;
+  --thumbnail-font-size: 60px;
 }
 
 
@@ -237,9 +224,23 @@ img {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   column-gap: 15px;
   row-gap: 30px;
+  --thumbnail-height: 120px;
+  --thumbnail-font-size: 30px;
 }
 .page-list.item-count-1, .page-list.item-count-2 {
   grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
+}
+
+
+/* thumbnail */
+.thumbnail {
+  display: grid;
+  place-items: center;
+  min-height: var(--thumbnail-height);
+}
+.thumbnail-emoji {
+  background-color: var(--color-accent-bg);
+  font-size: var(--thumbnail-font-size);
 }
 
 
@@ -258,24 +259,6 @@ img {
   }
 }
 
-.page-list .thumbnail {
-  min-height: 120px;
-}
-.page-list .thumbnail-emoji {
-  font-size: 30px;
-}
-.large-card .thumbnail {
-  min-height: 80px;
-}
-.large-card .thumbnail-emoji {
-  font-size: 24px;
-}
-.widget .thumbnail {
-  min-height: 80px;
-}
-.widget .thumbnail-emoji {
-  font-size: 24px;
-}
 
 .widget .card__title {
   padding-left: 10px;
@@ -286,6 +269,8 @@ img {
 
 .large-card {
   border: 2px solid var(--color-accent-border);
+  --thumbnail-height: 80px;
+  --thumbnail-font-size: 24px;
 }
 .large-card a {
   text-decoration: none;
@@ -311,6 +296,8 @@ img {
 .widget__body {
   font-size: var(--font-size-sm);
   padding: 5px 10px;
+  --thumbnail-height: 80px;
+  --thumbnail-font-size: 24px;
 }
 
 .widget__body ul {
