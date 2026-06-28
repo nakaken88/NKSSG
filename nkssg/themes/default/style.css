@@ -13,7 +13,7 @@
 }
 
 
-/* reset */
+/* reset and base */
 *,
 *::before,
 *::after {
@@ -22,21 +22,6 @@
 
 body {
   margin: 0;
-}
-
-a {
-  text-decoration: none;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-
-/* base */
-body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: sans-serif;
@@ -46,6 +31,7 @@ body {
 }
 
 a {
+  text-decoration: none;
   color: var(--color-link);
   transition: color 0.3s;
 }
@@ -56,24 +42,27 @@ a:visited {
   color: var(--color-link-visited);
 }
 
-
-/* layout */
-.global > * {
-  max-width: 1080px;
-  margin: 0 auto;
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
-.global-main > * {
-  margin: 10px;
+
+/* layout */
+.global-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  gap: 10px;
+  padding: 10px;
 }
 
 @media (min-width: 769px) {
   .global-main {
-    display: grid;
-    grid-template: auto/auto 340px;
-  }
-  .global-main > * {
-    margin: 20px;
+    grid-template-columns: auto 320px;
+    gap: 20px;
+    padding: 20px;
   }
 }
 
