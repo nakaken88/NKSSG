@@ -440,6 +440,31 @@ class TestArchiveLookup:
         archives = self._make_archives()
         assert archives.get_terms('nonexistent') == []
 
+    def test_get_term_returns_correct_term(self):
+        archives = self._make_archives()
+        term = archives.get_term('category', 'cat1')
+        assert term is not None
+        assert term.name == 'cat1'
+        assert term.root_name == 'category'
+
+    def test_get_term_case_insensitive(self):
+        archives = self._make_archives()
+        assert archives.get_term('category', 'CAT1') is archives.get_term('category', 'cat1')
+
+    def test_get_term_nested_term(self):
+        archives = self._make_archives()
+        term = archives.get_term('category', 'cat2')
+        assert term is not None
+        assert term.name == 'cat2'
+
+    def test_get_term_unknown_term_returns_none(self):
+        archives = self._make_archives()
+        assert archives.get_term('category', 'nonexistent') is None
+
+    def test_get_term_unknown_taxonomy_returns_none(self):
+        archives = self._make_archives()
+        assert archives.get_term('nonexistent', 'cat1') is None
+
 
 class TestUpdateUrls:
     def _make_archives(self, tax_config):

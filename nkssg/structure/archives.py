@@ -14,6 +14,7 @@ class Archives:
         self.config = config
         self.plugins = plugins
         self.archives: dict[PurePath, Archive] = {}
+        self.long_ids: dict[PurePath, PurePath] = {}
         self.rendered_pages: list[Page] = []
 
         global_root_archive = Archive(None, '/')
@@ -76,16 +77,13 @@ class Archives:
             single.archive_list.append(archive)
 
     def setup_taxonomy_archives(self, singles):
-        long_ids: dict[PurePath, PurePath] = {}
-
         for tax_name, tax_config in self.config.taxonomy.items():
-            self.initialize_taxonomy_archives(tax_name, tax_config.terms, long_ids)
+            self.initialize_taxonomy_archives(tax_name, tax_config.terms)
 
-        self.add_singles_to_taxonomy_archives(singles, long_ids)
+        self.add_singles_to_taxonomy_archives(singles)
 
     def initialize_taxonomy_archives(
-            self, tax_name, terms: dict[str, TermConfig],
-            long_ids: dict[PurePath, PurePath]):
+            self, tax_name, terms: dict[str, TermConfig]):
 
         base_id = PurePath('/taxonomy', tax_name)
         term_paths: dict[str, PurePath] = {}
@@ -107,10 +105,9 @@ class Archives:
         for term_name in terms:
             archive_id = get_path(term_name)
             self.create_archive(archive_id)
-            long_ids[PurePath('/taxonomy', tax_name, term_name.lower())] = archive_id
+            self.long_ids[PurePath('/taxonomy', tax_name, term_name.lower())] = archive_id
 
-    def add_singles_to_taxonomy_archives(
-            self, singles: Singles, long_ids: dict[PurePath, PurePath]):
+    def add_singles_to_taxonomy_archives(self, singles: Singles):
         taxonomy_root_archive = self.create_archive(PurePath('/taxonomy'))
         for root_name in taxonomy_root_archive.children:
             for single in singles:
@@ -121,11 +118,11 @@ class Archives:
                     terms = [terms]
                 for term in set(terms):
                     short_id = PurePath('/taxonomy', root_name, str(term).lower())
-                    if short_id not in long_ids:
+                    if short_id not in self.long_ids:
                         logging.warning(f'{root_name}: {term} is not found ({single})')
                         continue
 
-                    archive_id = long_ids[short_id]
+                    archive_id = self.long_ids[short_id]
                     archive = self.archives[archive_id]
                     archive.singles.append(single)
                     single.archive_list.append(archive)
@@ -241,6 +238,11 @@ class Archives:
             a for a in self.archives.values()
             if a.archive_type == 'taxonomy' and a.root_name == tax_name and not a.is_root
         ]
+
+    def get_term(self, tax_name: str, term_name: str) -> 'Archive | None':
+        key = PurePath('/taxonomy', tax_name, term_name.lower())
+        archive_id = self.long_ids.get(key)
+        return self.archives.get(archive_id) if archive_id else None
 
 
 class Archive(Page):
