@@ -1,6 +1,6 @@
 [project]
 name = "nkssg"
-version = "0.0.4-alpha"
+version = "0.0.4a1"
 description = "NakaKen Static Site Generator"
 authors = [{ name = "nakaken88" }]
 readme = "README.md"
