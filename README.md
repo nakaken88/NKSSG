@@ -12,6 +12,16 @@ Python 3.10+
 
 ## Install
 
+**Project-level (recommended):**
+
+```
+uv add git+https://github.com/nakaken88/NKSSG
+```
+
+Run with `uv run nkssg`, or activate the virtual environment first to use `nkssg` directly.
+
+**Global install:**
+
 ```
 uv tool install git+https://github.com/nakaken88/NKSSG
 ```
@@ -54,6 +64,14 @@ Output will be in the `public/` folder.
 ```
 nkssg serve
 ```
+
+### Clean
+
+```
+nkssg clean
+```
+
+Removes the output directory and cache.
 
 ### Add Post from Template
 
